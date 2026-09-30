@@ -68,12 +68,11 @@ class AutonomousChecklistAgent:
     và cơ chế tự đánh giá điều kiện dừng (Goal Achieved / Max Steps).
     """
 
-    def __init__(self, max_steps: int = 3, llm_mode: str = "auto"):
+    def __init__(self, max_steps: int = 3):
         # Ràng buộc cứng an toàn Bounded Loop: max_steps không bao giờ được vượt quá 3
         if max_steps > 3:
             raise ValueError(f"Vi phạm Bounded Loop: max_steps ({max_steps}) không được vượt quá giới hạn 3 bước!")
         self.max_steps = min(max(1, max_steps), 3)
-        self.llm_mode = llm_mode
         self.status = AgentStatus.IDLE
         self.plan: List[Step] = []
         self.logs: List[StepLog] = []
@@ -187,6 +186,7 @@ class AutonomousChecklistAgent:
         đã thu thập được từ các bước trước đó (context propagation).
         """
         if step.action_type == "research_points":
+            time.sleep(0.010)
             result = (
                 f"CÁC LUẬN ĐIỂM CỐT LÕI VỀ {topic.upper()}:\n"
                 f"- Khái niệm & bản chất cốt lõi của {topic}.\n"
@@ -198,6 +198,7 @@ class AutonomousChecklistAgent:
             return result
 
         elif step.action_type == "outline":
+            time.sleep(0.012)
             if "rag" in topic.lower():
                 outline = (
                     "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU\n"
@@ -229,6 +230,7 @@ class AutonomousChecklistAgent:
             return outline
 
         elif step.action_type == "generate":
+            time.sleep(0.025)
             outline = self.context_memory.get("outline", "")
             if "rag" in topic.lower():
                 article = (
@@ -264,6 +266,7 @@ class AutonomousChecklistAgent:
             return article
 
         elif step.action_type == "review_polish":
+            time.sleep(0.018)
             draft = self.context_memory.get("draft_article", "")
             review_notes = [
                 "✓ Nội dung có phù hợp với người mới không? Đạt yêu cầu, ví dụ thi mở sách trực quan.",
@@ -310,7 +313,7 @@ class AutonomousChecklistAgent:
         """
         Vòng lặp Autonomous Agent: Lập plan động -> Lặp thực thi -> Lưu log -> Kiểm tra dừng -> Báo cáo cuối
         """
-        start_time = time.time()
+        start_time = time.perf_counter()
         self.logs.clear()
         self.context_memory.clear()
 
@@ -335,18 +338,21 @@ class AutonomousChecklistAgent:
 
         # 2. Vòng lặp thực thi tuần tự có giới hạn (Bounded Execution Loop)
         for idx, step in enumerate(plan, 1):
-            step_start = time.time()
+            step_start = time.perf_counter()
             step.status = "IN_PROGRESS"
             steps_executed += 1
 
             print(f"\n▶️  [BƯỚC {step.step_id}/{len(plan)}] Đang thực hiện: {step.title}...")
+
+            # Lưu lại danh sách context keys TRƯỚC KHI thực thi bước để phản ánh chính xác context đầu vào
+            input_context = list(self.context_memory.keys())
 
             # Thực thi hành động của bước
             result = self._execute_step_action(step, topic)
             step.result = result
             step.status = "COMPLETED"
 
-            step_duration = round(time.time() - step_start, 3)
+            step_duration = round(time.perf_counter() - step_start, 3)
 
             # Ghi log chi tiết bước (Audit Trail)
             log_entry = StepLog(
@@ -354,7 +360,7 @@ class AutonomousChecklistAgent:
                 step_title=step.title,
                 timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
                 duration_sec=step_duration,
-                input_context_keys=list(self.context_memory.keys()),
+                input_context_keys=input_context,
                 output_summary=result[:120].replace("\n", " ") + "...",
                 status=step.status,
                 details={
@@ -375,7 +381,7 @@ class AutonomousChecklistAgent:
                 break
 
         # 3. Xác định trạng thái và sản phẩm cuối
-        total_duration = round(time.time() - start_time, 3)
+        total_duration = round(time.perf_counter() - start_time, 3)
         self.final_output = (
             self.context_memory.get("final_article") or 
             self.context_memory.get("draft_article") or 
