@@ -134,7 +134,7 @@ def generate_terminal_screenshot():
         ("[STOP CONDITION] Kich hoat dieu kien dung: Goal achieved (Dat muc tieu)", "#F87171"),
         ("==========================================================================", "#38BDF8"),
         ("BAO CAO CUOI CUNG (FINAL AGENT REPORT)", "#38BDF8"),
-        ("   - Trang thai: COMPLETED | So buoc hoan thanh: 3/3 | Thoi gian: 0.055s", "#F8FAFC"),
+        ("   - Trang thai: COMPLETED | So buoc hoan thanh: 3/3 | Thoi gian: 0.056s", "#F8FAFC"),
         ("   - San pham: Bai viet '# BAT MI VE RAG...' (2,180 ky tu)", "#FCD34D"),
         ("Da xuat du lieu chi tiet ra: agent_final_report.json", "#A7F3D0"),
     ]
