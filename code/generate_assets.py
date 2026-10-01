@@ -4,6 +4,7 @@ cho bài viết LaTeX: Xây dựng Autonomous Agent hoàn thành checklist 3 bư
 """
 
 import os
+import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -99,6 +100,30 @@ def generate_architecture_diagram():
 
 
 def generate_terminal_screenshot():
+    # Đọc trực tiếp dữ liệu thực nghiệm từ agent_final_report.json nếu có
+    report_path = os.path.join(os.path.dirname(__file__), "agent_final_report.json")
+    report = None
+    if os.path.exists(report_path):
+        try:
+            with open(report_path, "r", encoding="utf-8") as f:
+                report = json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not read {report_path}: {e}")
+
+    # Trích xuất số liệu thực tế từ báo cáo hoặc dùng giá trị chuẩn
+    if report and "execution_logs" in report and len(report["execution_logs"]) >= 3:
+        d1 = report["execution_logs"][0].get("duration_sec", 0.012)
+        d2 = report["execution_logs"][1].get("duration_sec", 0.025)
+        d3 = report["execution_logs"][2].get("duration_sec", 0.018)
+        tot_time = report.get("total_duration_sec", round(d1 + d2 + d3 + 0.001, 3))
+        chars = len(report.get("final_output", "")) or 2250
+        status = report.get("status", "COMPLETED")
+        executed = report.get("steps_executed", 3)
+        total_p = report.get("total_steps_planned", 3)
+    else:
+        d1, d2, d3, tot_time, chars = 0.012, 0.025, 0.018, 0.056, 2250
+        status, executed, total_p = "COMPLETED", 3, 3
+
     fig, ax = plt.subplots(figsize=(11, 7.2), dpi=300)
     fig.patch.set_facecolor("#0F172A")  # Dark Slate theme
     ax.set_facecolor("#0F172A")
@@ -126,16 +151,16 @@ def generate_terminal_screenshot():
         ("   [3] Ra soat, kiem tra do ro rang va hoan thien bai viet", "#F1F5F9"),
         ("--------------------------------------------------------------------------", "#475569"),
         ("[BUOC 1/3] Dang thuc hien: Xac dinh cac y chinh can giai thich ve RAG...", "#E2E8F0"),
-        ("   -> Trang thai: COMPLETED (0.012s) | Dan y 5 muc duoc luu vao State", "#34D399"),
+        (f"   -> Trang thai: COMPLETED ({d1:.3f}s) | Dan y 5 muc duoc luu vao State", "#34D399"),
         ("[BUOC 2/3] Dang thuc hien: Viet noi dung bai chia se hoan chinh...", "#E2E8F0"),
-        ("   -> Trang thai: COMPLETED (0.025s) | Da soan thao 4 phan co ban", "#34D399"),
+        (f"   -> Trang thai: COMPLETED ({d2:.3f}s) | Da soan thao 4 phan co ban", "#34D399"),
         ("[BUOC 3/3] Dang thuc hien: Ra soat, kiem tra do ro rang va hoan thien...", "#E2E8F0"),
-        ("   -> Trang thai: COMPLETED (0.018s) | Checklist ra soat 4 tieu chi, bo sung Loi ket", "#34D399"),
+        (f"   -> Trang thai: COMPLETED ({d3:.3f}s) | Checklist ra soat 4 tieu chi, bo sung Loi ket", "#34D399"),
         ("[STOP CONDITION] Kich hoat dieu kien dung: Goal achieved (Dat muc tieu)", "#F87171"),
         ("==========================================================================", "#38BDF8"),
         ("BAO CAO CUOI CUNG (FINAL AGENT REPORT)", "#38BDF8"),
-        ("   - Trang thai: COMPLETED | So buoc hoan thanh: 3/3 | Thoi gian: 0.056s", "#F8FAFC"),
-        ("   - San pham: Bai viet '# BAT MI VE RAG...' (2,250 ky tu)", "#FCD34D"),
+        (f"   - Trang thai: {status} | So buoc hoan thanh: {executed}/{total_p} | Thoi gian: {tot_time:.3f}s", "#F8FAFC"),
+        (f"   - San pham: Bai viet '# BAT MI VE RAG...' ({chars:,} ky tu)", "#FCD34D"),
         ("Da xuat du lieu chi tiet ra: agent_final_report.json", "#A7F3D0"),
     ]
 
