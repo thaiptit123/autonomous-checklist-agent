@@ -279,7 +279,7 @@ class AutonomousChecklistAgent:
                 f"{topic} không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ "
                 "và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n"
                 "---\n"
-                "*(Biên soạn bởi Autonomous Content Agent - Hoàn thành kiểm duyệt chất lượng 100%)*"
+                "*(Biên soạn bởi Autonomous Content Agent - Hoàn thành rà soát theo checklist)*"
             )
             self.context_memory["review_notes"] = review_notes
             self.context_memory["final_article"] = polished_article

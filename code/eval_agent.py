@@ -4,8 +4,6 @@ Bộ kịch bản kiểm thử tự động cho Autonomous Checklist Agent
 """
 
 import sys
-import os
-import json
 
 from checklist_agent import AutonomousChecklistAgent, AgentStatus
 
@@ -59,5 +57,5 @@ if __name__ == "__main__":
     test_scenario_outline_docker_early_stop()
     test_scenario_bounded_loop_validation()
     print("\n" + "=" * 65)
-    print("🎉 TẤT CẢ 3 KỊCH BẢN ĐÁNH GIÁ ĐỀU ĐẠT CHUẨN XUẤT SẮC!")
+    print("🎉 TẤT CẢ 3 KỊCH BẢN KIỂM THỬ ĐỀU ĐẠT (PASSED)!")
     print("=" * 65)

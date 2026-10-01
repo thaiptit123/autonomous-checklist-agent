@@ -217,7 +217,7 @@ def generate_state_flow_diagram():
                                 edgecolor="#059669", facecolor="#ECFDF5", linewidth=1.8)
     ax.add_patch(s3)
     ax.text(8.25, 3.6, "BUOC 3\nRa Soat & Hoan Thien", fontsize=10, fontweight="bold", ha="center", color="#059669")
-    ax.text(8.25, 2.8, "Input: draft_article\nOutput: final_article\n(Nghiem thu 100%)", fontsize=8, ha="center", color="#1E293B")
+    ax.text(8.25, 2.8, "Input: draft_article\nOutput: final_article\n(Da ra soat theo checklist)", fontsize=8, ha="center", color="#1E293B")
 
     # Condition Check Banner
     cond_box = patches.FancyBboxPatch((1.5, 0.4), 7.0, 1.2, boxstyle="round,pad=0.15", 
