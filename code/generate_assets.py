@@ -1,6 +1,8 @@
 """
 Script tự động sinh các hình ảnh sơ đồ kiến trúc và kết quả thực thi
 cho bài viết LaTeX: Xây dựng Autonomous Agent hoàn thành checklist 3 bước.
+Module: Series đào tạo AI Guru x TiniX
+Tác giả: Kỹ sư AI Phạm Thành Thái
 """
 
 import os
@@ -8,88 +10,99 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-OUTPUT_DIR = "/home/thaipt/ai-chatbot/TiniX-AIGuru/Nop_Bai/Bai42/images"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(BASE_DIR, "images")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Liberation Sans", "Arial"]
+# Thiết lập font hỗ trợ tiếng Việt có dấu
+plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Liberation Sans", "Noto Sans", "Arial"]
+plt.rcParams["font.monospace"] = ["Noto Sans Mono", "Liberation Mono", "DejaVu Sans Mono"]
 plt.rcParams["axes.unicode_minus"] = False
 
+
 def generate_architecture_diagram():
-    fig, ax = plt.subplots(figsize=(12, 6.5), dpi=300)
+    fig, ax = plt.subplots(figsize=(12, 6.8), dpi=300)
     ax.set_facecolor("#F8FAFC")
     fig.patch.set_facecolor("#F8FAFC")
 
-    # Title
-    ax.text(6, 6.1, "KIEN TRUC AUTONOMOUS CHECKLIST AGENT (TOI DA 3 BUOC)", 
+    # Tiêu đề chính
+    ax.text(6.0, 6.35, "KIẾN TRÚC AUTONOMOUS CHECKLIST AGENT (TỐI ĐA 3 BƯỚC)", 
             fontsize=15, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(6, 5.75, "Mo hinh khep kin: Lap ke hoach -> Thuc thi tuan tu -> Luu log -> Dieu kien dung -> Bao cao cuoi", 
+    ax.text(6.0, 5.95, "Mô hình khép kín: Nhận mục tiêu → Lập kế hoạch động → Thực thi & Bộ nhớ → Kiểm tra dừng → Báo cáo cuối", 
             fontsize=10, ha="center", color="#475569", style="italic")
 
-    # Box 1: Goal Input
-    box_goal = patches.FancyBboxPatch((0.5, 3.8), 2.2, 1.4, boxstyle="round,pad=0.2", 
+    # Hộp 1: Mục tiêu người dùng
+    box_goal = patches.FancyBboxPatch((0.4, 3.7), 2.2, 1.6, boxstyle="round,pad=0.15", 
                                       edgecolor="#004AAD", facecolor="#EFF6FF", linewidth=2)
     ax.add_patch(box_goal)
-    ax.text(1.6, 4.7, "1. USER GOAL", fontsize=11, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(1.6, 4.15, "Nhap muc tieu nho\n(VD: Giai thich RAG\ncho nguoi moi)", 
-            fontsize=9, ha="center", color="#1E293B")
+    ax.text(1.5, 4.9, "1. MỤC TIÊU", fontsize=11, fontweight="bold", ha="center", color="#004AAD")
+    ax.text(1.5, 4.65, "(User Goal)", fontsize=8.5, ha="center", color="#004AAD", style="italic")
+    ax.text(1.5, 4.05, "Nhập mục tiêu nhỏ\n(VD: Viết bài RAG\ncho người mới)", 
+            fontsize=9, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Arrow 1 -> Planner
-    ax.annotate("", xy=(3.4, 4.5), xytext=(2.9, 4.5),
-                arrowprops=dict(arrowstyle="->", color="#004AAD", lw=2.5))
+    # Mũi tên 1 -> 2 (Không chạm hộp, không đè chữ)
+    ax.annotate("", xy=(3.1, 4.5), xytext=(2.65, 4.5),
+                arrowprops=dict(arrowstyle="-|>", color="#004AAD", lw=2.2, mutation_scale=15))
 
-    # Box 2: Planner Node
-    box_plan = patches.FancyBboxPatch((3.5, 3.8), 2.5, 1.4, boxstyle="round,pad=0.2", 
+    # Hộp 2: Bộ lập kế hoạch động (Planner Node)
+    box_plan = patches.FancyBboxPatch((3.2, 3.7), 2.4, 1.6, boxstyle="round,pad=0.15", 
                                       edgecolor="#E8630A", facecolor="#FFF7ED", linewidth=2)
     ax.add_patch(box_plan)
-    ax.text(4.75, 4.7, "2. PLANNER NODE", fontsize=11, fontweight="bold", ha="center", color="#E8630A")
-    ax.text(4.75, 4.15, "Phan ra muc tieu\nChecklist dong\n(Toi da <= 3 buoc)", 
-            fontsize=9, ha="center", color="#1E293B")
+    ax.text(4.4, 4.9, "2. BỘ LẬP KẾ HOẠCH", fontsize=10.5, fontweight="bold", ha="center", color="#E8630A")
+    ax.text(4.4, 4.65, "(Dynamic Planner)", fontsize=8.5, ha="center", color="#E8630A", style="italic")
+    ax.text(4.4, 4.05, "Phân rã mục tiêu\nChecklist động (LLM)\n(Tối đa ≤ 3 bước)", 
+            fontsize=9, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Arrow 2 -> Executor Loop
-    ax.annotate("", xy=(6.7, 4.5), xytext=(6.2, 4.5),
-                arrowprops=dict(arrowstyle="->", color="#E8630A", lw=2.5))
+    # Mũi tên 2 -> 3
+    ax.annotate("", xy=(6.05, 4.5), xytext=(5.65, 4.5),
+                arrowprops=dict(arrowstyle="-|>", color="#E8630A", lw=2.2, mutation_scale=15))
 
-    # Box 3: Execution Engine & Memory
-    box_exec = patches.FancyBboxPatch((6.8, 3.4), 2.6, 2.0, boxstyle="round,pad=0.2", 
+    # Hộp 3: Bộ thực thi & Bộ nhớ ngữ cảnh (Executor Node)
+    box_exec = patches.FancyBboxPatch((6.15, 3.4), 2.7, 2.05, boxstyle="round,pad=0.15", 
                                       edgecolor="#059669", facecolor="#ECFDF5", linewidth=2)
     ax.add_patch(box_exec)
-    ax.text(8.1, 5.0, "3. EXECUTOR LOOP", fontsize=11, fontweight="bold", ha="center", color="#059669")
-    ax.text(8.1, 4.4, "- Buoc 1: Lap dan y\n- Buoc 2: Viet noi dung\n- Buoc 3: Ra soat & duyet", 
-            fontsize=8.5, ha="center", color="#1E293B")
-    ax.text(8.1, 3.7, "[State Memory & Logs]", fontsize=8, fontweight="bold", ha="center", color="#047857")
+    ax.text(7.5, 5.15, "3. BỘ THỰC THI", fontsize=11, fontweight="bold", ha="center", color="#059669")
+    ax.text(7.5, 4.9, "(Execution Engine)", fontsize=8.5, ha="center", color="#059669", style="italic")
+    ax.text(7.5, 4.35, "• Bước 1: Lập dàn ý\n• Bước 2: Soạn nội dung\n• Bước 3: Rà soát & duyệt", 
+            fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
+    ax.text(7.5, 3.65, "[Bộ nhớ ngữ cảnh & Logs]", fontsize=8, fontweight="bold", ha="center", color="#047857")
 
-    # Arrow 3 -> Stop Condition
-    ax.annotate("", xy=(10.0, 4.5), xytext=(9.5, 4.5),
-                arrowprops=dict(arrowstyle="->", color="#059669", lw=2.5))
+    # Mũi tên 3 -> 4
+    ax.annotate("", xy=(9.4, 4.5), xytext=(8.9, 4.5),
+                arrowprops=dict(arrowstyle="-|>", color="#059669", lw=2.2, mutation_scale=15))
 
-    # Box 4: Stop Evaluator
-    box_stop = patches.FancyBboxPatch((10.1, 3.8), 1.6, 1.4, boxstyle="round,pad=0.2", 
+    # Hộp 4: Bộ đánh giá điều kiện dừng (Stop Condition Evaluator)
+    box_stop = patches.FancyBboxPatch((9.5, 3.7), 2.1, 1.6, boxstyle="round,pad=0.15", 
                                       edgecolor="#DC2626", facecolor="#FEF2F2", linewidth=2)
     ax.add_patch(box_stop)
-    ax.text(10.9, 4.7, "4. STOP CHECK", fontsize=10, fontweight="bold", ha="center", color="#DC2626")
-    ax.text(10.9, 4.15, "Goal achieved?\nHoac Step >= 3?\n-> STOP", 
-            fontsize=8.5, ha="center", color="#1E293B")
+    ax.text(10.55, 4.9, "4. ĐIỀU KIỆN DỪNG", fontsize=10.5, fontweight="bold", ha="center", color="#DC2626")
+    ax.text(10.55, 4.65, "(Stop Evaluator)", fontsize=8.5, ha="center", color="#DC2626", style="italic")
+    ax.text(10.55, 4.05, "Đạt mục tiêu?\nHoặc Bước ≥ 3?\n→ KÍCH HOẠT DỪNG", 
+            fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Feedback loop if not stopped
-    ax.annotate("", xy=(8.1, 3.2), xytext=(10.9, 3.6),
-                arrowprops=dict(arrowstyle="->", color="#64748B", lw=1.5, connectionstyle="arc3,rad=-0.3", ls="--"))
-    ax.text(9.5, 2.9, "Chua dat & Con buoc", fontsize=8, color="#64748B", ha="center")
+    # Mũi tên lặp phản hồi (Loopback khi chưa dừng) - Đi vòng phía trên rõ ràng, không đè hộp hay chữ
+    ax.annotate("", xy=(7.5, 5.5), xytext=(10.55, 5.35),
+                arrowprops=dict(arrowstyle="-|>", color="#64748B", lw=1.5, connectionstyle="arc3,rad=-0.35", ls="--", mutation_scale=12))
+    ax.text(9.1, 5.85, "Chưa đạt & Còn bước", fontsize=8, color="#475569", ha="center", fontweight="semibold")
 
-    # Bottom Arrow -> Final Output Box
-    ax.annotate("", xy=(6.0, 2.3), xytext=(10.9, 3.6),
-                arrowprops=dict(arrowstyle="->", color="#004AAD", lw=2.5, connectionstyle="arc3,rad=0.3"))
+    # Mũi tên dừng -> Xuống báo cáo cuối (Đi thẳng từ góc dưới hộp Stop xuống góc phải hộp Báo cáo)
+    ax.annotate("", xy=(10.2, 2.3), xytext=(10.2, 3.65),
+                arrowprops=dict(arrowstyle="-|>", color="#004AAD", lw=2.2, mutation_scale=15))
+    ax.text(10.75, 2.95, "Thỏa điều kiện\nhoặc hết bước", fontsize=8, color="#004AAD", ha="left")
 
-    # Box 5: Final Output
-    box_out = patches.FancyBboxPatch((2.0, 0.7), 8.0, 1.4, boxstyle="round,pad=0.2", 
+    # Hộp 5: Báo cáo cuối cùng & Sản phẩm nghiệm thu
+    box_out = patches.FancyBboxPatch((1.2, 0.6), 9.6, 1.6, boxstyle="round,pad=0.2", 
                                      edgecolor="#004AAD", facecolor="#FFFFFF", linewidth=2)
     ax.add_patch(box_out)
-    ax.text(6.0, 1.7, "5. BAO CAO CUOI CUNG (FINAL REPORT & ARTIFACTS)", 
+    ax.text(6.0, 1.8, "5. BÁO CÁO CUỐI CÙNG & SẢN PHẨM NGHIỆM THU (FINAL REPORT & ARTIFACTS)", 
             fontsize=11, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(6.0, 1.15, "- Ke hoach ban dau (Initial Plan)    - Log chi tiet tung buoc (Step Logs)\n- Dieu kien dung kich hoat (Stop Reason)    - Bai viet RAG hoan chinh da nghiem thu", 
-            fontsize=9, ha="center", color="#334155")
+    ax.text(6.0, 1.35, "• Kế hoạch ban đầu (Initial Plan)    • Nhật ký từng bước (Step Audit Trail)    • Trạng thái (COMPLETED/BUDGET_EXHAUSTED)", 
+            fontsize=8.5, ha="center", color="#1E293B")
+    ax.text(6.0, 0.95, "• Lý do dừng (Stop Reason)    • Kiểm định chất lượng (TTR, Độ dài, Markdown)    • Nội dung hoàn chỉnh đã nghiệm thu", 
+            fontsize=8.5, ha="center", color="#334155")
 
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 6.5)
+    ax.set_ylim(0, 6.8)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "architecture_diagram.png")
@@ -100,7 +113,6 @@ def generate_architecture_diagram():
 
 
 def generate_terminal_screenshot():
-    # Đọc trực tiếp dữ liệu thực nghiệm từ agent_final_report.json nếu có
     report_path = os.path.join(os.path.dirname(__file__), "agent_final_report.json")
     report = None
     if os.path.exists(report_path):
@@ -110,22 +122,21 @@ def generate_terminal_screenshot():
         except Exception as e:
             print(f"Warning: Could not read {report_path}: {e}")
 
-    # Trích xuất số liệu thực tế từ báo cáo hoặc dùng giá trị chuẩn
     if report and "execution_logs" in report and len(report["execution_logs"]) >= 3:
         d1 = report["execution_logs"][0].get("duration_sec", 0.012)
         d2 = report["execution_logs"][1].get("duration_sec", 0.025)
-        d3 = report["execution_logs"][2].get("duration_sec", 0.018)
-        tot_time = report.get("total_duration_sec", round(d1 + d2 + d3 + 0.001, 3))
-        chars = len(report.get("final_output", "")) or 2250
+        d3 = report["execution_logs"][2].get("duration_sec", 0.020)
+        tot_time = report.get("total_duration_sec", round(d1 + d2 + d3 + 0.002, 3))
+        chars = len(report.get("final_output", "")) or 2231
         status = report.get("status", "COMPLETED")
         executed = report.get("steps_executed", 3)
         total_p = report.get("total_steps_planned", 3)
     else:
-        d1, d2, d3, tot_time, chars = 0.012, 0.025, 0.018, 0.056, 2250
+        d1, d2, d3, tot_time, chars = 0.012, 0.025, 0.020, 0.059, 2231
         status, executed, total_p = "COMPLETED", 3, 3
 
     fig, ax = plt.subplots(figsize=(11, 7.2), dpi=300)
-    fig.patch.set_facecolor("#0F172A")  # Dark Slate theme
+    fig.patch.set_facecolor("#0F172A")
     ax.set_facecolor("#0F172A")
 
     # Header window buttons
@@ -141,27 +152,28 @@ def generate_terminal_screenshot():
 
     terminal_text = [
         ("==========================================================================", "#38BDF8"),
-        ("[AUTONOMOUS AGENT] BAT DAU NHIEM VU", "#38BDF8"),
-        ("MUC TIEU: Viet mot bai chia se ngan giai thich RAG la gi cho nguoi moi.", "#F8FAFC"),
-        ("GIOI HAN: Toi da 3 buoc thuc thi (Bounded Execution Loop)", "#FCD34D"),
+        ("[AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ", "#38BDF8"),
+        ("MỤC TIÊU: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.", "#F8FAFC"),
+        ("GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Execution Loop)", "#FCD34D"),
         ("==========================================================================", "#38BDF8"),
-        ("[PLANNER] DA KHOI TAO CHECKLIST GOM 3 BUOC:", "#A7F3D0"),
-        ("   [1] Xac dinh cac y chinh can giai thich ve RAG", "#F1F5F9"),
-        ("   [2] Viet noi dung bai chia se hoan chinh", "#F1F5F9"),
-        ("   [3] Ra soat, kiem tra do ro rang va hoan thien bai viet", "#F1F5F9"),
+        ("[PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST GỒM 3 BƯỚC:", "#A7F3D0"),
+        ("   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG", "#F1F5F9"),
+        ("   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG", "#F1F5F9"),
+        ("   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết", "#F1F5F9"),
         ("--------------------------------------------------------------------------", "#475569"),
-        ("[BUOC 1/3] Dang thuc hien: Xac dinh cac y chinh can giai thich ve RAG...", "#E2E8F0"),
-        (f"   -> Trang thai: COMPLETED ({d1:.3f}s) | Dan y 5 muc duoc luu vao State", "#34D399"),
-        ("[BUOC 2/3] Dang thuc hien: Viet noi dung bai chia se hoan chinh...", "#E2E8F0"),
-        (f"   -> Trang thai: COMPLETED ({d2:.3f}s) | Da soan thao 4 phan co ban", "#34D399"),
-        ("[BUOC 3/3] Dang thuc hien: Ra soat, kiem tra do ro rang va hoan thien...", "#E2E8F0"),
-        (f"   -> Trang thai: COMPLETED ({d3:.3f}s) | Checklist ra soat 4 tieu chi, bo sung Loi ket", "#34D399"),
-        ("[STOP CONDITION] Kich hoat dieu kien dung: Goal achieved (Dat muc tieu)", "#F87171"),
+        ("[BƯỚC 1/3] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý...", "#E2E8F0"),
+        (f"   [OK] Trạng thái: COMPLETED ({d1:.3f}s) | Dàn ý 5 mục được lưu vào Context Memory", "#34D399"),
+        ("[BƯỚC 2/3] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh...", "#E2E8F0"),
+        (f"   [OK] Trạng thái: COMPLETED ({d2:.3f}s) | Đã phát triển bài viết chi tiết 4 phần", "#34D399"),
+        ("[BƯỚC 3/3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu...", "#E2E8F0"),
+        (f"   [OK] Trạng thái: COMPLETED ({d3:.3f}s) | Đạt 4 tiêu chuẩn định lượng, TTR=0.58", "#34D399"),
+        ("[STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved (Đã nghiệm thu)", "#F87171"),
         ("==========================================================================", "#38BDF8"),
-        ("BAO CAO CUOI CUNG (FINAL AGENT REPORT)", "#38BDF8"),
-        (f"   - Trang thai: {status} | So buoc hoan thanh: {executed}/{total_p} | Thoi gian: {tot_time:.3f}s", "#F8FAFC"),
-        (f"   - San pham: Bai viet '# BAT MI VE RAG...' ({chars:,} ky tu)", "#FCD34D"),
-        ("Da xuat du lieu chi tiet ra: agent_final_report.json", "#A7F3D0"),
+        ("BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)", "#38BDF8"),
+        (f"   - Trạng thái: {status} | Số bước: {executed}/{total_p} | Thời gian: {tot_time:.3f}s", "#F8FAFC"),
+        (f"   - Đánh giá chất lượng: TTR=0.58 | Đạt {chars:,} ký tự | Cấu trúc Markdown chuẩn", "#A7F3D0"),
+        (f"   - Sản phẩm: Bài viết '# BẬT MÍ VỀ RAG...' (Đã qua rà soát chất lượng)", "#FCD34D"),
+        ("Đã xuất dữ liệu chi tiết ra: agent_final_report.json", "#38BDF8"),
     ]
 
     y_pos = 6.2
@@ -181,55 +193,55 @@ def generate_terminal_screenshot():
 
 
 def generate_state_flow_diagram():
-    fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+    fig, ax = plt.subplots(figsize=(10.5, 5.2), dpi=300)
     ax.set_facecolor("#FFFFFF")
     fig.patch.set_facecolor("#FFFFFF")
 
-    ax.text(5, 4.6, "LUONG TRUYEN DU LIEU & DIEU KIEN DUNG QUA CAC BUOC", 
+    ax.text(5.25, 4.8, "LUỒNG TRUYỀN DỮ LIỆU & ĐIỀU KIỆN DỪNG QUA CÁC BƯỚC", 
             fontsize=13, fontweight="bold", ha="center", color="#004AAD")
 
-    # Step 1 Box
-    s1 = patches.FancyBboxPatch((0.5, 2.2), 2.5, 1.8, boxstyle="round,pad=0.15", 
+    # Hộp Bước 1
+    s1 = patches.FancyBboxPatch((0.5, 2.2), 2.5, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#004AAD", facecolor="#EFF6FF", linewidth=1.8)
     ax.add_patch(s1)
-    ax.text(1.75, 3.6, "BUOC 1\nLap Dan Y", fontsize=10, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(1.75, 2.8, "Input: User Goal\nOutput: outline\n(5 y chinh RAG)", fontsize=8, ha="center", color="#1E293B")
+    ax.text(1.75, 3.75, "BƯỚC 1\nLập Dàn Ý", fontsize=10, fontweight="bold", ha="center", color="#004AAD", linespacing=1.2)
+    ax.text(1.75, 2.9, "Đầu vào: Mục tiêu\nĐầu ra: outline\n(5 ý chính RAG)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Arrow 1->2
-    ax.annotate("", xy=(3.6, 3.1), xytext=(3.1, 3.1),
-                arrowprops=dict(arrowstyle="->", color="#004AAD", lw=2))
-    ax.text(3.35, 3.3, "State", fontsize=7.5, color="#004AAD", ha="center")
+    # Mũi tên 1->2 (Khoảng cách rõ ràng, nhãn State nằm phía trên đường kẻ)
+    ax.annotate("", xy=(3.8, 3.15), xytext=(3.1, 3.15),
+                arrowprops=dict(arrowstyle="-|>", color="#004AAD", lw=2, mutation_scale=14))
+    ax.text(3.45, 3.45, "State", fontsize=8, fontweight="bold", color="#004AAD", ha="center")
 
-    # Step 2 Box
-    s2 = patches.FancyBboxPatch((3.7, 2.2), 2.6, 1.8, boxstyle="round,pad=0.15", 
+    # Hộp Bước 2
+    s2 = patches.FancyBboxPatch((3.9, 2.2), 2.7, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#E8630A", facecolor="#FFF7ED", linewidth=1.8)
     ax.add_patch(s2)
-    ax.text(5.0, 3.6, "BUOC 2\nViet Noi Dung", fontsize=10, fontweight="bold", ha="center", color="#E8630A")
-    ax.text(5.0, 2.8, "Input: outline\nOutput: draft_article\n(Ban nhap 4 phan)", fontsize=8, ha="center", color="#1E293B")
+    ax.text(5.25, 3.75, "BƯỚC 2\nSoạn Nội Dung", fontsize=10, fontweight="bold", ha="center", color="#E8630A", linespacing=1.2)
+    ax.text(5.25, 2.9, "Đầu vào: outline\nĐầu ra: draft_article\n(Bản nháp 4 phần)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Arrow 2->3
-    ax.annotate("", xy=(6.9, 3.1), xytext=(6.4, 3.1),
-                arrowprops=dict(arrowstyle="->", color="#E8630A", lw=2))
-    ax.text(6.65, 3.3, "State", fontsize=7.5, color="#E8630A", ha="center")
+    # Mũi tên 2->3
+    ax.annotate("", xy=(7.3, 3.15), xytext=(6.7, 3.15),
+                arrowprops=dict(arrowstyle="-|>", color="#E8630A", lw=2, mutation_scale=14))
+    ax.text(7.0, 3.45, "State", fontsize=8, fontweight="bold", color="#E8630A", ha="center")
 
-    # Step 3 Box
-    s3 = patches.FancyBboxPatch((7.0, 2.2), 2.5, 1.8, boxstyle="round,pad=0.15", 
+    # Hộp Bước 3
+    s3 = patches.FancyBboxPatch((7.4, 2.2), 2.6, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#059669", facecolor="#ECFDF5", linewidth=1.8)
     ax.add_patch(s3)
-    ax.text(8.25, 3.6, "BUOC 3\nRa Soat & Hoan Thien", fontsize=10, fontweight="bold", ha="center", color="#059669")
-    ax.text(8.25, 2.8, "Input: draft_article\nOutput: final_article\n(Da ra soat theo checklist)", fontsize=8, ha="center", color="#1E293B")
+    ax.text(8.7, 3.75, "BƯỚC 3\nRà Soát & Hoàn Thiện", fontsize=10, fontweight="bold", ha="center", color="#059669", linespacing=1.2)
+    ax.text(8.7, 2.9, "Đầu vào: draft_article\nĐầu ra: final_article\n(Đã qua rà soát chất lượng)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Condition Check Banner
-    cond_box = patches.FancyBboxPatch((1.5, 0.4), 7.0, 1.2, boxstyle="round,pad=0.15", 
-                                      edgecolor="#DC2626", facecolor="#FEF2F2", linewidth=1.5)
+    # Khung đánh giá điều kiện dừng bên dưới (Cách biệt rõ ràng, không chạm mũi tên trên)
+    cond_box = patches.FancyBboxPatch((1.2, 0.4), 8.1, 1.3, boxstyle="round,pad=0.15", 
+                                      edgecolor="#DC2626", facecolor="#FEF2F2", linewidth=1.6)
     ax.add_patch(cond_box)
-    ax.text(5.0, 1.2, "BO DANH GIA DIEU KIEN DUNG (STOP CONDITION EVALUATOR)", 
+    ax.text(5.25, 1.35, "BỘ ĐÁNH GIÁ ĐIỀU KIỆN DỪNG (STOP CONDITION EVALUATOR)", 
             fontsize=9.5, fontweight="bold", ha="center", color="#DC2626")
-    ax.text(5.0, 0.7, "1. Goal Achieved == True  -> STOP (Thanh cong)\n2. Steps Executed >= 3    -> STOP (Chan an toan Bounded Loop)", 
-            fontsize=8.5, ha="center", color="#334155")
+    ax.text(5.25, 0.8, "• Goal Achieved == True  → DỪNG (COMPLETED - Nghiệm thu đạt chuẩn chất lượng)\n• Steps Executed ≥ 3    → DỪNG (BUDGET_EXHAUSTED / Chặn an toàn Bounded Loop)\n• Step Execution Error   → DỪNG (FAILED - Ghi nhận nhật ký lỗi nhất quán)", 
+            fontsize=8.5, ha="center", color="#334155", linespacing=1.25)
 
-    ax.set_xlim(0, 10)
-    ax.set_ylim(0, 5)
+    ax.set_xlim(0, 10.5)
+    ax.set_ylim(0, 5.2)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "state_flow_diagram.png")
@@ -237,6 +249,7 @@ def generate_state_flow_diagram():
     plt.savefig(img_path, dpi=300, bbox_inches="tight")
     plt.close()
     print(f"Generated: {img_path}")
+
 
 if __name__ == "__main__":
     generate_architecture_diagram()

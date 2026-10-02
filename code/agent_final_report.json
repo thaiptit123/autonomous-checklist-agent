@@ -3,51 +3,51 @@
   "total_steps_planned": 3,
   "steps_executed": 3,
   "status": "COMPLETED",
-  "stop_reason": "Goal achieved: Bài viết đã được tạo và rà soát hoàn tất theo đúng mục tiêu.",
+  "stop_reason": "Goal achieved: Bài viết hoàn chỉnh đã qua kiểm duyệt chất lượng đạt yêu cầu.",
   "plan": [
     {
       "step_id": 1,
-      "title": "Xác định các ý chính cần giải thích về RAG (Retrieval-Augmented Generation)",
-      "description": "Lập dàn ý các câu hỏi trọng tâm: Định nghĩa RAG (Retrieval-Augmented Generation), vì sao cần dùng, nguyên lý hoạt động và ví dụ thực tế.",
+      "title": "Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)",
+      "description": "Lập dàn ý các câu hỏi trọng tâm: Định nghĩa RAG (Retrieval-Augmented Generation), nguyên lý và ví dụ thực tế.",
       "action_type": "outline",
       "status": "COMPLETED",
-      "result": "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU\n1. RAG là gì? (Retrieval-Augmented Generation - Thế hệ tăng cường truy xuất).\n2. Vì sao cần RAG? (Khắc phục hiện tượng ảo giác - hallucination, cập nhật tri thức mới mà không cần huấn luyện lại).\n3. RAG hoạt động như thế nào? (Quy trình 3 bước: Lập chỉ mục Vector -> Truy xuất tài liệu liên quan -> Tạo câu trả lời bằng LLM kèm ngữ cảnh).\n4. Ví dụ đời thường dễ hiểu: Giống như thi đề mở được mở sách tra cứu tài liệu thay vì chỉ nhớ kiến thức cũ trong đầu.\n5. Khi nào nên áp dụng RAG? (Tra cứu tài liệu nội bộ doanh nghiệp, hỏi đáp quy trình chính sách, chatbot chăm sóc khách hàng)."
+      "result": "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU\n1. RAG là gì? (Retrieval-Augmented Generation - Tạo sinh tăng cường truy xuất).\n2. Vì sao cần RAG? (Khắc phục ảo giác hallucination, cập nhật tri thức mới).\n3. Nguyên lý vận hành: Lập chỉ mục Vector -> Truy xuất ngữ cảnh -> Phản hồi LLM.\n4. Minh họa đời thường: Giống như làm bài thi đề mở được tra cứu tài liệu.\n5. Ứng dụng thực tế: Chatbot nội bộ doanh nghiệp và hỏi đáp tri thức chuyên ngành."
     },
     {
       "step_id": 2,
       "title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)",
-      "description": "Dựa trên dàn ý Bước 1, phát triển văn phong thân thiện, trực quan, phù hợp cho người mới bắt đầu.",
+      "description": "Dựa trên dàn ý Bước 1, phát triển văn phong thân thiện, trực quan, phù hợp cho người học.",
       "action_type": "generate",
       "status": "COMPLETED",
-      "result": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay nói dối khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn hàng trăm triệu đồng huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ (chunking) và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi của bạn LẪN các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!"
+      "result": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay phát sinh thông tin sai lệch khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn kém chi phí huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi lẫn các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!"
     },
     {
       "step_id": 3,
-      "title": "Rà soát, kiểm tra độ rõ ràng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
-      "description": "Kiểm tra tính dễ hiểu cho người mới, soát lỗi lặp từ ngữ, thêm kết luận và đánh giá mức độ đạt mục tiêu.",
+      "title": "Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
+      "description": "Kiểm tra tính dễ hiểu, đo lường chỉ số từ vựng TTR, bổ sung lời kết và nghiệm thu.",
       "action_type": "review_polish",
       "status": "COMPLETED",
-      "result": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay nói dối khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn hàng trăm triệu đồng huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ (chunking) và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi của bạn LẪN các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!\n\n## 5. Lời kết cho người mới bắt đầu\nRAG (Retrieval-Augmented Generation) không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n---\n*(Biên soạn bởi Autonomous Content Agent - Hoàn thành rà soát theo checklist)*"
+      "result": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay phát sinh thông tin sai lệch khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn kém chi phí huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi lẫn các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!\n\n## 5. Lời kết cho người mới bắt đầu\nRAG (Retrieval-Augmented Generation) không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n---\n*(Biên soạn bởi Autonomous Content Agent - Đã qua rà soát chất lượng)*"
     }
   ],
   "execution_logs": [
     {
       "step_id": 1,
-      "step_title": "Xác định các ý chính cần giải thích về RAG (Retrieval-Augmented Generation)",
-      "timestamp": "2026-10-01 10:58:57",
+      "step_title": "Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)",
+      "timestamp": "2026-10-02 16:15:22",
       "duration_sec": 0.012,
       "input_context_keys": [],
-      "output_summary": "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU 1. RAG là gì? (Retrieval-Augmented Generation - Thế hệ tăng cường tru...",
+      "output_summary": "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU 1. RAG là gì? (Retrieval-Augmented Generation - Tạo sinh tăng cường t...",
       "status": "COMPLETED",
       "details": {
         "action_type": "outline",
-        "output_length_chars": 635
+        "output_length_chars": 446
       }
     },
     {
       "step_id": 2,
       "step_title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)",
-      "timestamp": "2026-10-01 10:58:57",
+      "timestamp": "2026-10-02 16:15:22",
       "duration_sec": 0.025,
       "input_context_keys": [
         "outline"
@@ -56,14 +56,14 @@
       "status": "COMPLETED",
       "details": {
         "action_type": "generate",
-        "output_length_chars": 1891
+        "output_length_chars": 1884
       }
     },
     {
       "step_id": 3,
-      "step_title": "Rà soát, kiểm tra độ rõ ràng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
-      "timestamp": "2026-10-01 10:58:57",
-      "duration_sec": 0.018,
+      "step_title": "Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
+      "timestamp": "2026-10-02 16:15:22",
+      "duration_sec": 0.02,
       "input_context_keys": [
         "outline",
         "draft_article"
@@ -72,10 +72,26 @@
       "status": "COMPLETED",
       "details": {
         "action_type": "review_polish",
-        "output_length_chars": 2246
+        "output_length_chars": 2231
       }
     }
   ],
-  "final_output": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay nói dối khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn hàng trăm triệu đồng huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ (chunking) và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi của bạn LẪN các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!\n\n## 5. Lời kết cho người mới bắt đầu\nRAG (Retrieval-Augmented Generation) không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n---\n*(Biên soạn bởi Autonomous Content Agent - Hoàn thành rà soát theo checklist)*",
-  "total_duration_sec": 0.056
+  "final_output": "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\nBạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n## 1. RAG là gì?\nRAG là viết tắt của **Retrieval-Augmented Generation** (Tạm dịch: *Tạo câu trả lời tăng cường bằng truy xuất thông tin*). Hiểu đơn giản, thay vì bắt AI chỉ dựa vào 'trí nhớ cố định' (kiến thức thu nhận từ lúc huấn luyện), RAG trang bị cho AI khả năng tra cứu tài liệu thực tế bên ngoài ngay tại thời điểm được hỏi.\n\n## 2. Vì sao LLM truyền thống cần đến RAG?\n- **Tránh ảo giác (Hallucination):** LLM hay phát sinh thông tin sai lệch khi thiếu dữ liệu. RAG cung cấp nguồn dẫn chứng chính xác để AI dựa vào.\n- **Cập nhật dữ liệu thời gian thực:** Không cần tốn kém chi phí huấn luyện lại mô hình mỗi khi có văn bản mới.\n- **Bảo mật dữ liệu riêng tư:** Cho phép kết nối an toàn với cơ sở dữ liệu nội bộ công ty mà không sợ rò rỉ ra ngoài.\n\n## 3. RAG hoạt động như thế nào?\nCơ chế của RAG diễn ra mượt mà theo 3 chặng:\n1. **Chuyển đổi & Lưu trữ (Indexing):** Tài liệu văn bản được cắt nhỏ và mã hóa thành vector toán học rồi lưu vào Vector Database.\n2. **Truy xuất (Retrieval):** Khi bạn đặt câu hỏi, hệ thống tìm kiếm trong cơ sở dữ liệu những đoạn văn bản liên quan nhất.\n3. **Tạo phản hồi (Generation):** LLM nhận cả câu hỏi lẫn các đoạn tài liệu tìm thấy, tổng hợp và trả về câu trả lời chuẩn xác nhất.\n\n## 4. Hình dung đơn giản nhất\nHãy tưởng tượng LLM thông thường như một học sinh đi thi 'đóng sách' (chỉ dựa vào trí nhớ hạn chế). Còn hệ thống RAG là học sinh bước vào phòng thi 'mở sách': khi gặp câu hỏi khó, bạn ấy mở đúng cuốn cẩm nang tra cứu và viết ra câu trả lời hoàn hảo!\n\n## 5. Lời kết cho người mới bắt đầu\nRAG (Retrieval-Augmented Generation) không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n---\n*(Biên soạn bởi Autonomous Content Agent - Đã qua rà soát chất lượng)*",
+  "quality_metrics": {
+    "passed": true,
+    "char_count": 2231,
+    "word_count": 466,
+    "ttr": 0.577,
+    "matched_keywords": [
+      "giải",
+      "rag"
+    ],
+    "review_notes": [
+      "✓ Tiêu chuẩn độ dài: Đạt 2231 ký tự (466 từ, ngưỡng tối thiểu 250 ký tự)",
+      "✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc gạch đầu dòng Markdown rõ ràng",
+      "✓ Đa dạng từ vựng (TTR = 0.58): Không lặp từ ngữ bất thường (ngưỡng yêu cầu >= 0.35)",
+      "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, rag)"
+    ]
+  },
+  "total_duration_sec": 0.059
 }
