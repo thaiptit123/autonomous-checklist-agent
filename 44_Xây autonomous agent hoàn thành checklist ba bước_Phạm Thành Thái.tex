@@ -539,7 +539,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
-    \item \textbf{Planner thích ứng theo luật:} Tác nhân phân tích Intent/Topic theo các luật đã định nghĩa để sinh đúng số bước cần thiết (ở đây nhận thấy chỉ cần tạo dàn ý nên chỉ tạo đúng \textbf{2 bước}):
+    \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Trong chế độ dự phòng để minh họa khả năng dừng sớm, Agent sử dụng luật nhận diện ý định (Intent) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}:
     \begin{enumerate}
         \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
         \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
@@ -593,7 +593,7 @@ Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế đ�
 3 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Bám sát tài liệu nguồn) \\ \hline
 4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
 5 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
-6 & Mục tiêu mở hoàn toàn (Apache Kafka) & \texttt{COMPLETED} & \texttt{Goal achieved} (Không hardcode topic) \\ \hline
+6 & Mục tiêu mở hoàn toàn (Apache Kafka) & \texttt{COMPLETED} & \texttt{Goal achieved} (Xử lý ngoài chủ đề mẫu) \\ \hline
 7 & Quan sát \& Thích ứng kế hoạch động & \texttt{PASS (Observe)} & \texttt{Adaptive Plan} (Bước 1 chỉnh Bước 2) \\ \hline
 8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
 9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
