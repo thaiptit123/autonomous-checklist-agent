@@ -199,7 +199,7 @@
 
 Trong làn sóng phát triển của Trí tuệ Nhân tạo hiện đại, khái niệm \textbf{AI Agent} đã có bước chuyển mình ngoạn mục từ những chuỗi câu lệnh tĩnh (Chains/Workflows) sang các hệ thống tự hành (\textbf{Autonomous Systems}). Một tác nhân tự hành hướng mục tiêu không chỉ thực thi một chuỗi hướng dẫn cố định được lập trình sẵn mà sở hữu khả năng tự phân tích mục tiêu (Goal-driven Planning), tự chia nhỏ nhiệm vụ thành các bước khả thi, tuần tự thực thi, truyền dữ liệu ngữ cảnh giữa các chặng và tự đánh giá để kích hoạt điều kiện dừng (\textbf{Stop Condition}) an toàn.
 
-Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng trọn vẹn một \textbf{Autonomous Checklist Agent} với giới hạn hữu hạn (\textbf{Bounded Loop}) tối đa ba bước. Chúng ta sẽ lấy kịch bản thực tế rất trực quan và gần gũi: \textit{Người dùng nhập yêu cầu viết một bài chia sẻ ngắn giải thích RAG (Retrieval-Augmented Generation) cho người mới bắt đầu}. Hệ thống tác nhân sẽ tự động lập checklist gồm 3 bước logic (Lên dàn ý $\rightarrow$ Viết nội dung $\rightarrow$ Rà soát \& Hoàn thiện), lần lượt thực thi thông qua mô hình ngôn ngữ lớn (LLM cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}), ghi lại nhật ký (\textbf{nhật ký từng bước}) minh bạch và xuất ra báo cáo cuối cùng (\textbf{báo cáo tổng kết}).
+Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng trọn vẹn một \textbf{Autonomous Checklist Agent} với giới hạn hữu hạn (\textbf{Bounded Loop}) tối đa ba bước. Chúng ta sẽ lấy kịch bản thực tế rất trực quan và gần gũi: \textit{Người dùng nhập yêu cầu viết một bài chia sẻ ngắn giải thích RAG (Retrieval-Augmented Generation) cho người mới bắt đầu}. Hệ thống tác nhân sẽ tự động lập checklist gồm 3 bước logic (Lên dàn ý $\rightarrow$ Viết nội dung $\rightarrow$ Rà soát \& Hoàn thiện), lần lượt thực thi thông qua mô hình ngôn ngữ lớn (LLM cục bộ qua Ollama API, mặc định sử dụng \texttt{tinix-lm:latest}), ghi lại nhật ký (\textbf{nhật ký từng bước}) minh bạch và xuất ra báo cáo cuối cùng (\textbf{báo cáo tổng kết}).
 
 \hypertarget{bai-viet-nay-danh-cho-ai}{%
 \section*{Bài viết này dành cho ai?}\label{bai-viet-nay-danh-cho-ai}}
@@ -212,7 +212,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \item
   \textbf{Yêu cầu kiến thức nền:} Hiểu biết cơ bản về ngôn ngữ lập trình Python (Data classes, Enum, xử lý chuỗi và tệp tin JSON). Đã từng làm quen với khái niệm LLM và kỹ thuật sinh văn bản có cấu trúc.
 \item
-  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+} (khuyến nghị Python 3.10 trở lên). Hệ thống tích hợp trực tiếp mô hình ngôn ngữ lớn (LLM Engine cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}) kết hợp cơ chế fallback tự chứa, đảm bảo tính sẵn sàng cao và khả năng kiểm thử tự động 100\% khép kín.
+  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+} (khuyến nghị Python 3.10 trở lên). Hệ thống tích hợp trực tiếp mô hình ngôn ngữ lớn (LLM cục bộ qua Ollama API, mặc định sử dụng \texttt{tinix-lm:latest}) kết hợp cơ chế fallback tự chứa, kèm bộ kiểm thử tự động gồm cả chế độ LLM thật và fallback giúp kiểm chứng các luồng chính và các trường hợp lỗi.
 \end{itemize}
 
 \hypertarget{muc-tieu}{%
@@ -499,7 +499,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{                stop_reason }\OperatorTok{=} \StringTok{f"Execution failed: Lỗi tại bước \{step.step_id\} - \{e\}"}
                 \ControlFlowTok{break}
 
-            \CommentTok{# Thích ứng kế hoạch cho bước kế tiếp (Observe & Dynamic Replan)}
+            \CommentTok{# Thích ứng kế hoạch cho bước kế tiếp (Observe & Adaptive Planning)}
             \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{<} \BuiltInTok{len}\NormalTok{(plan): }\VariableTok{self}\NormalTok{._observe_and_adapt(step, result, plan[idx], goal)}
 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
@@ -532,7 +532,7 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
-    \item \textbf{Quan sát và thích ứng kế hoạch (observe \& dynamic replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Quan sát và thích ứng kế hoạch (Observe \& Adaptive Planning):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 

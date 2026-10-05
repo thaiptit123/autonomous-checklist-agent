@@ -6,7 +6,7 @@ Tài liệu hướng dẫn và mã nguồn thực hành thuộc series chuyên s
 - **Mục tiêu:** Xây dựng Autonomous Checklist Agent cho phép người dùng nhập mục tiêu nhỏ (ví dụ: *Viết bài chia sẻ giải thích RAG cho người mới bắt đầu*).
 - **Cơ chế cốt lõi:**
   - Tự động phân tích mục tiêu và lập checklist tối đa 3 bước (Dynamic Planning qua LLM `tinix-lm:latest` / Ollama GPU cục bộ kết hợp Fallback an toàn).
-  - Vòng lặp quan sát và thích ứng kế hoạch động (**Observe & Dynamic Replan**): Sau mỗi bước thực thi, tác nhân quan sát kết quả trung gian để điều chỉnh chỉ dẫn thực thi cho các bước kế tiếp.
+  - Vòng lặp quan sát và thích ứng kế hoạch (**Observe & Adaptive Planning**): Sau mỗi bước thực thi, tác nhân quan sát kết quả trung gian để điều chỉnh chỉ dẫn thực thi cho các bước kế tiếp.
   - Thực thi tuần tự (Sequential Execution) và truyền trạng thái qua State Memory.
   - Kiểm soát giới hạn vòng lặp hữu hạn (Bounded Loop $\le$ 3 bước).
   - Đánh giá chất lượng định lượng chặt chẽ (**Automated Quality Evaluator**: TTR đa dạng từ vựng $\ge 0.35$, độ dài ký tự/từ, cấu trúc Markdown, từ khóa trọng tâm).
@@ -20,7 +20,7 @@ Bai44/
 ├── 44_Xây autonomous agent hoàn thành checklist ba bước_Phạm Thành Thái.pdf
 ├── README.md
 ├── code/
-│   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe/Replan)
+│   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe & Adapt)
 │   ├── eval_agent.py           # Bộ 9 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
 │   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM thực tế (~10.25s)
