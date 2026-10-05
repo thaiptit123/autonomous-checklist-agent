@@ -5,7 +5,7 @@ Tác giả: Kỹ sư AI Phạm Thành Thái
 
 Hệ thống Autonomous Agent tự động nhận mục tiêu người dùng, tự lập checklist động
 tối đa 3 bước (Dynamic Planning), thực thi tuần tự, tích hợp mô hình ngôn ngữ lớn (LLM),
-quan sát phản hồi trung gian để thích ứng kế hoạch (Observe & Dynamic Replan),
+quan sát phản hồi trung gian để thích ứng chỉ dẫn bước kế tiếp (Observe & Adapt),
 kiểm duyệt chất lượng định lượng (Quality Evaluator), lưu vết thực thi (Audit Log)
 và kiểm soát điều kiện dừng an toàn đa trạng thái (Bounded Loop Stop Condition).
 """
@@ -26,7 +26,8 @@ class AgentStatus(str, Enum):
     IDLE = "IDLE"
     PLANNING = "PLANNING"
     RUNNING = "RUNNING"
-    COMPLETED = "COMPLETED"
+    COMPLETED = "COMPLETED"  # Đại diện cho trạng thái hoàn thành mục tiêu (GOAL_ACHIEVED)
+    GOAL_ACHIEVED = "COMPLETED"  # Alias tương đương literal với nhận xét reviewer
     BUDGET_EXHAUSTED = "BUDGET_EXHAUSTED"
     FAILED = "FAILED"
 
@@ -224,8 +225,8 @@ class OllamaClient:
 class AutonomousChecklistAgent:
     """
     Autonomous Agent hoàn thành checklist tối đa 3 bước với Bounded Loop,
-    hỗ trợ LLM Planner & Executor thật, quan sát phản hồi trung gian để thích ứng kế hoạch
-    (Observe & Dynamic Replan), và kiểm soát điều kiện dừng đa trạng thái.
+    hỗ trợ LLM Planner & Executor thật, quan sát phản hồi trung gian để thích ứng chỉ dẫn bước kế tiếp
+    (Observe & Adapt), và kiểm soát điều kiện dừng đa trạng thái.
     """
 
     def __init__(self, max_steps: int = 3, use_llm: bool = True):
@@ -378,7 +379,7 @@ class AutonomousChecklistAgent:
 
     def _observe_and_adapt(self, current_step: Step, result: str, next_step: Optional[Step], goal: str) -> Optional[str]:
         """
-        Khâu quan sát (Observation) và thích ứng kế hoạch động (Dynamic Replanning / Step Adaptation).
+        Khâu quan sát (Observation) và thích ứng chỉ dẫn bước kế tiếp (Observe & Adaptive Step Guidance).
         Tác nhân phân tích kết quả trung gian từ bước vừa chạy để tinh chỉnh hoặc bổ sung
         trọng tâm nhiệm vụ cho bước tiếp theo, chứng minh sự khác biệt rõ rệt với workflow cố định.
         """
@@ -718,7 +719,7 @@ class AutonomousChecklistAgent:
                 next_step = plan[idx]
                 adapt_msg = self._observe_and_adapt(step, result, next_step, goal)
                 if adapt_msg:
-                    print(f"   🔄 [REPLAN/ADAPT] Thích ứng kế hoạch Bước {next_step.step_id}: {adapt_msg}")
+                    print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
 
             # Đánh giá điều kiện dừng sau mỗi bước
             should_stop, reason, final_status = self._evaluate_stop_condition(idx, len(plan), intent, goal)

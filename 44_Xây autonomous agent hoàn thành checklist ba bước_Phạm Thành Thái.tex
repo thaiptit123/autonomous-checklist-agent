@@ -336,7 +336,7 @@ Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ng�
 \subsection{2. Thiết kế vòng lặp giới hạn và bộ đánh giá dừng đa trạng thái}
 Để giải quyết triệt để rủi ro trên, hệ thống của chúng ta thiết lập cơ chế kiểm soát kép phân định rõ ràng 3 trạng thái kết thúc:
 \begin{enumerate}
-    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không (ví dụ: mục tiêu viết bài đòi hỏi phải có \texttt{final\_article} và vượt qua kiểm định của \texttt{QualityEvaluator}). Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved}.
+    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không (ví dụ: mục tiêu viết bài đòi hỏi phải có \texttt{final\_article} và vượt qua kiểm định của \texttt{QualityEvaluator}). Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED} đại diện cho mục tiêu hoàn thành, tương đương \texttt{GOAL\_ACHIEVED}).
     \item \textbf{Trạng thái hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}):} Khi số bước thực thi đạt ngưỡng cho phép (ví dụ \texttt{max\_steps = 1} với mục tiêu viết bài, hệ thống mới chỉ xong dàn ý), tác nhân ngắt vòng lặp an toàn và ghi nhận trạng thái \texttt{BUDGET\_EXHAUSTED} chứ không báo nhầm là \texttt{COMPLETED}.
     \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), hệ thống ngắt phiên làm việc ngay lập tức, chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
 \end{enumerate}
@@ -539,7 +539,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
-    \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Trong chế độ dự phòng để minh họa khả năng dừng sớm, Agent sử dụng luật nhận diện ý định (Intent) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}:
+    \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Kịch bản này cố ý chạy ở chế độ dự phòng (\texttt{use\_llm=False}) nhằm kiểm chứng độc lập khả năng nhận diện ý định và dừng sớm an toàn khi LLM ngoại tuyến (năng lực lập kế hoạch động qua LLM đã được kiểm chứng riêng ở Kịch bản 1). Agent sử dụng luật nhận diện ý định (Intent) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}:
     \begin{enumerate}
         \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
         \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
@@ -575,7 +575,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 
 
 \subsection{4. Kiểm thử toàn diện 9 kịch bản đánh giá năng lực tự hành}
-Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 9 kịch bản bao phủ toàn diện. Trong đó, các kịch bản 1–6 và 8 kiểm tra chu trình tác nhân đầy đủ với trạng thái hoạt động (\texttt{AgentStatus}) và lý do dừng (\texttt{stop\_reason}); các kịch bản 7 và 9 kiểm tra trực tiếp ở mức thành phần (unit-level) đối với cơ chế quan sát thích ứng và rào chắn an toàn Bounded Loop:
+Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 9 kịch bản bao phủ toàn diện. Toàn bộ các kịch bản chu trình đầy đủ (1–6, 8) được chuẩn hóa xác thực tự động qua hàm kiểm định \texttt{assert\_status\_stop\_reason\_consistent()} để đảm bảo tính nhất quán tuyệt đối giữa trạng thái hoạt động (\texttt{AgentStatus}) và lý do dừng (\texttt{stop\_reason}); hai kịch bản 7 và 9 kiểm tra trực tiếp ở mức thành phần (unit-level) đối với cơ chế thích ứng chỉ dẫn bước kế tiếp và rào chắn an toàn Bounded Loop:
 
 \renewcommand{\arraystretch}{0.88}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
@@ -593,7 +593,7 @@ Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế đ�
 3 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Bám sát tài liệu nguồn) \\ \hline
 4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
 5 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
-6 & Mục tiêu mở hoàn toàn (Apache Kafka) & \texttt{COMPLETED} & \texttt{Goal achieved} (Xử lý ngoài chủ đề mẫu) \\ \hline
+6 & Mục tiêu ngoài chủ đề mẫu (Apache Kafka - Fallback) & \texttt{COMPLETED} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
 7 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
 8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
 9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline

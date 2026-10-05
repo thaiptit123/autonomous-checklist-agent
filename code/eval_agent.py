@@ -5,12 +5,30 @@ Bộ kịch bản kiểm thử toàn diện cho Autonomous Checklist Agent (Seri
 2. Dynamic Planning & Execution với Bounded Loop (<= 3 bước)
 3. Đánh giá điều kiện dừng chặt chẽ (Goal Achieved vs Budget Exhausted vs Failed)
 4. Kiểm định chất lượng định lượng (Quality Evaluator: TTR, Length, Structure, Relevance)
-5. Thích ứng kế hoạch động theo quan sát (Observe & Dynamic Replan)
+5. Quan sát và thích ứng chỉ dẫn bước kế tiếp (Observe & Adaptive Step Guidance)
 6. Các kịch bản biên & kịch bản thất bại (Open-domain goals, Evaluator rejection, Action exceptions)
 """
 
 import sys
 from checklist_agent import AutonomousChecklistAgent, AgentStatus
+
+
+def assert_status_stop_reason_consistent(report):
+    """Kiểm tra tính nhất quán hệ thống giữa AgentStatus và nội dung stop_reason."""
+    if report.status == AgentStatus.COMPLETED:
+        assert "Goal achieved" in report.stop_reason, (
+            f"Mâu thuẫn: status là COMPLETED nhưng stop_reason là '{report.stop_reason}'"
+        )
+    elif report.status == AgentStatus.BUDGET_EXHAUSTED:
+        assert "Budget exhausted" in report.stop_reason, (
+            f"Mâu thuẫn: status là BUDGET_EXHAUSTED nhưng stop_reason là '{report.stop_reason}'"
+        )
+    elif report.status == AgentStatus.FAILED:
+        assert "Execution failed" in report.stop_reason, (
+            f"Mâu thuẫn: status là FAILED nhưng stop_reason là '{report.stop_reason}'"
+        )
+    else:
+        raise AssertionError(f"Trạng thái không hợp lệ: {report.status}")
 
 
 def test_scenario_full_rag_llm():
@@ -22,11 +40,11 @@ def test_scenario_full_rag_llm():
     goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
     report = agent.run(goal)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.COMPLETED
     assert report.steps_executed == 3
     assert report.total_steps_planned == 3
     assert len(report.execution_logs) == 3
-    assert "Goal achieved" in report.stop_reason
     assert report.quality_metrics["passed"] is True
     assert report.quality_metrics["ttr"] >= 0.35
     assert report.total_duration_sec > 0.5  # Minh chứng thời gian thực thi thực tế của LLM
@@ -41,10 +59,10 @@ def test_scenario_outline_docker_early_stop():
     goal = "Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."
     report = agent.run(goal)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.COMPLETED
     assert report.total_steps_planned == 2  # Dynamic Planner chỉ sinh 2 bước
     assert report.steps_executed == 2
-    assert "Goal achieved" in report.stop_reason
     assert "Docker" in report.final_output
     assert report.quality_metrics["passed"] is True
     print("✅ TEST 2 PASSED: Dynamic Planner tự tạo đúng 2 bước và dừng sớm an toàn khi mục tiêu hoàn thành.")
@@ -62,10 +80,10 @@ def test_scenario_summarize_with_input_document():
     goal = "Tóm tắt tài liệu kỹ thuật về Model Context Protocol (MCP) cho kỹ sư phần mềm."
     report = agent.run(goal, input_document=sample_doc)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.COMPLETED
     assert report.total_steps_planned == 2
     assert report.steps_executed == 2
-    assert "Goal achieved" in report.stop_reason
     assert "MCP" in report.final_output
     assert report.quality_metrics["passed"] is True
     print("✅ TEST 3 PASSED: Hoàn thành tóm tắt tài liệu nguồn 2 bước bám sát nội dung và nghiệm thu đạt chuẩn.")
@@ -81,9 +99,9 @@ def test_scenario_budget_exhausted_unmet_goal():
     goal = "Viết bài chia sẻ chuyên sâu về Kubernetes cho đội ngũ DevOps."
     report = agent.run(goal)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.BUDGET_EXHAUSTED
     assert report.steps_executed == 1
-    assert "Budget exhausted" in report.stop_reason
     assert "chưa tạo được sản phẩm đầu ra hoàn thiện" in report.stop_reason
     print("✅ TEST 4 PASSED: Phân định chính xác BUDGET_EXHAUSTED khi hết ngân sách bước nhưng chưa hoàn thành mục tiêu.")
 
@@ -109,9 +127,9 @@ def test_scenario_quality_rejection_budget_exhausted():
     report = agent.run(goal)
 
     # Dù chạy đủ 3 bước, sản phẩm không pass QualityEvaluator -> BẮT BUỘC kết luận BUDGET_EXHAUSTED!
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.BUDGET_EXHAUSTED
     assert report.quality_metrics["passed"] is False
-    assert "Budget exhausted" in report.stop_reason
     assert "Độ dài chưa đạt" in report.stop_reason or "Chưa thỏa mãn" in report.stop_reason
     print("✅ TEST 5 PASSED: QualityEvaluator đóng vai trò cổng gác chất lượng nghiêm ngặt, từ chối sản phẩm không đạt chuẩn.")
 
@@ -125,16 +143,16 @@ def test_scenario_open_domain_kafka():
     goal = "Hướng dẫn cơ bản về kiến trúc Event-Driven với Apache Kafka cho kỹ sư backend."
     report = agent.run(goal)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.COMPLETED
     assert "Kafka" in report.final_output
-    assert "Goal achieved" in report.stop_reason
     assert report.quality_metrics["passed"] is True
     print("✅ TEST 6 PASSED: Hệ thống xử lý mục tiêu mở hoàn toàn linh hoạt, sinh cấu trúc bài viết và nghiệm thu hợp lệ.")
 
 
 def test_scenario_dynamic_observation_and_adaptation():
     print("\n" + "#" * 68)
-    print("TEST 7: Kịch bản Quan sát & Thích ứng kế hoạch động (Observe & Dynamic Replan)")
+    print("TEST 7: Kịch bản Quan sát & Thích ứng chỉ dẫn bước kế tiếp (Observe & Adaptive Step Guidance)")
     print("#" * 68)
     agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
     goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
@@ -169,8 +187,8 @@ def test_scenario_action_failure_recovery():
     goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
     report = agent.run(goal)
 
+    assert_status_stop_reason_consistent(report)
     assert report.status == AgentStatus.FAILED
-    assert "Execution failed" in report.stop_reason
     assert "Mất kết nối" in report.stop_reason
     assert report.steps_executed == 2
     assert report.execution_logs[-1]["status"] == "FAILED"
