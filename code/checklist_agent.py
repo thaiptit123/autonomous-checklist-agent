@@ -561,9 +561,7 @@ class AutonomousChecklistAgent:
                 f"Tóm lại, **{topic}** không đơn thuần là một công cụ hay kỹ thuật riêng lẻ, "
                 f"mà là một phương pháp luận kiến trúc giúp nâng tầm tư duy xây dựng hệ thống. "
                 f"Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, "
-                f"bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của {topic} trong thực tiễn.\n\n"
-                f"---\n"
-                f"*(Nội dung được tổng hợp có cấu trúc bởi Autonomous Agent - Đã kiểm định chất lượng định lượng qua QualityEvaluator)*"
+                f"bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của {topic} trong thực tiễn."
             )
             eval_res = self.evaluator.evaluate(polished_article, goal, "full_article")
             self.context_memory["review_notes"] = eval_res["review_notes"]

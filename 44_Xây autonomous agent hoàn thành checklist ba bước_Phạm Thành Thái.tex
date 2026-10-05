@@ -264,7 +264,7 @@ AI Guru x TiniX
 
 \section{Lý thuyết cơ bản: Kiến trúc tác nhân tự hành và vòng lặp quyết định}\label{ly-thuyet-co-ban}
 
-\subsection{1. Phân biệt chuỗi tác vụ cố định (Hardcoded Chain) và tác nhân tự hành}
+\subsection{1. Phân biệt chuỗi tác vụ cố định (hardcoded chain) và tác nhân tự hành}
 Trong giai đoạn đầu của kỹ thuật phần mềm AI, các lập trình viên thường xây dựng ứng dụng dưới dạng chuỗi pipeline tuần tự:
 \begin{center}
 \texttt{Input $\rightarrow$ Prompt 1 $\rightarrow$ Model $\rightarrow$ Prompt 2 $\rightarrow$ Model $\rightarrow$ Output}
@@ -326,7 +326,7 @@ Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau s
 
 \section{Điều kiện dừng và giới hạn an toàn trong vòng lặp}\label{dieu-kien-dung}
 
-\subsection{1. Hiểm họa của vòng lặp vô hạn (Infinite Loop Trap)}
+\subsection{1. Hiểm họa của vòng lặp vô hạn (infinite loop trap)}
 Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ngữ rất dễ rơi vào trạng thái "ảo giác lặp" (reasoning loop): bước sau cố gắng sửa đổi bước trước một cách không hồi kết, hoặc liên tục gọi lại cùng một công cụ với tham số tương tự. Điều này dẫn tới hai hậu quả nghiêm trọng:
 \begin{enumerate}
     \item \textbf{Cạn kiệt ngân sách (Token exhaustion):} Tiêu tốn chi phí gọi mô hình lớn một cách không cần thiết.
@@ -381,7 +381,7 @@ Chúng ta sử dụng \texttt{dataclass} và \texttt{Enum} để định nghĩa 
 \end{Shaded}
 
 \subsection{2. Bộ kiểm định chất lượng định lượng và kết nối mô hình ngôn ngữ lớn}
-Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{QualityEvaluator} tính toán trực tiếp các chỉ số kỹ thuật và kết nối mô hình ngôn ngữ lớn qua \texttt{OllamaClient}:
+Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{QualityEvaluator} tính toán trực tiếp các chỉ số kỹ thuật và kết nối mô hình ngôn ngữ lớn qua \texttt{OllamaClient}. \textit{*(Các đoạn mã dưới đây phản ánh trung thực cấu trúc cài đặt trong tệp \texttt{checklist\_agent.py} trên repository)*}:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -402,7 +402,8 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        crit_length }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{>=}\NormalTok{ min_chars}
 \NormalTok{        crit_structure }\OperatorTok{=} \BuiltInTok{bool}\NormalTok{(re.search(}\StringTok{r'(^|\textbackslash{}n)(#\{1,4\}\textbackslash{}s+|[0-9]+\textbackslash{}.\textbackslash{}s+|-\textbackslash{}s+|\textbackslash{}*\textbackslash{}s+)'}\NormalTok{, content))}
 \NormalTok{        crit_diversity }\OperatorTok{=}\NormalTok{ ttr }\OperatorTok{>=} \FloatTok{0.35}
-\NormalTok{        stop_words }\OperatorTok{=}\NormalTok{ \{}\StringTok{"viết"}\NormalTok{, }\StringTok{"bài"}\NormalTok{, }\StringTok{"cho"}\NormalTok{, }\StringTok{"về"}\NormalTok{, }\StringTok{"người"}\NormalTok{, }\StringTok{"mới"}\NormalTok{, }\StringTok{"bắt"}\NormalTok{, }\StringTok{"đầu"}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"là"}\NormalTok{, }\StringTok{"gì"}\NormalTok{\}}
+        \NormalTok{stop_words }\OperatorTok{=}\NormalTok{ \{}\StringTok{"viết"}\NormalTok{, }\StringTok{"bài"}\NormalTok{, }\StringTok{"cho"}\NormalTok{, }\StringTok{"về"}\NormalTok{, }\StringTok{"người"}\NormalTok{, }\StringTok{"mới"}\NormalTok{, }\StringTok{"bắt"}\NormalTok{, }\StringTok{"đầu"}\NormalTok{, }\StringTok{"sinh"}\NormalTok{,}
+                      \StringTok{"viên"}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"là"}\NormalTok{, }\StringTok{"gì"}\NormalTok{, }\StringTok{"một"}\NormalTok{, }\StringTok{"tài"}\NormalTok{, }\StringTok{"liệu"}\NormalTok{, }\StringTok{"chuẩn"}\NormalTok{, }\StringTok{"bị"}\NormalTok{, }\StringTok{"hướng"}\NormalTok{, }\StringTok{"dẫn"}\NormalTok{, }\StringTok{"này"}\NormalTok{, }\StringTok{"đây"}\NormalTok{\}}
 \NormalTok{        goal_kws }\OperatorTok{=}\NormalTok{ [w }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ goal.lower().split() }\ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(w) }\OperatorTok{>} \DecValTok{2} \KeywordTok{and}\NormalTok{ w }\KeywordTok{not} \KeywordTok{in}\NormalTok{ stop_words]}
 \NormalTok{        matched_kws }\OperatorTok{=}\NormalTok{ [kw }\ControlFlowTok{for}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ goal_kws }\ControlFlowTok{if}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ content.lower()]}
 \NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
@@ -421,7 +422,8 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
         \ControlFlowTok{if}\NormalTok{ max_steps }\OperatorTok{>}\NormalTok{ }\DecValTok{3}\NormalTok{:}
             \ControlFlowTok{raise} \DataTypeTok{ValueError}\NormalTok{(}\StringTok{f"Vi phạm Bounded Loop: max_steps (\{max_steps\}) > 3!"}\NormalTok{)}
         \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, max_steps), }\DecValTok{3}\NormalTok{)}
-        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient(model}\OperatorTok{=}\StringTok{"tinix-lm:latest"}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}
+        \VariableTok{self}\NormalTok{.use_llm }\OperatorTok{=}\NormalTok{ use_llm}
+        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient() }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}
         \VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
         \VariableTok{self}\NormalTok{.context_memory: }\DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
 
@@ -458,16 +460,16 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
         \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:}\VariableTok{self}\NormalTok{.max_steps]}
         \ControlFlowTok{return} \VariableTok{self}\NormalTok{.plan}
 
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{_evaluate_stop_condition}\NormalTok{(}\VariableTok{self}\NormalTok{, idx: }\DataTypeTok{int}\NormalTok{, total: }\DataTypeTok{int}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{):}
-        \CommentTok{# Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{_evaluate_stop_condition}\NormalTok{(}\VariableTok{self}\NormalTok{, current_step_index: }\DataTypeTok{int}\NormalTok{, total_steps: }\DataTypeTok{int}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Tuple}\NormalTok{[}\DataTypeTok{bool}\NormalTok{, }\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Optional}\NormalTok{[AgentStatus]]:}
+        \CommentTok{# 1. Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True}
         \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"} \KeywordTok{and} \StringTok{"outline"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
             \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"outline"}\NormalTok{], goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Dàn ý đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
         \ControlFlowTok{if} \StringTok{"final_article"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
             \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"final_article"}\NormalTok{], goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
-        \CommentTok{# Hết ngân sách bước thực thi: Bắt buộc thẩm định lại chất lượng}
-        \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{>=}\NormalTok{ total }\KeywordTok{or}\NormalTok{ idx }\OperatorTok{>=} \VariableTok{self}\NormalTok{.max_steps:}
+        \CommentTok{# 2. Hết ngân sách bước thực thi: Bắt buộc thẩm định lại chất lượng}
+        \ControlFlowTok{if}\NormalTok{ current_step_index }\OperatorTok{>=}\NormalTok{ total_steps:}
 \NormalTok{            target }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"final_article"}\NormalTok{) }\KeywordTok{or} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"outline"}\NormalTok{)}
             \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Sản phẩm đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.COMPLETED}
@@ -522,7 +524,7 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.60\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.52\textwidth]{images/terminal_execution.png}
     \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
     \label{fig:terminal}
 \end{figure}
@@ -530,19 +532,19 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
-    \item \textbf{Quan sát \& Thích ứng kế hoạch (observe \& dynamic replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
-    \item \textbf{Thực thi LLM thật \& Kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
+    \item \textbf{Quan sát và thích ứng kế hoạch (observe \& dynamic replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
-\subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị Outline Docker (Tự xác định 2 bước \& Dừng sớm)}
-Để minh chứng rõ nét rằng Agent \textbf{không bị hardcode cố định 3 bước}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
+\subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
+Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
     \item \textbf{Planner thích ứng theo luật:} Tác nhân phân tích Intent/Topic theo các luật đã định nghĩa để sinh đúng số bước cần thiết (ở đây nhận thấy chỉ cần tạo dàn ý nên chỉ tạo đúng \textbf{2 bước}):
     \begin{enumerate}
         \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
         \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
     \end{enumerate}
-    \item \textbf{Kích hoạt Stop Condition sớm:} Ngay khi Bước 2 hoàn thành, bộ thẩm định \texttt{QualityEvaluator} trực tiếp đánh giá sản phẩm dàn ý (kiểm tra độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa.
+    \item \textbf{Kích hoạt điều kiện dừng sớm (stop condition):} Ngay khi Bước 2 hoàn thành, bộ thẩm định \texttt{QualityEvaluator} trực tiếp đánh giá sản phẩm dàn ý (kiểm tra độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa.
 \end{itemize}
 
 Điều này minh họa khả năng thích ứng của hệ thống: Agent \textbf{không bắt buộc chạy đủ 3 bước trong mọi mục tiêu}, mà biết khi nào nhiệm vụ đã hoàn thành để chủ động dừng lại an toàn.
@@ -550,7 +552,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.02}
 \begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
 \caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái} \label{tab:so-sanh-chat-luong} \\
 \hline
@@ -575,7 +577,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Kiểm thử toàn diện 9 kịch bản đánh giá năng lực tự hành}
 Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 9 kịch bản bao phủ toàn diện. Trong đó, các kịch bản 1–6 và 8 kiểm tra chu trình tác nhân đầy đủ với trạng thái hoạt động (\texttt{AgentStatus}) và lý do dừng (\texttt{stop\_reason}); các kịch bản 7 và 9 kiểm tra trực tiếp ở mức thành phần (unit-level) đối với cơ chế quan sát thích ứng và rào chắn an toàn Bounded Loop:
 
-\renewcommand{\arraystretch}{0.95}
+\renewcommand{\arraystretch}{0.88}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
 \caption{Kết quả kiểm thử 9 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
 \hline
