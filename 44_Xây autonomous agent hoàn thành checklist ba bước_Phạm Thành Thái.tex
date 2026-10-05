@@ -222,7 +222,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Kiến thức đạt được:} Nắm vững kiến trúc cốt lõi của một hệ thống Autonomous Agent: bộ lập kế hoạch (Planner), bộ thực thi tuần tự (Executor), bộ nhớ trạng thái ngữ cảnh (bộ nhớ trạng thái (context memory)), bộ điều phối vòng lặp hữu hạn (Bounded Loop Controller) và bộ đánh giá điều kiện dừng (Stop Condition Evaluator). Phân biệt ranh giới rõ ràng giữa quy trình cứng (Hardcoded Workflow) và tác nhân tự thích ứng (Autonomous Agent).
+  \textbf{Kiến thức đạt được:} Nắm vững kiến trúc cốt lõi của một hệ thống Autonomous Agent: bộ lập kế hoạch (Planner), bộ thực thi tuần tự (Executor), bộ nhớ trạng thái ngữ cảnh (context memory), bộ điều phối vòng lặp hữu hạn (Bounded Loop Controller) và bộ đánh giá điều kiện dừng (Stop Condition Evaluator). Phân biệt ranh giới rõ ràng giữa quy trình cứng (Hardcoded Workflow) và tác nhân tự thích ứng (Autonomous Agent).
 \item
   \textbf{Sản phẩm đầu ra:} Xây dựng thành công script \texttt{checklist\_agent.py} hoàn chỉnh. Chạy thành công ca kiểm thử tạo bài viết chia sẻ về RAG với đầy đủ 3 thành phần đầu ra bắt buộc theo tiêu chuẩn: \textbf{kế hoạch ban đầu} (Initial Plan), \textbf{nhật ký từng bước} (Step Execution Logs) và \textbf{báo cáo tổng kết} (báo cáo tổng kết) kèm nội dung bài viết đã nghiệm thu xuất ra tệp tin \texttt{agent\_final\_report.json}.
 \end{itemize}
@@ -289,7 +289,7 @@ Một hệ thống tác nhân tự hành hoàn chỉnh được cấu thành t�
 \begin{itemize}
     \item \textbf{Tiếp nhận mục tiêu (Goal Ingestion):} Nhận câu lệnh hoặc bài toán từ người dùng (ví dụ: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}).
     \item \textbf{Bộ lập kế hoạch động (dynamic planner):} Sử dụng mô hình ngôn ngữ lớn phân tích ý định và sản sinh danh sách công việc (checklist) với ràng buộc nghiêm ngặt: độ dài checklist không vượt quá \texttt{max\_steps} ($\le 3$ bước).
-    \item \textbf{Bộ thực thi tuần tự (sequential executor):} Chịu trách nhiệm thực thi từng bước (sinh luận điểm, lập dàn ý, soạn thảo và rà soát chất lượng) dựa trên ngữ cảnh tích lũy từ các bước trước.
+    \item \textbf{Bộ thực thi tuần tự (sequential executor):} Chịu trách nhiệm thực thi từng bước trong checklist theo chỉ dẫn hành động (Action) dựa trên ngữ cảnh tích lũy từ các bước trước.
     \item \textbf{Bộ nhớ trạng thái ngữ cảnh (context memory):} Đóng vai trò cầu nối dữ liệu, tích lũy kết quả của các bước trước đó để làm đầu vào cho các bước tiếp theo.
     \item \textbf{Bộ đánh giá dừng và báo cáo (stop evaluator \& reporter):} Giám sát vòng lặp, kiểm soát điều kiện dừng an toàn và tổng hợp toàn bộ tiến trình thành báo cáo nghiệm thu cuối cùng.
 \end{itemize}
