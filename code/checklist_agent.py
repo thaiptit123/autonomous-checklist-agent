@@ -424,6 +424,12 @@ class AutonomousChecklistAgent:
         Executor thực thi từng bước dựa trên action_type và truyền dữ liệu ngữ cảnh (Context Propagation).
         Hỗ trợ LLM sinh nội dung động từ mục tiêu thực tế.
         """
+        # Rào chắn kiểm soát dữ liệu đầu vào: Tác vụ tóm tắt bắt buộc phải có tài liệu nguồn
+        if step.action_type == "summarize" or (step.action_type == "research_points" and "tóm tắt" in goal.lower()):
+            doc_context = self.context_memory.get("input_document", "").strip()
+            if not doc_context:
+                raise ValueError("Thiếu tài liệu nguồn để tóm tắt (Missing source document)")
+
         # 1. Thử gọi LLM sinh nội dung nếu có sẵn
         if self.use_llm and self.llm and self.llm.is_available():
             context_summary = "\n".join([f"- {k}: {str(v)[:220]}..." for k, v in self.context_memory.items()])
@@ -503,23 +509,17 @@ class AutonomousChecklistAgent:
         elif step.action_type == "summarize":
             time.sleep(0.015)
             doc_context = self.context_memory.get("input_document", "").strip()
-            if doc_context:
-                parts = [p.strip() for p in re.split(r'[.\n]+', doc_context) if len(p.strip()) > 8]
-                main_concept = parts[0] if parts else doc_context[:80]
-                details = parts[1] if len(parts) > 1 else "Hệ thống hỗ trợ chuẩn hóa giao thức và liên kết tài nguyên."
-                summary = (
-                    f"# Bản tóm tắt súc tích: {topic}\n\n"
-                    f"- **Khái niệm cốt lõi:** {main_concept}.\n"
-                    f"- **Đặc tính kỹ thuật trọng tâm:** {details}.\n"
-                    f"- **Giá trị ứng dụng:** Tối ưu hóa kiến trúc, đảm bảo tính mô đun hóa và độ an toàn cao trong tích hợp."
-                )
-            else:
-                summary = (
-                    f"# Bản tóm tắt súc tích: {topic}\n\n"
-                    f"- **Khái niệm cốt lõi:** {topic} cung cấp giải pháp chuẩn hóa giúp tối ưu hóa hiệu năng và độ tin cậy.\n"
-                    f"- **Chi tiết nổi bật:** Kiến trúc mô đun hóa cho phép dễ dàng tích hợp và mở rộng an toàn.\n"
-                    f"- **Bài học rút ra:** Nắm vững các nguyên tắc cơ bản trước khi đưa vào môi trường sản xuất."
-                )
+            if not doc_context:
+                raise ValueError("Thiếu tài liệu nguồn để tóm tắt (Missing source document)")
+            parts = [p.strip() for p in re.split(r'[.\n]+', doc_context) if len(p.strip()) > 8]
+            main_concept = parts[0] if parts else doc_context[:80]
+            details = parts[1] if len(parts) > 1 else "Hệ thống hỗ trợ chuẩn hóa giao thức và liên kết tài nguyên."
+            summary = (
+                f"# Bản tóm tắt súc tích: {topic}\n\n"
+                f"- **Khái niệm cốt lõi:** {main_concept}.\n"
+                f"- **Đặc tính kỹ thuật trọng tâm:** {details}.\n"
+                f"- **Giá trị ứng dụng:** Tối ưu hóa kiến trúc, đảm bảo tính mô đun hóa và độ an toàn cao trong tích hợp."
+            )
             self.context_memory["summary"] = summary
             return summary
 

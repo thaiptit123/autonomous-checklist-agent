@@ -574,12 +574,12 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \noindent\textit{*(Ghi chú: Các chỉ số định lượng TTR = 0.59 và 1.056 ký tự được ghi nhận từ một phiên chạy thực nghiệm minh họa của LLM)*}
 
 
-\subsection{4. Kiểm thử toàn diện 9 kịch bản đánh giá năng lực tự hành}
-Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 9 kịch bản bao phủ toàn diện. Toàn bộ các kịch bản chu trình đầy đủ (1–6, 8) được chuẩn hóa xác thực tự động qua hàm kiểm định \texttt{assert\_status\_stop\_reason\_consistent()} để đảm bảo tính nhất quán tuyệt đối giữa trạng thái hoạt động (\texttt{AgentStatus}) và lý do dừng (\texttt{stop\_reason}); hai kịch bản 7 và 9 kiểm tra trực tiếp ở mức thành phần (unit-level) đối với cơ chế thích ứng chỉ dẫn bước kế tiếp và rào chắn an toàn Bounded Loop:
+\subsection{4. Kiểm thử toàn diện 10 kịch bản đánh giá năng lực tự hành}
+Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 10 kịch bản bao phủ toàn diện. Toàn bộ các kịch bản chu trình đầy đủ (1–6, 8, 10) được chuẩn hóa xác thực tự động qua hàm kiểm định \texttt{assert\_status\_stop\_reason\_consistent()} để đảm bảo tính nhất quán tuyệt đối giữa trạng thái hoạt động (\texttt{AgentStatus}) và lý do dừng (\texttt{stop\_reason}); hai kịch bản 7 và 9 kiểm tra trực tiếp ở mức thành phần (unit-level) đối với cơ chế thích ứng chỉ dẫn bước kế tiếp và rào chắn an toàn Bounded Loop:
 
-\renewcommand{\arraystretch}{0.88}
+\renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 9 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 10 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -597,6 +597,7 @@ Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế đ�
 7 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
 8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
 9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
+10 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{FAILED} & \texttt{Execution failed} (Chặn tạo nội dung giả) \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}

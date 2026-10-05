@@ -1,12 +1,12 @@
 """
-Bộ kịch bản kiểm thử toàn diện cho Autonomous Checklist Agent (Series AI Guru x TiniX)
+Bộ 10 kịch bản kiểm thử toàn diện cho Autonomous Checklist Agent (Series AI Guru x TiniX)
 Đánh giá:
 1. LLM Autonomous Execution & Real Latency (Chế độ LLM thật qua Ollama)
 2. Dynamic Planning & Execution với Bounded Loop (<= 3 bước)
 3. Đánh giá điều kiện dừng chặt chẽ (Goal Achieved vs Budget Exhausted vs Failed)
 4. Kiểm định chất lượng định lượng (Quality Evaluator: TTR, Length, Structure, Relevance)
 5. Quan sát và thích ứng chỉ dẫn bước kế tiếp (Observe & Adaptive Step Guidance)
-6. Các kịch bản biên & kịch bản thất bại (Open-domain goals, Evaluator rejection, Action exceptions)
+6. Các kịch bản biên & kịch bản thất bại (Open-domain goals, Evaluator rejection, Action exceptions, Missing source doc)
 """
 
 import sys
@@ -208,6 +208,23 @@ def test_scenario_bounded_loop_validation():
         print("✅ TEST 9 PASSED: Cơ chế Bounded Loop chặn đứng vi phạm giới hạn số bước.")
 
 
+def test_scenario_summarize_without_document_fails():
+    print("\n" + "#" * 68)
+    print("TEST 10: Kịch bản từ chối tóm tắt khi thiếu tài liệu nguồn (Missing Source Doc -> FAILED)")
+    print("#" * 68)
+    agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+    # Người dùng yêu cầu tóm tắt nhưng không cung cấp tài liệu nguồn (input_document=None)
+    goal = "Tóm tắt tài liệu này cho ban giám đốc."
+    report = agent.run(goal, input_document=None)
+
+    assert_status_stop_reason_consistent(report)
+    assert report.status == AgentStatus.FAILED
+    assert "tài liệu" in report.stop_reason.lower() or "missing source document" in report.stop_reason.lower()
+    assert report.steps_executed == 1
+    assert report.execution_logs[-1]["status"] == "FAILED"
+    print("✅ TEST 10 PASSED: Phát hiện thiếu tài liệu nguồn chính xác, từ chối tạo nội dung giả và báo FAILED an toàn.")
+
+
 if __name__ == "__main__":
     test_scenario_full_rag_llm()
     test_scenario_outline_docker_early_stop()
@@ -218,6 +235,7 @@ if __name__ == "__main__":
     test_scenario_dynamic_observation_and_adaptation()
     test_scenario_action_failure_recovery()
     test_scenario_bounded_loop_validation()
+    test_scenario_summarize_without_document_fails()
     print("\n" + "=" * 68)
-    print("🎉 TẤT CẢ 9/9 KỊCH BẢN KIỂM THỬ ĐỀU ĐẠT CHUẨN (ALL 9/9 PASSED)!")
+    print("🎉 TẤT CẢ 10/10 KỊCH BẢN KIỂM THỬ ĐỀU ĐẠT CHUẨN (ALL 10/10 PASSED)!")
     print("=" * 68)
