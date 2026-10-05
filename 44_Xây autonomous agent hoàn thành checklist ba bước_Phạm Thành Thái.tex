@@ -299,18 +299,18 @@ Một hệ thống Autonomous Checklist Agent chuẩn mực được cấu thàn
 \subsection{1. Kịch bản thực tế: Bài viết chia sẻ về RAG cho người mới bắt đầu}
 Để chứng minh năng lực tự hành một cách thuyết phục nhất, chúng ta chọn một tác vụ cụ thể, có ranh giới rõ ràng nhưng đòi hỏi chất lượng logic cao: \textbf{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. 
 
-Thay vì hardcode cứng nhắc luôn luôn là 3 bước, tác nhân xác định checklist dựa trên mục tiêu thực tế trong giới hạn tối đa 3 bước:
+Với kịch bản này, LLM Planner tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}):
 \begin{itemize}
-    \item \textbf{Bước 1: Xác định các ý chính cần giải thích về RAG (Action: \texttt{outline}).} Cần xác định các trọng tâm: RAG là gì, vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), cách hoạt động 3 chặng (Indexing, Retrieval, Generation), ví dụ thi mở sách dễ hiểu và lời khuyên áp dụng.
-    \item \textbf{Bước 2: Viết nội dung bài chia sẻ hoàn chỉnh (Action: \texttt{generate}).} Lấy toàn bộ dàn ý từ Bước 1 làm ngữ cảnh đầu vào, phát triển thành một bài viết mạch lạc, văn phong hấp dẫn, giải thích cặn kẽ từng luận điểm.
-    \item \textbf{Bước 3: Rà soát, kiểm tra độ rõ ràng và hoàn thiện (Action: \texttt{review\_polish}).} Đóng vai trò người biên tập khó tính: kiểm tra xem bài viết có quá tải thuật ngữ với người mới không, có bị lặp ý không, bổ sung lời kết và nghiệm thu chất lượng.
+    \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{research\_points}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG (Retrieval-Augmented Generation), vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
+    \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{outline}).} Kế thừa các luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần mạch lạc: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
+    \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
 \end{itemize}
 
-\textit{Lưu ý kỹ thuật về tính tự hành (Autonomy) của Planner:} Hệ thống tích hợp trực tiếp mô hình ngôn ngữ lớn (LLM Engine cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}) làm bộ não cho cả bộ lập kế hoạch động (planner) và Executor. Planner sinh kế hoạch JSON linh hoạt trực tiếp từ mục tiêu người dùng, còn Executor sinh nội dung ngữ cảnh động kèm bộ kiểm duyệt chất lượng định lượng \texttt{QualityEvaluator}. Hệ thống đồng thời tích hợp cơ chế fallback dự phòng để đảm bảo tính sẵn sàng cao khi môi trường chạy offline.
+\textit{Khác biệt cốt lõi so với workflow cố định:} Thay vì gán cứng một danh sách công việc bằng mã nguồn \texttt{if/elif}, action type và tiêu đề từng bước được LLM trực tiếp suy luận từ câu lệnh người dùng. Hệ thống đồng thời tích hợp cơ chế fallback dự phòng để đảm bảo tính sẵn sàng cao khi môi trường chạy offline.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/state_flow_diagram.png}
+    \includegraphics[width=0.82\textwidth]{images/state_flow_diagram.png}
     \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái (context memory) và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
@@ -318,9 +318,9 @@ Thay vì hardcode cứng nhắc luôn luôn là 3 bước, tác nhân xác đị
 \subsection{2. Cơ chế truyền trạng thái (cơ chế truyền ngữ cảnh)}
 Như minh họa ở Hình \ref{fig:state_flow}, tính liên tục của tác nhân phụ thuộc hoàn toàn vào việc chia sẻ bộ nhớ \texttt{context\_memory}:
 \begin{itemize}
-    \item Khi Bước 1 kết thúc, kết quả được gắn vào khóa \texttt{context\_memory["outline"]}.
-    \item Bước 2 khi bắt đầu sẽ tự động trích xuất \texttt{context\_memory["outline"]} để làm ngữ cảnh định hướng sinh bài viết, và sau khi hoàn thành sẽ lưu bản nháp vào \texttt{context\_memory["draft\_article"]}.
-    \item Bước 3 trích xuất \texttt{draft\_article}, tiến hành kiểm duyệt theo bộ tiêu chí (Checklist items), bổ sung phần tổng kết và xuất ra kết quả hoàn thiện tại \texttt{context\_memory["final\_article"]}.
+    \item Khi Bước 1 hoàn thành, các luận điểm nền tảng được lưu vào \texttt{research\_points} trong \texttt{context\_memory}.
+    \item Bước 2 khi bắt đầu sẽ tự động trích xuất \texttt{research\_points} để làm ngữ cảnh định hướng sinh dàn ý phân cấp, và sau khi hoàn tất sẽ lưu kết quả vào \texttt{outline}.
+    \item Bước 3 trích xuất đồng thời \texttt{research\_points} và \texttt{outline}, tiến hành soạn thảo toàn diện bài viết, kiểm định theo bộ tiêu chí \texttt{QualityEvaluator} và xuất ra kết quả nghiệm thu tại \texttt{final\_article}.
 \end{itemize}
 Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau sẽ hoạt động "mù" (context blindness) và tác nhân sẽ không thể đạt được mục tiêu chung.
 
@@ -403,21 +403,25 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \KeywordTok{class}\NormalTok{ }\DataTypeTok{QualityEvaluator}\NormalTok{:}
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{calculate_ttr}\NormalTok{(text: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{float}\NormalTok{:}
-        \CommentTok{# Đo Type-Token Ratio (TTR): Tỷ lệ từ vựng duy nhất trên tổng số từ}
-\NormalTok{        words }\OperatorTok{=}\NormalTok{ re.findall(}\StringTok{r'[a-zA-Z0-9\_]+'}\NormalTok{, text.lower())}
+        \CommentTok{# Đo Type-Token Ratio (TTR) theo chuẩn Unicode tiếng Việt}
+\NormalTok{        words }\OperatorTok{=}\NormalTok{ re.findall(}\StringTok{r'[\textbackslash{}w-]+'}\NormalTok{, text.lower(), re.UNICODE)}
         \ControlFlowTok{return} \BuiltInTok{round}\NormalTok{(}\BuiltInTok{len}\NormalTok{(}\BuiltInTok{set}\NormalTok{(words)) }\OperatorTok{/} \BuiltInTok{len}\NormalTok{(words), }\DecValTok{3}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ words }\ControlFlowTok{else} \FloatTok{0.0}
 
     \AttributeTok{@classmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{evaluate}\NormalTok{(}\VariableTok{cls}\NormalTok{, content: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{]:}
+        \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content: }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: }\ConstantTok{False}\NormalTok{, }\StringTok{"ttr"}\NormalTok{: }\FloatTok{0.0}\NormalTok{, }\StringTok{"char_count"}\NormalTok{: }\DecValTok{0}\NormalTok{\}}
+\NormalTok{        words }\OperatorTok{=}\NormalTok{ [re.sub(}\StringTok{r"^[^\textbackslash{}w]+|[^\textbackslash{}w]+$"}\NormalTok{, }\StringTok{""}\NormalTok{, w) }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ content.lower().split() }\ControlFlowTok{if}\NormalTok{ w]}
 \NormalTok{        ttr }\OperatorTok{=} \VariableTok{cls}\NormalTok{.calculate_ttr(content)}
 \NormalTok{        min_chars }\OperatorTok{=} \DecValTok{100} \ControlFlowTok{if}\NormalTok{ intent }\KeywordTok{in}\NormalTok{ (}\StringTok{"outline_only"}\NormalTok{, }\StringTok{"summarize"}\NormalTok{) }\ControlFlowTok{else} \DecValTok{250}
 \NormalTok{        crit_length }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(content) }\OperatorTok{>=}\NormalTok{ min_chars}
-\NormalTok{        crit_structure }\OperatorTok{=} \BuiltInTok{any}\NormalTok{(line.strip().startswith((}\StringTok{'#'}\NormalTok{, }\StringTok{'-'}\NormalTok{, }\StringTok{'1.'}\NormalTok{)) }\ControlFlowTok{for}\NormalTok{ line }\KeywordTok{in}\NormalTok{ content.splitlines())}
-\NormalTok{        crit_diversity }\OperatorTok{=}\NormalTok{ ttr }\OperatorTok{>=} \FloatTok{0.35}  \CommentTok{# Ngưỡng chứng minh không lặp từ}
-\NormalTok{        goal_kws }\OperatorTok{=}\NormalTok{ [w }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ re.findall(}\StringTok{r'[a-zA-Z0-9\_]+'}\NormalTok{, goal.lower()) }\ControlFlowTok{if}\NormalTok{ len(w) }\OperatorTok{>} \DecValTok{2}\NormalTok{]}
-\NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{any}\NormalTok{(kw }\KeywordTok{in}\NormalTok{ content.lower() }\ControlFlowTok{for}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ goal_kws) }\ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
+\NormalTok{        crit_structure }\OperatorTok{=} \BuiltInTok{bool}\NormalTok{(re.search(}\StringTok{r'(^|\textbackslash{}n)(#\{1,4\}\textbackslash{}s+|[0-9]+\textbackslash{}.\textbackslash{}s+|-\textbackslash{}s+|\textbackslash{}*\textbackslash{}s+)'}\NormalTok{, content))}
+\NormalTok{        crit_diversity }\OperatorTok{=}\NormalTok{ ttr }\OperatorTok{>=} \FloatTok{0.35}
+\NormalTok{        stop_words }\OperatorTok{=}\NormalTok{ \{}\StringTok{"viết"}\NormalTok{, }\StringTok{"bài"}\NormalTok{, }\StringTok{"cho"}\NormalTok{, }\StringTok{"về"}\NormalTok{, }\StringTok{"người"}\NormalTok{, }\StringTok{"mới"}\NormalTok{, }\StringTok{"bắt"}\NormalTok{, }\StringTok{"đầu"}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"là"}\NormalTok{, }\StringTok{"gì"}\NormalTok{\}}
+\NormalTok{        goal_kws }\OperatorTok{=}\NormalTok{ [w }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ goal.lower().split() }\ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(w) }\OperatorTok{>} \DecValTok{2} \KeywordTok{and}\NormalTok{ w }\KeywordTok{not} \KeywordTok{in}\NormalTok{ stop_words]}
+\NormalTok{        matched_kws }\OperatorTok{=}\NormalTok{ [kw }\ControlFlowTok{for}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ goal_kws }\ControlFlowTok{if}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ content.lower()]}
+\NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
 \NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance}
-        \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content)\}}
+        \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
 \end{Highlighting}
 \end{Shaded}
 
@@ -433,29 +437,33 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
         \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, max_steps), }\DecValTok{3}\NormalTok{)}
         \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient(model}\OperatorTok{=}\StringTok{"tinix-lm:latest"}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}
         \VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
-        \VariableTok{self}\NormalTok{.context_memory }\OperatorTok{=}\NormalTok{ \{\}}
+        \VariableTok{self}\NormalTok{.context_memory: }\DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
 
     \KeywordTok{def}\NormalTok{ }\FunctionTok{plan_steps}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{List}\NormalTok{[Step]:}
-        \CommentTok{# Gọi LLM sinh checklist JSON tự động theo mục tiêu hoặc qua Fallback}
-        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.llm }\KeywordTok{and} \VariableTok{self}\NormalTok{.llm.is_available():}
-\NormalTok{            steps }\OperatorTok{=} \VariableTok{self}\NormalTok{._call_llm_planner(goal)}
+        \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.PLANNING}
+        \CommentTok{# 1. Gọi trực tiếp LLM Ollama sinh checklist JSON động}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \VariableTok{self}\NormalTok{.llm }\KeywordTok{and} \VariableTok{self}\NormalTok{.llm.is_available():}
+\NormalTok{            prompt }\OperatorTok{=} \StringTok{f"Lập checklist tối đa 3 bước cho mục tiêu: '\{goal\}'. Trả về JSON..."}
+\NormalTok{            resp }\OperatorTok{=} \VariableTok{self}\NormalTok{.llm.generate(prompt)}
+\NormalTok{            steps }\OperatorTok{=} \VariableTok{self}\NormalTok{._parse_llm_plan_json(resp, goal)}
             \ControlFlowTok{if}\NormalTok{ steps: }\ControlFlowTok{return}\NormalTok{ steps[:}\VariableTok{self}\NormalTok{.max_steps]}
+        \CommentTok{# 2. Fallback thích ứng ngữ nghĩa nếu LLM chưa sẵn sàng}
         \ControlFlowTok{return} \VariableTok{self}\NormalTok{._heuristic_fallback_plan(goal)[:}\VariableTok{self}\NormalTok{.max_steps]}
 
     \KeywordTok{def}\NormalTok{ }\FunctionTok{_evaluate_stop_condition}\NormalTok{(}\VariableTok{self}\NormalTok{, idx: }\DataTypeTok{int}\NormalTok{, total: }\DataTypeTok{int}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{):}
-        \CommentTok{# 1. Đánh giá nghiệm thu mục tiêu (COMPLETED)}
+        \CommentTok{# Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True}
         \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"} \KeywordTok{and} \StringTok{"outline"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
             \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"outline"}\NormalTok{], goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Dàn ý đạt chuẩn."}\NormalTok{, AgentStatus.COMPLETED}
+                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Dàn ý đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
         \ControlFlowTok{if} \StringTok{"final_article"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
             \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"final_article"}\NormalTok{], goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn."}\NormalTok{, AgentStatus.COMPLETED}
-        \CommentTok{# 2. Hết ngân sách bước thực thi (BUDGET_EXHAUSTED)}
-        \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{>=}\NormalTok{ total:}
+                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
+        \CommentTok{# Hết ngân sách bước thực thi: Bắt buộc thẩm định lại chất lượng}
+        \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{>=}\NormalTok{ total }\KeywordTok{or}\NormalTok{ idx }\OperatorTok{>=} \VariableTok{self}\NormalTok{.max_steps:}
 \NormalTok{            target }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"final_article"}\NormalTok{) }\KeywordTok{or} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"outline"}\NormalTok{)}
             \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Đạt chuẩn chất lượng."}\NormalTok{, AgentStatus.COMPLETED}
-            \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
+                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Sản phẩm đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.COMPLETED}
+            \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
         \ControlFlowTok{return} \ConstantTok{False}\NormalTok{, }\StringTok{"Continue"}\NormalTok{, }\ConstantTok{None}
 \end{Highlighting}
 \end{Shaded}
@@ -465,8 +473,9 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{run}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{FinalReport}\NormalTok{:}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{run}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, input_document: }\DataTypeTok{Optional}\NormalTok{[}\DataTypeTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ }\ConstantTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{FinalReport}\NormalTok{:}
 \NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter()}
+        \ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
 \NormalTok{        plan }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal)}
 \NormalTok{        topic, intent }\OperatorTok{=} \VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
         \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING}
@@ -476,10 +485,12 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{                result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal)}
 \NormalTok{                step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"COMPLETED"}
             \ControlFlowTok{except} \DataTypeTok{Exception} \KeywordTok{as}\NormalTok{ e:}
-\NormalTok{                step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}
-                \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.FAILED}
+\NormalTok{                step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED}
 \NormalTok{                stop_reason }\OperatorTok{=} \StringTok{f"Execution failed: Lỗi tại bước \{step.step_id\} - \{e\}"}
                 \ControlFlowTok{break}
+
+            \CommentTok{# Thích ứng kế hoạch cho bước kế tiếp (Observe & Dynamic Replan)}
+            \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{<} \BuiltInTok{len}\NormalTok{(plan): }\VariableTok{self}\NormalTok{._observe_and_adapt(step, result, plan[idx], goal)}
 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop:}
@@ -487,18 +498,23 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
                 \ControlFlowTok{if}\NormalTok{ final_status: }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status}
                 \ControlFlowTok{break}
 
-        \ControlFlowTok{return} \VariableTok{self}\NormalTok{._build_final_report(goal, plan, stop_reason, start_time)}
+        \ControlFlowTok{return}\NormalTok{ FinalReport(}
+\NormalTok{            goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx,}
+\NormalTok{            status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan],}
+\NormalTok{            execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output,}
+\NormalTok{            quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter() }\OperatorTok{-}\NormalTok{ start_time, }\DecValTok{3}\NormalTok{)}
+\NormalTok{        )}
 \end{Highlighting}
 \end{Shaded}
 
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực Autonomous Agent}\label{thuc-nghiem}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
-Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. planner nhận diện mục đích là tạo bài viết đầy đủ, từ đó sinh checklist 3 bước (Outline $\rightarrow$ Write $\rightarrow$ Review) và lần lượt thực thi như thể hiện ở Hình \ref{fig:terminal}.
+Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.68\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.60\textwidth]{images/terminal_execution.png}
     \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
     \label{fig:terminal}
 \end{figure}
@@ -511,11 +527,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \end{enumerate}
 
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị Outline Docker (Tự xác định 2 bước \& Dừng sớm)}
-Để minh chứng rõ nét rằng Agent \textbf{không bị hardcode cố định 3 bước}, chúng ta kiểm thử với một mục tiêu nhỏ hơn:
-\begin{center}
-\textit{Goal: "Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."}
-\end{center}
-Khi nhận yêu cầu này:
+Để minh chứng rõ nét rằng Agent \textbf{không bị hardcode cố định 3 bước}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
     \item \textbf{Planner thích ứng theo luật:} Tác nhân phân tích Intent/Topic theo các luật đã định nghĩa để sinh đúng số bước cần thiết (ở đây nhận thấy chỉ cần tạo dàn ý nên chỉ tạo đúng \textbf{2 bước}):
     \begin{enumerate}
@@ -528,22 +540,23 @@ Khi nhận yêu cầu này:
 Điều này minh họa khả năng thích ứng của hệ thống: không phải bài toán nào cũng ép buộc chạy hết 3 bước, mà Agent biết khi nào nhiệm vụ đã hoàn thành để chủ động dừng lại.
 
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
-Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa bản nháp sau Bước 2 và bản hoàn thiện sau Bước 3 nhờ cơ chế cơ chế truyền ngữ cảnh:
+Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\renewcommand{\arraystretch}{1.3}
+\renewcommand{\arraystretch}{1.2}
 \begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
 \caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái} \label{tab:so-sanh-chat-luong} \\
 \hline
 \rowcolor{primary!15}
-\textbf{Bản nháp sau Bước 2 (Soạn thảo thô)} & \textbf{Bản hoàn thiện sau Bước 3 (Đã rà soát)} \\ \hline
+\textbf{Sản phẩm sau Bước 2 (Dàn ý chi tiết)} & \textbf{Sản phẩm sau Bước 3 (Bài viết hoàn thiện)} \\ \hline
 \endfirsthead
 \hline
 \rowcolor{primary!15}
-\textbf{Bản nháp sau Bước 2 (Soạn thảo thô)} & \textbf{Bản hoàn thiện sau Bước 3 (Đã rà soát)} \\ \hline
+\textbf{Sản phẩm sau Bước 2 (Dàn ý chi tiết)} & \textbf{Sản phẩm sau Bước 3 (Bài viết hoàn thiện)} \\ \hline
 \endhead
-Đã có định nghĩa cơ bản và 3 chặng Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation. & Bổ sung thêm ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay lập tức. \strut \tabularnewline \hline
-Kết thúc đột ngột ở phần mô tả kỹ thuật, người đọc chưa biết bước tiếp theo nên bắt đầu từ đâu. & Bổ sung mục Lời kết thực tế: hướng dẫn người mới bắt đầu với thư viện mã nguồn mở (ChromaDB, Qdrant kết hợp LangChain).\strut \tabularnewline \hline
-\raggedright Chưa qua khâu quan sát và thẩm định chất lượng định lượng.\strut & \raggedright Đã qua kiểm định định lượng bằng \texttt{QualityEvaluator}: TTR = 0.59 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
+Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
+Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
+Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 1.056 ký tự (223 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
+\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.59 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -604,43 +617,20 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \end{Highlighting}
 \end{Shaded}
 
-Báo cáo này mang lại giá trị cốt lõi về mặt kỹ thuật:
-\begin{itemize}
-    \tightlist
-    \item \textbf{Tính minh bạch (Observability):} Bất kỳ ai kiểm tra hệ thống cũng thấy rõ từng bước chạy mất bao lâu, tiêu thụ những khóa ngữ cảnh nào (\texttt{input\_context\_keys}) và cho ra kết quả gì.
-    \item \textbf{Khả năng tái lập (Reproducibility):} Giúp kỹ sư dễ dàng truy vết xem lỗi phát sinh từ khâu lập kế hoạch (Planner) hay khâu thực thi (Executor).
-\end{itemize}
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh (\texttt{input\_context\_keys}) tiêu thụ và \textbf{Khả năng tái lập (Reproducibility)} hỗ trợ truy vết lỗi giữa khâu lập kế hoạch (Planner) và thực thi (Executor).
 
 \section{Mở rộng và Ứng dụng thực tế của Checklist Agent}\label{mo-rong-ung-dung}
 
 Mô hình Checklist Agent 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
 
-\textbf{1. Trợ lý Tự động Viết Tài liệu API (Technical Documentation Agent):}
-Khi một lập trình viên hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã:
-\begin{itemize}
-    \tightlist
-    \item \textit{Bước 1:} Quét hàm để bóc tách tham số đầu vào/đầu ra và các mã lỗi (Error codes).
-    \item \textit{Bước 2:} Sinh tài liệu chi tiết kèm ví dụ cURL.
-    \item \textit{Bước 3:} Rà soát cú pháp chuẩn OpenAPI Spec $\rightarrow$ Nghiệm thu $\rightarrow$ Lưu file.
-\end{itemize}
+\textbf{1. Trợ lý Tự động Viết Tài liệu API (Technical Documentation Agent):}\\
+Khi kỹ sư hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách tham số và error codes) $\rightarrow$ Bước 2 (Sinh tài liệu chi tiết kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI Spec $\rightarrow$ Lưu file).
 
-\textbf{2. Trợ lý Rà soát Pull Request (PR Code Reviewer Agent):}
-Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}:
-\begin{itemize}
-    \tightlist
-    \item \textit{Bước 1:} Trích xuất \texttt{git diff} những file thay đổi.
-    \item \textit{Bước 2:} Đối chiếu với bộ quy tắc an ninh (kiểm tra rò rỉ secret, SQL injection, null check).
-    \item \textit{Bước 3:} Tổng hợp comment góp ý và gửi thông báo lên GitHub/GitLab.
-\end{itemize}
+\textbf{2. Trợ lý Rà soát Pull Request (PR Code Reviewer Agent):}\\
+Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}: Bước 1 (Trích xuất git diff những file thay đổi) $\rightarrow$ Bước 2 (Đối chiếu bộ quy tắc an ninh: secret, SQL injection, null check) $\rightarrow$ Bước 3 (Tổng hợp comment góp ý và thông báo lên GitHub/GitLab).
 
-\textbf{3. Trợ lý Tự động Hóa Chăm sóc Khách hàng Cấp cao:}
-Nhận khiếu nại phức tạp từ khách hàng, Agent tự chia bước:
-\begin{itemize}
-    \tightlist
-    \item \textit{Bước 1:} Tra cứu lịch sử đơn hàng trong cơ sở dữ liệu nội bộ.
-    \item \textit{Bước 2:} Đối chiếu với chính sách đổi trả hiện hành của công ty.
-    \item \textit{Bước 3:} Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log vào hệ thống CRM.
-\end{itemize}
+\textbf{3. Trợ lý Tự động Hóa Chăm sóc Khách hàng Cấp cao:}\\
+Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
 
 \section{Kết luận}\label{ket-luan}
 

@@ -18,6 +18,7 @@ def test_scenario_full_rag_llm():
     print("TEST 1: Kịch bản LLM tự hành thực tế - Viết bài chia sẻ giải thích RAG")
     print("#" * 68)
     agent = AutonomousChecklistAgent(max_steps=3, use_llm=True)
+    assert agent.llm is not None and agent.llm.is_available(), "Ollama LLM phải khả dụng cho Test 1"
     goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
     report = agent.run(goal)
 
