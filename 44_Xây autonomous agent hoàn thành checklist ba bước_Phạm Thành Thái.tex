@@ -243,21 +243,21 @@ AI Guru x TiniX
 \section*{Các thuật ngữ cơ bản}\label{cac-thuat-ngu-co-ban}}
 \phantomsection\addcontentsline{toc}{section}{Các thuật ngữ cơ bản}
 
-\renewcommand{\arraystretch}{2.0}
+\renewcommand{\arraystretch}{1.7}
 
-\textbf{Bảng 1: Các thuật ngữ trong hệ thống Autonomous Systems và Agent Loops}
+\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}
 
 \begin{longtable}{|p{0.25\linewidth}|p{0.70\linewidth}|}
 \hline
 \thd{\raggedright Thuật ngữ\strut} & \thd{\raggedright Định nghĩa\strut}\tabularnewline \hline
 \hline
 \endhead
-\raggedright \textbf{Autonomous Agent}\strut & \raggedright Thực thể AI có quyền tự chủ đưa ra quyết định: tự phân tích mục tiêu tổng thể, tự lập kế hoạch hành động, tự quan sát kết quả và điều chỉnh hành vi mà không cần con người can thiệp vào từng bước rẽ nhánh.\strut \tabularnewline \hline
-\raggedright \textbf{Goal-driven Planning}\strut & \raggedright Cơ chế lập kế hoạch hướng mục tiêu. Thay vì tuân theo các bước cố định, tác nhân tiếp nhận mục tiêu và xác định danh sách công việc (checklist) phù hợp trong giới hạn an toàn.\strut \tabularnewline \hline
-\raggedright \textbf{Bounded Loop}\strut & \raggedright Vòng lặp thực thi có giới hạn chặn trên (ví dụ \texttt{max\_steps = 3}). Đây là cơ chế chốt chặn an toàn bắt buộc trong hệ thống tự hành để triệt tiêu nguy cơ vòng lặp vô hạn (Infinite Loop) gây tốn kém chi phí token hoặc treo máy.\strut \tabularnewline \hline
-\raggedright \textbf{Stop Condition (Điều kiện dừng)}\strut & \raggedright Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}).\strut \tabularnewline \hline
-\raggedright \textbf{cơ chế truyền ngữ cảnh}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
-\raggedright \textbf{nhật ký từng bước \& báo cáo tổng kết}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
+\raggedright \textbf{Tác nhân tự hành (autonomous agent)}\strut & \raggedright Thực thể AI có quyền tự chủ đưa ra quyết định: tự phân tích mục tiêu tổng thể, tự lập kế hoạch hành động, tự quan sát kết quả và điều chỉnh hành vi mà không cần con người can thiệp vào từng bước rẽ nhánh.\strut \tabularnewline \hline
+\raggedright \textbf{Lập kế hoạch theo mục tiêu (goal-driven planning)}\strut & \raggedright Cơ chế lập kế hoạch hướng mục tiêu. Thay vì tuân theo các bước cố định, tác nhân tiếp nhận mục tiêu và xác định danh sách công việc (checklist) phù hợp trong giới hạn an toàn.\strut \tabularnewline \hline
+\raggedright \textbf{Vòng lặp giới hạn (bounded loop)}\strut & \raggedright Vòng lặp thực thi có giới hạn chặn trên (ví dụ \texttt{max\_steps = 3}). Đây là cơ chế chốt chặn an toàn bắt buộc trong hệ thống tự hành để triệt tiêu nguy cơ vòng lặp vô hạn (Infinite Loop) gây tốn kém chi phí token hoặc treo máy.\strut \tabularnewline \hline
+\raggedright \textbf{Điều kiện dừng (stop condition)}\strut & \raggedright Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}).\strut \tabularnewline \hline
+\raggedright \textbf{Bộ nhớ trạng thái ngữ cảnh (context memory)}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
+\raggedright \textbf{Nhật ký từng bước \& báo cáo tổng kết}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -280,7 +280,7 @@ Mô hình này (thường thấy trong các sequential chain cơ bản) hoạt �
 
 Ngược lại, \textbf{tác nhân tự hành (autonomous agent)} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt tạo nên tính tự hành chính là:
 \begin{enumerate}
-    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Ở chế độ LLM, Planner và Executor được sinh trực tiếp từ mục tiêu; cơ chế fallback deterministic chỉ đóng vai trò dự phòng an toàn khi LLM không khả dụng.
+    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Ở chế độ LLM, bộ lập kế hoạch (planner) và bộ thực thi (executor) được sinh trực tiếp từ mục tiêu; cơ chế dự phòng xác định (deterministic fallback) chỉ đóng vai trò an toàn khi LLM không khả dụng.
     \item \textbf{Chủ động đánh giá điều kiện dừng:} Sau mỗi bước thực thi, tác nhân tự kiểm tra xem kết quả hiện tại đã thỏa mãn mục tiêu chưa. Nếu đã đạt (\texttt{Goal Achieved}), nó chủ động ra lệnh \textbf{dừng ngay lập tức} mà không cần chạy cố các bước thừa.
 \end{enumerate}
 
@@ -306,7 +306,7 @@ Với kịch bản này, bộ lập kế hoạch tự động phân tích mục 
     \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
 \end{itemize}
 
-\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, Planner và Executor được sinh trực tiếp từ mục tiêu người dùng; cơ chế dự phòng tổng hợp cấu trúc xác định (Deterministic Structural Synthesis) từ bộ nhớ ngữ cảnh chỉ đóng vai trò chốt chặn an toàn khi LLM không khả dụng hoặc ngoại tuyến.
+\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, bộ lập kế hoạch và bộ thực thi được sinh trực tiếp từ mục tiêu người dùng; cơ chế dự phòng tổng hợp cấu trúc xác định từ bộ nhớ ngữ cảnh chỉ đóng vai trò chốt chặn an toàn khi LLM không khả dụng hoặc ngoại tuyến.
 
 \begin{figure}[H]
     \centering
@@ -532,7 +532,7 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
-    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), cho thấy hệ thống có khả năng thích ứng với kết quả trung gian thay vì chỉ thực thi một chuỗi bước cố định.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
