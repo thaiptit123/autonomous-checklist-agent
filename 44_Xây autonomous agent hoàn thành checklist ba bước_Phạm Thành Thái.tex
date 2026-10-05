@@ -262,9 +262,9 @@ AI Guru x TiniX
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 
-\section{Lý thuyết cơ bản: Kiến trúc Autonomous Agent và Vòng lặp Quyết định}\label{ly-thuyet-co-ban}
+\section{Lý thuyết cơ bản: Kiến trúc tác nhân tự hành và vòng lặp quyết định}\label{ly-thuyet-co-ban}
 
-\subsection{1. Phân biệt chuỗi tác vụ cố định (Hardcoded Chain) và Autonomous Agent}
+\subsection{1. Phân biệt chuỗi tác vụ cố định (Hardcoded Chain) và tác nhân tự hành}
 Trong giai đoạn đầu của kỹ thuật phần mềm AI, các lập trình viên thường xây dựng ứng dụng dưới dạng chuỗi pipeline tuần tự:
 \begin{center}
 \texttt{Input $\rightarrow$ Prompt 1 $\rightarrow$ Model $\rightarrow$ Prompt 2 $\rightarrow$ Model $\rightarrow$ Output}
@@ -274,24 +274,24 @@ Mô hình này (thường thấy trong các sequential chain cơ bản) hoạt �
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.95\textwidth]{images/architecture_diagram.png}
-    \caption{Kiến trúc tổng thể của Autonomous Checklist Agent với vòng lặp Bounded Loop}
+    \caption{Kiến trúc tổng thể của tác nhân tự hành với vòng lặp giới hạn (bounded loop)}
     \label{fig:architecture}
 \end{figure}
 
-Ngược lại, \textbf{Autonomous Agent} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt tạo nên "chất tự hành" (autonomy) chính là:
+Ngược lại, \textbf{tác nhân tự hành (autonomous agent)} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt tạo nên tính tự hành chính là:
 \begin{enumerate}
-    \item \textbf{Planner sinh kế hoạch trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp Goal. Tác nhân sử dụng LLM để phân tích mục tiêu và tự sinh checklist phù hợp trong giới hạn tối đa 3 bước, thay vì chạy theo chuỗi bước viết sẵn bằng \texttt{if/elif}.
+    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Tác nhân sử dụng mô hình ngôn ngữ lớn để phân tích mục tiêu và tự sinh checklist phù hợp trong giới hạn tối đa 3 bước, thay vì chạy theo chuỗi bước viết sẵn bằng \texttt{if/elif}.
     \item \textbf{Chủ động đánh giá điều kiện dừng:} Sau mỗi bước thực thi, tác nhân tự kiểm tra xem kết quả hiện tại đã thỏa mãn mục tiêu chưa. Nếu đã đạt (\texttt{Goal Achieved}), nó chủ động ra lệnh \textbf{dừng ngay lập tức} mà không cần chạy cố các bước thừa.
 \end{enumerate}
 
 \subsection{2. Năm thành phần cốt lõi của một Checklist Agent}
-Một hệ thống Autonomous Checklist Agent chuẩn mực được cấu thành từ 5 bộ phận hữu cơ:
+Một hệ thống tác nhân tự hành hoàn chỉnh được cấu thành từ 5 bộ phận hữu cơ:
 \begin{itemize}
     \item \textbf{Tiếp nhận mục tiêu (Goal Ingestion):} Nhận câu lệnh hoặc bài toán từ người dùng (ví dụ: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}).
-    \item \textbf{Bộ lập kế hoạch động (bộ lập kế hoạch động (planner)):} Sử dụng LLM phân tích ý định và sản sinh danh sách công việc (Checklist) với ràng buộc nghiêm ngặt: độ dài checklist không vượt quá \texttt{max\_steps} ($\le 3$ bước).
-    \item \textbf{Bộ thực thi tuần tự (bộ thực thi tuần tự (executor)):} Chịu trách nhiệm thực thi từng bước (sinh dàn ý, phát triển bài viết, rà soát chất lượng) dựa trên ngữ cảnh tích lũy từ các bước trước.
-    \item \textbf{Bộ nhớ trạng thái ngữ cảnh (bộ nhớ trạng thái (context memory)):} Đóng vai trò cầu nối dữ liệu, tích lũy kết quả của các bước trước đó để làm đầu vào cho các bước tiếp theo.
-    \item \textbf{Bộ đánh giá dừng và báo cáo (bộ đánh giá điều kiện dừng \& Reporter):} Giám sát vòng lặp, kiểm soát điều kiện dừng an toàn và tổng hợp toàn bộ tiến trình thành báo cáo nghiệm thu cuối cùng.
+    \item \textbf{Bộ lập kế hoạch động (dynamic planner):} Sử dụng mô hình ngôn ngữ lớn phân tích ý định và sản sinh danh sách công việc (checklist) với ràng buộc nghiêm ngặt: độ dài checklist không vượt quá \texttt{max\_steps} ($\le 3$ bước).
+    \item \textbf{Bộ thực thi tuần tự (sequential executor):} Chịu trách nhiệm thực thi từng bước (sinh luận điểm, lập dàn ý, soạn thảo và rà soát chất lượng) dựa trên ngữ cảnh tích lũy từ các bước trước.
+    \item \textbf{Bộ nhớ trạng thái ngữ cảnh (context memory):} Đóng vai trò cầu nối dữ liệu, tích lũy kết quả của các bước trước đó để làm đầu vào cho các bước tiếp theo.
+    \item \textbf{Bộ đánh giá dừng và báo cáo (stop evaluator \& reporter):} Giám sát vòng lặp, kiểm soát điều kiện dừng an toàn và tổng hợp toàn bộ tiến trình thành báo cáo nghiệm thu cuối cùng.
 \end{itemize}
 
 \section{Thiết kế checklist tự động và cơ chế quản lý trạng thái}\label{thiet-ke-checklist}
@@ -299,46 +299,46 @@ Một hệ thống Autonomous Checklist Agent chuẩn mực được cấu thàn
 \subsection{1. Kịch bản thực tế: Bài viết chia sẻ về RAG cho người mới bắt đầu}
 Để chứng minh năng lực tự hành một cách thuyết phục nhất, chúng ta chọn một tác vụ cụ thể, có ranh giới rõ ràng nhưng đòi hỏi chất lượng logic cao: \textbf{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. 
 
-Với kịch bản này, LLM Planner tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}):
+Với kịch bản này, bộ lập kế hoạch tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}):
 \begin{itemize}
     \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{research\_points}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG (Retrieval-Augmented Generation), vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
     \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{outline}).} Kế thừa các luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần mạch lạc: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
     \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
 \end{itemize}
 
-\textit{Khác biệt cốt lõi so với workflow cố định:} Thay vì gán cứng một danh sách công việc bằng mã nguồn \texttt{if/elif}, action type và tiêu đề từng bước được LLM trực tiếp suy luận từ câu lệnh người dùng. Hệ thống đồng thời tích hợp cơ chế fallback dự phòng để đảm bảo tính sẵn sàng cao khi môi trường chạy offline.
+\textit{Khác biệt cốt lõi so với workflow cố định:} Thay vì gán cứng một danh sách công việc bằng mã nguồn \texttt{if/elif}, action type và tiêu đề từng bước được mô hình trực tiếp suy luận từ câu lệnh người dùng. Hệ thống đồng thời tích hợp cơ chế dự phòng tổng hợp cấu trúc xác định (Deterministic Structural Synthesis) từ bộ nhớ ngữ cảnh để đảm bảo an toàn tuyệt đối khi môi trường mạng ngoại tuyến.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.82\textwidth]{images/state_flow_diagram.png}
-    \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái (context memory) và cơ chế rà soát điều kiện dừng ở từng bước}
+    \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
 
-\subsection{2. Cơ chế truyền trạng thái (cơ chế truyền ngữ cảnh)}
+\subsection{2. Cơ chế truyền trạng thái (context propagation)}
 Như minh họa ở Hình \ref{fig:state_flow}, tính liên tục của tác nhân phụ thuộc hoàn toàn vào việc chia sẻ bộ nhớ \texttt{context\_memory}:
 \begin{itemize}
     \item Khi Bước 1 hoàn thành, các luận điểm nền tảng được lưu vào \texttt{research\_points} trong \texttt{context\_memory}.
     \item Bước 2 khi bắt đầu sẽ tự động trích xuất \texttt{research\_points} để làm ngữ cảnh định hướng sinh dàn ý phân cấp, và sau khi hoàn tất sẽ lưu kết quả vào \texttt{outline}.
     \item Bước 3 trích xuất đồng thời \texttt{research\_points} và \texttt{outline}, tiến hành soạn thảo toàn diện bài viết, kiểm định theo bộ tiêu chí \texttt{QualityEvaluator} và xuất ra kết quả nghiệm thu tại \texttt{final\_article}.
 \end{itemize}
-Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau sẽ hoạt động "mù" (context blindness) và tác nhân sẽ không thể đạt được mục tiêu chung.
+Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau sẽ hoạt động thiếu định hướng và tác nhân sẽ không thể đạt được mục tiêu chung.
 
-\section{Điều kiện dừng và giới hạn an toàn (Bounded Loop \& Stop Conditions)}\label{dieu-kien-dung}
+\section{Điều kiện dừng và giới hạn an toàn trong vòng lặp}\label{dieu-kien-dung}
 
 \subsection{1. Hiểm họa của vòng lặp vô hạn (Infinite Loop Trap)}
-Trong các hệ thống tự hành không có kiểm soát, LLM rất dễ rơi vào trạng thái "ảo giác lặp" (reasoning loop): bước sau cố gắng sửa đổi bước trước một cách không hồi kết, hoặc liên tục gọi lại cùng một công cụ với tham số tương tự. Điều này dẫn tới hai hậu quả nghiêm trọng:
+Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ngữ rất dễ rơi vào trạng thái "ảo giác lặp" (reasoning loop): bước sau cố gắng sửa đổi bước trước một cách không hồi kết, hoặc liên tục gọi lại cùng một công cụ với tham số tương tự. Điều này dẫn tới hai hậu quả nghiêm trọng:
 \begin{enumerate}
-    \item \textbf{Cạn kiệt ngân sách (Token exhaustion):} Tiêu tốn hàng nghìn USD tiền API chỉ trong vài phút.
+    \item \textbf{Cạn kiệt ngân sách (Token exhaustion):} Tiêu tốn chi phí gọi mô hình lớn một cách không cần thiết.
     \item \textbf{Tắc nghẽn hệ thống (Process hanging):} Tài nguyên server bị chiếm dụng, luồng xử lý không bao giờ trả về kết quả cho người dùng.
 \end{enumerate}
 
-\subsection{2. Thiết kế Bounded Loop và bộ đánh giá dừng đa trạng thái}
+\subsection{2. Thiết kế vòng lặp giới hạn và bộ đánh giá dừng đa trạng thái}
 Để giải quyết triệt để rủi ro trên, hệ thống của chúng ta thiết lập cơ chế kiểm soát kép phân định rõ ràng 3 trạng thái kết thúc:
 \begin{enumerate}
     \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không (ví dụ: mục tiêu viết bài đòi hỏi phải có \texttt{final\_article} và vượt qua kiểm định của \texttt{QualityEvaluator}). Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved}.
     \item \textbf{Trạng thái hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}):} Khi số bước thực thi đạt ngưỡng cho phép (ví dụ \texttt{max\_steps = 1} với mục tiêu viết bài, hệ thống mới chỉ xong dàn ý), tác nhân ngắt vòng lặp an toàn và ghi nhận trạng thái \texttt{BUDGET\_EXHAUSTED} chứ không báo nhầm là \texttt{COMPLETED}.
-    \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), hệ thống ngắt phiên làm việc ngay lập tức, chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào Step Log.
+    \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), hệ thống ngắt phiên làm việc ngay lập tức, chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
 \end{enumerate}
 
 Nhờ đó, tác nhân vừa có tính linh hoạt tự hành, vừa tăng khả năng kiểm soát trong phạm vi các giới hạn được cấu hình.
@@ -507,7 +507,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \end{Highlighting}
 \end{Shaded}
 
-\section{Thực nghiệm kịch bản: Kiểm chứng năng lực Autonomous Agent}\label{thuc-nghiem}
+\section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
 Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
@@ -521,9 +521,9 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
-    \item \textbf{Lập kế hoạch động qua LLM (Dynamic Planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
-    \item \textbf{Quan sát \& Thích ứng kế hoạch (Observe \& Dynamic Replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
-    \item \textbf{Thực thi LLM thật \& Kiểm định dừng (Real Execution \& Quality Gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
+    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
+    \item \textbf{Quan sát \& Thích ứng kế hoạch (observe \& dynamic replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Thực thi LLM thật \& Kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị Outline Docker (Tự xác định 2 bước \& Dừng sớm)}
@@ -619,17 +619,17 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 
 Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh (\texttt{input\_context\_keys}) tiêu thụ và \textbf{Khả năng tái lập (Reproducibility)} hỗ trợ truy vết lỗi giữa khâu lập kế hoạch (Planner) và thực thi (Executor).
 
-\section{Mở rộng và Ứng dụng thực tế của Checklist Agent}\label{mo-rong-ung-dung}
+\section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
-Mô hình Checklist Agent 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
+Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
 
-\textbf{1. Trợ lý Tự động Viết Tài liệu API (Technical Documentation Agent):}\\
+\textbf{1. Trợ lý tự động viết tài liệu API (technical documentation agent):}\\
 Khi kỹ sư hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách tham số và error codes) $\rightarrow$ Bước 2 (Sinh tài liệu chi tiết kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI Spec $\rightarrow$ Lưu file).
 
-\textbf{2. Trợ lý Rà soát Pull Request (PR Code Reviewer Agent):}\\
+\textbf{2. Trợ lý rà soát pull request (code review agent):}\\
 Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}: Bước 1 (Trích xuất git diff những file thay đổi) $\rightarrow$ Bước 2 (Đối chiếu bộ quy tắc an ninh: secret, SQL injection, null check) $\rightarrow$ Bước 3 (Tổng hợp comment góp ý và thông báo lên GitHub/GitLab).
 
-\textbf{3. Trợ lý Tự động Hóa Chăm sóc Khách hàng Cấp cao:}\\
+\textbf{3. Trợ lý tự động hóa chăm sóc khách hàng:}\\
 Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
 
 \section{Kết luận}\label{ket-luan}

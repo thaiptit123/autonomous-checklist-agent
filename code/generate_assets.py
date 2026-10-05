@@ -21,14 +21,14 @@ plt.rcParams["axes.unicode_minus"] = False
 
 
 def generate_architecture_diagram():
-    fig, ax = plt.subplots(figsize=(12, 6.8), dpi=300)
+    fig, ax = plt.subplots(figsize=(12, 7.2), dpi=300)
     ax.set_facecolor("#F8FAFC")
     fig.patch.set_facecolor("#F8FAFC")
 
     # Tiêu đề chính
-    ax.text(6.0, 6.35, "KIẾN TRÚC AUTONOMOUS CHECKLIST AGENT (TỐI ĐA 3 BƯỚC)", 
+    ax.text(6.0, 6.78, "KIẾN TRÚC TÁC NHÂN TỰ HÀNH CHECKLIST (TỐI ĐA 3 BƯỚC)", 
             fontsize=15, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(6.0, 5.95, "Mô hình khép kín: Nhận mục tiêu → Lập kế hoạch động → Thực thi & Bộ nhớ → Kiểm tra dừng → Báo cáo cuối", 
+    ax.text(6.0, 6.38, "Mô hình khép kín: Nhận mục tiêu → Lập kế hoạch động → Thực thi & Bộ nhớ → Kiểm tra dừng → Báo cáo cuối", 
             fontsize=10, ha="center", color="#475569", style="italic")
 
     # Hộp 1: Mục tiêu người dùng
@@ -57,14 +57,14 @@ def generate_architecture_diagram():
     ax.annotate("", xy=(6.05, 4.5), xytext=(5.65, 4.5),
                 arrowprops=dict(arrowstyle="-|>", color="#E8630A", lw=2.2, mutation_scale=15))
 
-    # Hộp 3: Bộ thực thi & Bộ nhớ ngữ cảnh (Executor Node)
+    # Hộp 3: Bộ thực thi & Bộ nhớ ngữ cảnh (Execution Engine)
     box_exec = patches.FancyBboxPatch((6.15, 3.4), 2.7, 2.05, boxstyle="round,pad=0.15", 
                                       edgecolor="#059669", facecolor="#ECFDF5", linewidth=2)
     ax.add_patch(box_exec)
     ax.text(7.5, 5.15, "3. BỘ THỰC THI", fontsize=11, fontweight="bold", ha="center", color="#059669")
     ax.text(7.5, 4.9, "(Execution Engine)", fontsize=8.5, ha="center", color="#059669", style="italic")
-    ax.text(7.5, 4.35, "• Bước 1: Lập dàn ý\n• Bước 2: Soạn nội dung\n• Bước 3: Rà soát & duyệt", 
-            fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
+    ax.text(7.5, 4.35, "• Bước 1: Luận điểm (research_points)\n• Bước 2: Dàn ý (outline)\n• Bước 3: Hoàn thiện (review_polish)", 
+            fontsize=8, ha="center", color="#1E293B", linespacing=1.2)
     ax.text(7.5, 3.65, "[Bộ nhớ ngữ cảnh & Logs]", fontsize=8, fontweight="bold", ha="center", color="#047857")
 
     # Mũi tên 3 -> 4
@@ -80,10 +80,10 @@ def generate_architecture_diagram():
     ax.text(10.55, 4.05, "Đạt mục tiêu?\nHoặc Bước ≥ 3?\n→ KÍCH HOẠT DỪNG", 
             fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
 
-    # Mũi tên lặp phản hồi (Loopback khi chưa dừng) - Đi vòng phía trên rõ ràng, không đè hộp hay chữ
+    # Mũi tên lặp phản hồi (Loopback khi chưa dừng) - Đi vòng phía trên đỉnh, hoàn toàn không đè hộp hay chữ
     ax.annotate("", xy=(7.5, 5.5), xytext=(10.55, 5.35),
-                arrowprops=dict(arrowstyle="-|>", color="#64748B", lw=1.5, connectionstyle="arc3,rad=-0.35", ls="--", mutation_scale=12))
-    ax.text(9.1, 5.85, "Chưa đạt & Còn bước", fontsize=8, color="#475569", ha="center", fontweight="semibold")
+                arrowprops=dict(arrowstyle="-|>", color="#64748B", lw=1.6, connectionstyle="arc3,rad=0.22", ls="--", mutation_scale=12))
+    ax.text(9.0, 5.86, "Vòng lặp tiếp (Chưa đạt & Còn bước)", fontsize=8, color="#475569", ha="center", fontweight="semibold")
 
     # Mũi tên dừng -> Xuống báo cáo cuối (Đi thẳng từ góc dưới hộp Stop xuống góc phải hộp Báo cáo)
     ax.annotate("", xy=(10.2, 2.3), xytext=(10.2, 3.65),
@@ -102,7 +102,7 @@ def generate_architecture_diagram():
             fontsize=8.5, ha="center", color="#334155")
 
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 6.8)
+    ax.set_ylim(0, 7.2)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "architecture_diagram.png")
@@ -207,8 +207,8 @@ def generate_state_flow_diagram():
     s1 = patches.FancyBboxPatch((0.5, 2.2), 2.5, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#004AAD", facecolor="#EFF6FF", linewidth=1.8)
     ax.add_patch(s1)
-    ax.text(1.75, 3.75, "BƯỚC 1\nLập Dàn Ý", fontsize=10, fontweight="bold", ha="center", color="#004AAD", linespacing=1.2)
-    ax.text(1.75, 2.9, "Đầu vào: Mục tiêu\nĐầu ra: outline\n(5 ý chính RAG)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
+    ax.text(1.75, 3.75, "BƯỚC 1\nLuận Điểm Cốt Lõi", fontsize=10, fontweight="bold", ha="center", color="#004AAD", linespacing=1.2)
+    ax.text(1.75, 2.9, "action: research_points\nĐầu vào: Mục tiêu\nĐầu ra: research_points", fontsize=8, ha="center", color="#1E293B", linespacing=1.2)
 
     # Mũi tên 1->2 (Khoảng cách rõ ràng, nhãn State nằm phía trên đường kẻ)
     ax.annotate("", xy=(3.8, 3.15), xytext=(3.1, 3.15),
@@ -219,8 +219,8 @@ def generate_state_flow_diagram():
     s2 = patches.FancyBboxPatch((3.9, 2.2), 2.7, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#E8630A", facecolor="#FFF7ED", linewidth=1.8)
     ax.add_patch(s2)
-    ax.text(5.25, 3.75, "BƯỚC 2\nSoạn Nội Dung", fontsize=10, fontweight="bold", ha="center", color="#E8630A", linespacing=1.2)
-    ax.text(5.25, 2.9, "Đầu vào: outline\nĐầu ra: draft_article\n(Bản nháp 4 phần)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
+    ax.text(5.25, 3.75, "BƯỚC 2\nDàn Ý Chi Tiết", fontsize=10, fontweight="bold", ha="center", color="#E8630A", linespacing=1.2)
+    ax.text(5.25, 2.9, "action: outline\nĐầu vào: research_points\nĐầu ra: outline (dàn bài)", fontsize=8, ha="center", color="#1E293B", linespacing=1.2)
 
     # Mũi tên 2->3
     ax.annotate("", xy=(7.3, 3.15), xytext=(6.7, 3.15),
@@ -231,8 +231,8 @@ def generate_state_flow_diagram():
     s3 = patches.FancyBboxPatch((7.4, 2.2), 2.6, 1.9, boxstyle="round,pad=0.15", 
                                 edgecolor="#059669", facecolor="#ECFDF5", linewidth=1.8)
     ax.add_patch(s3)
-    ax.text(8.7, 3.75, "BƯỚC 3\nRà Soát & Hoàn Thiện", fontsize=10, fontweight="bold", ha="center", color="#059669", linespacing=1.2)
-    ax.text(8.7, 2.9, "Đầu vào: draft_article\nĐầu ra: final_article\n(Đã qua rà soát chất lượng)", fontsize=8.5, ha="center", color="#1E293B", linespacing=1.2)
+    ax.text(8.7, 3.75, "BƯỚC 3\nSoạn Thảo & Rà Soát", fontsize=10, fontweight="bold", ha="center", color="#059669", linespacing=1.2)
+    ax.text(8.7, 2.9, "action: review_polish\nĐầu vào: outline + memory\nĐầu ra: final_article", fontsize=8, ha="center", color="#1E293B", linespacing=1.2)
 
     # Khung đánh giá điều kiện dừng bên dưới (Cách biệt rõ ràng, không chạm mũi tên trên)
     cond_box = patches.FancyBboxPatch((1.2, 0.4), 8.1, 1.3, boxstyle="round,pad=0.15", 
