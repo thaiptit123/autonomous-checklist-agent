@@ -1,21 +1,23 @@
 """
 Bộ kịch bản kiểm thử toàn diện cho Autonomous Checklist Agent (Series AI Guru x TiniX)
 Đánh giá:
-1. Dynamic Planning & Execution với Bounded Loop (<= 3 bước)
-2. Kiểm tra điều kiện dừng (Goal Achieved vs Budget Exhausted vs Failed)
-3. Kiểm định chất lượng định lượng (Quality Evaluator: TTR, Length, Structure, Relevance)
-4. Các kịch bản biên & kịch bản thất bại (Failure cases, Open-domain goals, Step failures)
+1. LLM Autonomous Execution & Real Latency (Chế độ LLM thật qua Ollama)
+2. Dynamic Planning & Execution với Bounded Loop (<= 3 bước)
+3. Đánh giá điều kiện dừng chặt chẽ (Goal Achieved vs Budget Exhausted vs Failed)
+4. Kiểm định chất lượng định lượng (Quality Evaluator: TTR, Length, Structure, Relevance)
+5. Thích ứng kế hoạch động theo quan sát (Observe & Dynamic Replan)
+6. Các kịch bản biên & kịch bản thất bại (Open-domain goals, Evaluator rejection, Action exceptions)
 """
 
 import sys
 from checklist_agent import AutonomousChecklistAgent, AgentStatus
 
 
-def test_scenario_full_rag():
+def test_scenario_full_rag_llm():
     print("\n" + "#" * 68)
-    print("TEST 1: Kịch bản 3 bước - Viết bài chia sẻ giải thích RAG cho người mới")
+    print("TEST 1: Kịch bản LLM tự hành thực tế - Viết bài chia sẻ giải thích RAG")
     print("#" * 68)
-    agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+    agent = AutonomousChecklistAgent(max_steps=3, use_llm=True)
     goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
     report = agent.run(goal)
 
@@ -23,11 +25,11 @@ def test_scenario_full_rag():
     assert report.steps_executed == 3
     assert report.total_steps_planned == 3
     assert len(report.execution_logs) == 3
-    assert "Retrieval-Augmented Generation" in report.final_output
     assert "Goal achieved" in report.stop_reason
     assert report.quality_metrics["passed"] is True
     assert report.quality_metrics["ttr"] >= 0.35
-    print("✅ TEST 1 PASSED: Planner tự tạo 3 bước, thực thi trọn vẹn và đạt mục tiêu nghiệm thu.")
+    assert report.total_duration_sec > 0.5  # Minh chứng thời gian thực thi thực tế của LLM
+    print(f"✅ TEST 1 PASSED: LLM Planner & Executor hoàn thành xuất sắc trong {report.total_duration_sec}s (TTR={report.quality_metrics['ttr']}).")
 
 
 def test_scenario_outline_docker_early_stop():
@@ -42,31 +44,35 @@ def test_scenario_outline_docker_early_stop():
     assert report.total_steps_planned == 2  # Dynamic Planner chỉ sinh 2 bước
     assert report.steps_executed == 2
     assert "Goal achieved" in report.stop_reason
-    assert "DOCKER" in report.final_output.upper()
+    assert "Docker" in report.final_output
     assert report.quality_metrics["passed"] is True
-    print("✅ TEST 2 PASSED: Dynamic Planner tự tạo 2 bước, không ép khuôn 3 bước và dừng sớm an toàn.")
+    print("✅ TEST 2 PASSED: Dynamic Planner tự tạo đúng 2 bước và dừng sớm an toàn khi mục tiêu hoàn thành.")
 
 
-def test_scenario_summarize_two_steps():
+def test_scenario_summarize_with_input_document():
     print("\n" + "#" * 68)
-    print("TEST 3: Kịch bản tóm tắt tài liệu kỹ thuật (Summarize 2 bước)")
+    print("TEST 3: Kịch bản tóm tắt tài liệu nguồn (Summarize with Input Document)")
     print("#" * 68)
     agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+    sample_doc = (
+        "Model Context Protocol (MCP) là giao thức chuẩn mở do Anthropic phát triển. "
+        "MCP kết nối an toàn các mô hình AI với các công cụ cục bộ và kho dữ liệu phân tán doanh nghiệp."
+    )
     goal = "Tóm tắt tài liệu kỹ thuật về Model Context Protocol (MCP) cho kỹ sư phần mềm."
-    report = agent.run(goal)
+    report = agent.run(goal, input_document=sample_doc)
 
     assert report.status == AgentStatus.COMPLETED
     assert report.total_steps_planned == 2
     assert report.steps_executed == 2
     assert "Goal achieved" in report.stop_reason
-    assert "BẢN TÓM TẮT SÚC TÍCH" in report.final_output.upper()
+    assert "MCP" in report.final_output
     assert report.quality_metrics["passed"] is True
-    print("✅ TEST 3 PASSED: Hoàn thành tóm tắt tài liệu 2 bước và nghiệm thu đạt chuẩn.")
+    print("✅ TEST 3 PASSED: Hoàn thành tóm tắt tài liệu nguồn 2 bước bám sát nội dung và nghiệm thu đạt chuẩn.")
 
 
 def test_scenario_budget_exhausted_unmet_goal():
     print("\n" + "#" * 68)
-    print("TEST 4: Kịch bản hết bước nhưng CHƯA đạt mục tiêu (Budget Exhausted)")
+    print("TEST 4: Kịch bản hết ngân sách bước nhưng CHƯA đạt mục tiêu (Budget Exhausted)")
     print("#" * 68)
     # Mục tiêu yêu cầu viết bài hoàn chỉnh (cần outline -> draft -> review = 3 bước)
     # nhưng cấu hình max_steps = 1 (ngân sách chỉ cho phép 1 bước)
@@ -74,32 +80,79 @@ def test_scenario_budget_exhausted_unmet_goal():
     goal = "Viết bài chia sẻ chuyên sâu về Kubernetes cho đội ngũ DevOps."
     report = agent.run(goal)
 
-    # Đảm bảo hệ thống KHÔNG được báo COMPLETED khi mới chỉ xong dàn ý
     assert report.status == AgentStatus.BUDGET_EXHAUSTED
     assert report.steps_executed == 1
     assert "Budget exhausted" in report.stop_reason
-    assert "chưa hoàn thành trọn vẹn mục tiêu" in report.stop_reason
-    print("✅ TEST 4 PASSED: Phân định chính xác BUDGET_EXHAUSTED khi hết ngân sách bước nhưng chưa thỏa nghiệm thu.")
+    assert "chưa tạo được sản phẩm đầu ra hoàn thiện" in report.stop_reason
+    print("✅ TEST 4 PASSED: Phân định chính xác BUDGET_EXHAUSTED khi hết ngân sách bước nhưng chưa hoàn thành mục tiêu.")
 
 
-def test_scenario_open_domain_goal():
+def test_scenario_quality_rejection_budget_exhausted():
     print("\n" + "#" * 68)
-    print("TEST 5: Kịch bản mục tiêu mở ngoài các chủ đề định nghĩa sẵn")
+    print("TEST 5: Kịch bản QualityEvaluator từ chối nghiệm thu -> BUDGET_EXHAUSTED (dù chạy đủ 3 bước)")
     print("#" * 68)
     agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
-    goal = "Hướng dẫn tối ưu hóa cơ sở dữ liệu PostgreSQL cho các ứng dụng tải cao."
+
+    # Giả lập sản phẩm đầu ra bước 3 kém chất lượng (quá ngắn < 100 ký tự và thiếu cấu trúc)
+    original_execute = agent._execute_step_action
+
+    def degraded_execute(step, topic, goal):
+        if step.action_type == "review_polish":
+            bad_content = "RAG là retrieval augmented generation hết."
+            agent.context_memory["final_article"] = bad_content
+            return bad_content
+        return original_execute(step, topic, goal)
+
+    agent._execute_step_action = degraded_execute
+    goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
+    report = agent.run(goal)
+
+    # Dù chạy đủ 3 bước, sản phẩm không pass QualityEvaluator -> BẮT BUỘC kết luận BUDGET_EXHAUSTED!
+    assert report.status == AgentStatus.BUDGET_EXHAUSTED
+    assert report.quality_metrics["passed"] is False
+    assert "Budget exhausted" in report.stop_reason
+    assert "Độ dài chưa đạt" in report.stop_reason or "Chưa thỏa mãn" in report.stop_reason
+    print("✅ TEST 5 PASSED: QualityEvaluator đóng vai trò cổng gác chất lượng nghiêm ngặt, từ chối sản phẩm không đạt chuẩn.")
+
+
+def test_scenario_open_domain_kafka():
+    print("\n" + "#" * 68)
+    print("TEST 6: Kịch bản mục tiêu mở hoàn toàn (Open-Domain: Apache Kafka)")
+    print("#" * 68)
+    agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+    # Chủ đề Apache Kafka không hề nằm trong bất kỳ câu lệnh if/elif hardcode nào
+    goal = "Hướng dẫn cơ bản về kiến trúc Event-Driven với Apache Kafka cho kỹ sư backend."
     report = agent.run(goal)
 
     assert report.status == AgentStatus.COMPLETED
-    assert "PostgreSQL" in report.final_output
+    assert "Kafka" in report.final_output
     assert "Goal achieved" in report.stop_reason
     assert report.quality_metrics["passed"] is True
-    print("✅ TEST 5 PASSED: Hệ thống xử lý mục tiêu mở linh hoạt, sinh cấu trúc bài viết và nghiệm thu hợp lệ.")
+    print("✅ TEST 6 PASSED: Hệ thống xử lý mục tiêu mở hoàn toàn linh hoạt, sinh cấu trúc bài viết và nghiệm thu hợp lệ.")
+
+
+def test_scenario_dynamic_observation_and_adaptation():
+    print("\n" + "#" * 68)
+    print("TEST 7: Kịch bản Quan sát & Thích ứng kế hoạch động (Observe & Dynamic Replan)")
+    print("#" * 68)
+    agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+    goal = "Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."
+    plan = agent.plan_steps(goal)
+
+    # Giả lập kết quả bước 1 là dàn ý chưa có ví dụ đời thường
+    mock_outline = "1. Định nghĩa RAG.\n2. Cấu trúc Vector DB.\n3. Kết luận."
+    next_step = plan[1]
+    adaptation_note = agent._observe_and_adapt(plan[0], mock_outline, next_step, goal)
+
+    assert adaptation_note is not None
+    assert "ví dụ" in adaptation_note.lower() or "thích ứng" in next_step.description.lower()
+    assert "Chỉ dẫn thích ứng" in next_step.description
+    print(f"✅ TEST 7 PASSED: Tác nhân quan sát kết quả trung gian và thích ứng chỉ dẫn Bước 2: '{adaptation_note}'.")
 
 
 def test_scenario_action_failure_recovery():
     print("\n" + "#" * 68)
-    print("TEST 6: Kịch bản xử lý lỗi khi một Action thất bại (Action Failure -> FAILED)")
+    print("TEST 8: Kịch bản xử lý lỗi khi một Action thất bại (Action Failure -> FAILED)")
     print("#" * 68)
     agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
 
@@ -118,14 +171,14 @@ def test_scenario_action_failure_recovery():
     assert report.status == AgentStatus.FAILED
     assert "Execution failed" in report.stop_reason
     assert "Mất kết nối" in report.stop_reason
-    assert report.steps_executed == 2  # Bước 1 thành công, bước 2 gặp lỗi và dừng lại
+    assert report.steps_executed == 2
     assert report.execution_logs[-1]["status"] == "FAILED"
-    print("✅ TEST 6 PASSED: Bắt lỗi bước thực thi chính xác, chuyển trạng thái FAILED và ghi nhận log nhất quán.")
+    print("✅ TEST 8 PASSED: Bắt lỗi bước thực thi chính xác, chuyển trạng thái FAILED và ghi nhận log nhất quán.")
 
 
 def test_scenario_bounded_loop_validation():
     print("\n" + "#" * 68)
-    print("TEST 7: Kiểm định rào chắn Bounded Loop (Khống chế max_steps <= 3)")
+    print("TEST 9: Kiểm định rào chắn Bounded Loop (Khống chế max_steps <= 3)")
     print("#" * 68)
     try:
         agent = AutonomousChecklistAgent(max_steps=5)
@@ -133,17 +186,19 @@ def test_scenario_bounded_loop_validation():
         sys.exit(1)
     except ValueError as e:
         print(f"✅ Bắt lỗi thành công: {e}")
-        print("✅ TEST 7 PASSED: Cơ chế Bounded Loop chặn đứng vi phạm giới hạn số bước.")
+        print("✅ TEST 9 PASSED: Cơ chế Bounded Loop chặn đứng vi phạm giới hạn số bước.")
 
 
 if __name__ == "__main__":
-    test_scenario_full_rag()
+    test_scenario_full_rag_llm()
     test_scenario_outline_docker_early_stop()
-    test_scenario_summarize_two_steps()
+    test_scenario_summarize_with_input_document()
     test_scenario_budget_exhausted_unmet_goal()
-    test_scenario_open_domain_goal()
+    test_scenario_quality_rejection_budget_exhausted()
+    test_scenario_open_domain_kafka()
+    test_scenario_dynamic_observation_and_adaptation()
     test_scenario_action_failure_recovery()
     test_scenario_bounded_loop_validation()
     print("\n" + "=" * 68)
-    print("🎉 TẤT CẢ 7/7 KỊCH BẢN KIỂM THỬ ĐỀU ĐẠT CHUẨN (ALL PASSED)!")
+    print("🎉 TẤT CẢ 9/9 KỊCH BẢN KIỂM THỬ ĐỀU ĐẠT CHUẨN (ALL 9/9 PASSED)!")
     print("=" * 68)

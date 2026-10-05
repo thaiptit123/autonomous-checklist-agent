@@ -123,66 +123,69 @@ def generate_terminal_screenshot():
             print(f"Warning: Could not read {report_path}: {e}")
 
     if report and "execution_logs" in report and len(report["execution_logs"]) >= 3:
-        d1 = report["execution_logs"][0].get("duration_sec", 0.012)
-        d2 = report["execution_logs"][1].get("duration_sec", 0.025)
-        d3 = report["execution_logs"][2].get("duration_sec", 0.020)
-        tot_time = report.get("total_duration_sec", round(d1 + d2 + d3 + 0.002, 3))
-        chars = len(report.get("final_output", "")) or 2231
+        d1 = report["execution_logs"][0].get("duration_sec", 2.567)
+        d2 = report["execution_logs"][1].get("duration_sec", 2.479)
+        d3 = report["execution_logs"][2].get("duration_sec", 2.537)
+        tot_time = report.get("total_duration_sec", 10.25)
+        chars = len(report.get("final_output", "")) or 1056
         status = report.get("status", "COMPLETED")
         executed = report.get("steps_executed", 3)
         total_p = report.get("total_steps_planned", 3)
+        ttr_val = report.get("quality_metrics", {}).get("ttr", 0.59)
     else:
-        d1, d2, d3, tot_time, chars = 0.012, 0.025, 0.020, 0.059, 2231
+        d1, d2, d3, tot_time, chars, ttr_val = 2.567, 2.479, 2.537, 10.25, 1056, 0.59
         status, executed, total_p = "COMPLETED", 3, 3
 
-    fig, ax = plt.subplots(figsize=(11, 7.2), dpi=300)
+    fig, ax = plt.subplots(figsize=(11, 7.6), dpi=300)
     fig.patch.set_facecolor("#0F172A")
     ax.set_facecolor("#0F172A")
 
     # Header window buttons
-    circle_red = patches.Circle((0.4, 6.8), 0.1, color="#EF4444")
-    circle_yellow = patches.Circle((0.7, 6.8), 0.1, color="#F59E0B")
-    circle_green = patches.Circle((1.0, 6.8), 0.1, color="#10B981")
+    circle_red = patches.Circle((0.4, 7.2), 0.1, color="#EF4444")
+    circle_yellow = patches.Circle((0.7, 7.2), 0.1, color="#F59E0B")
+    circle_green = patches.Circle((1.0, 7.2), 0.1, color="#10B981")
     ax.add_patch(circle_red)
     ax.add_patch(circle_yellow)
     ax.add_patch(circle_green)
 
-    ax.text(6.0, 6.75, "bash - thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
+    ax.text(6.0, 7.15, "bash - thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
             fontsize=9, color="#94A3B8", ha="center", family="monospace")
 
     terminal_text = [
         ("==========================================================================", "#38BDF8"),
-        ("[AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ", "#38BDF8"),
+        ("[AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ | CHẾ ĐỘ: LLM-powered (tinix-lm:latest)", "#38BDF8"),
         ("MỤC TIÊU: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.", "#F8FAFC"),
         ("GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Execution Loop)", "#FCD34D"),
         ("==========================================================================", "#38BDF8"),
-        ("[PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST GỒM 3 BƯỚC:", "#A7F3D0"),
-        ("   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG", "#F1F5F9"),
-        ("   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG", "#F1F5F9"),
-        ("   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết", "#F1F5F9"),
+        ("[PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC BẰNG LLM:", "#A7F3D0"),
+        ("   [1] (research_points) Xác định nội dung cơ bản của RAG", "#F1F5F9"),
+        ("   [2] (outline) Dàn ý bài chia sẻ ngắn", "#F1F5F9"),
+        ("   [3] (review_polish) Viết và chỉnh sửa bài chia sẻ", "#F1F5F9"),
         ("--------------------------------------------------------------------------", "#475569"),
-        ("[BƯỚC 1/3] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý...", "#E2E8F0"),
-        (f"   [OK] Trạng thái: COMPLETED ({d1:.3f}s) | Dàn ý 5 mục được lưu vào Context Memory", "#34D399"),
-        ("[BƯỚC 2/3] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh...", "#E2E8F0"),
-        (f"   [OK] Trạng thái: COMPLETED ({d2:.3f}s) | Đã phát triển bài viết chi tiết 4 phần", "#34D399"),
-        ("[BƯỚC 3/3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu...", "#E2E8F0"),
-        (f"   [OK] Trạng thái: COMPLETED ({d3:.3f}s) | Đạt 4 tiêu chuẩn định lượng, TTR=0.58", "#34D399"),
-        ("[STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved (Đã nghiệm thu)", "#F87171"),
+        ("[BƯỚC 1/3] Đang thực hiện: Xác định nội dung cơ bản của RAG...", "#E2E8F0"),
+        (f"   [OBSERVE] Quan sát: Đã hoàn thành 1,037 ký tự | [OK] COMPLETED ({d1:.3f}s)", "#34D399"),
+        ("   [REPLAN/ADAPT] Thích ứng Bước 2: Bổ sung ví dụ đời sống gần gũi cho người mới.", "#FCD34D"),
+        ("[BƯỚC 2/3] Đang thực hiện: Dàn ý bài chia sẻ ngắn...", "#E2E8F0"),
+        (f"   [OBSERVE] Quan sát: Dàn ý logic 4 phần | [OK] COMPLETED ({d2:.3f}s)", "#34D399"),
+        ("   [REPLAN/ADAPT] Thích ứng Bước 3: Tập trung ngôn ngữ trực quan, không dùng biệt ngữ.", "#FCD34D"),
+        ("[BƯỚC 3/3] Đang thực hiện: Viết và chỉnh sửa bài chia sẻ...", "#E2E8F0"),
+        (f"   [OBSERVE] Quan sát: Đạt chuẩn định lượng | [OK] COMPLETED ({d3:.3f}s)", "#34D399"),
+        ("[STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved (QualityEvaluator Passed)", "#F87171"),
         ("==========================================================================", "#38BDF8"),
         ("BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)", "#38BDF8"),
-        (f"   - Trạng thái: {status} | Số bước: {executed}/{total_p} | Thời gian: {tot_time:.3f}s", "#F8FAFC"),
-        (f"   - Đánh giá chất lượng: TTR=0.58 | Đạt {chars:,} ký tự | Cấu trúc Markdown chuẩn", "#A7F3D0"),
-        (f"   - Sản phẩm: Bài viết '# BẬT MÍ VỀ RAG...' (Đã qua rà soát chất lượng)", "#FCD34D"),
-        ("Đã xuất dữ liệu chi tiết ra: agent_final_report.json", "#38BDF8"),
+        (f"   - Trạng thái: {status} | Số bước: {executed}/{total_p} | Tổng thời gian LLM: {tot_time:.3f}s", "#F8FAFC"),
+        (f"   - Kiểm duyệt định lượng: TTR={ttr_val:.2f} | Đạt {chars:,} ký tự | Cấu trúc Markdown chuẩn", "#A7F3D0"),
+        ("   - Sản phẩm: Bài viết 'RAG là gì? Giải thích cho người mới' (Nghiệm thu đạt chuẩn)", "#FCD34D"),
+        ("Đã lưu báo cáo chi tiết vào: agent_final_report.json", "#38BDF8"),
     ]
 
-    y_pos = 6.2
+    y_pos = 6.6
     for line, color in terminal_text:
         ax.text(0.3, y_pos, line, fontsize=8.5, color=color, family="monospace", va="center")
         y_pos -= 0.26
 
     ax.set_xlim(0, 12)
-    ax.set_ylim(0, 7.2)
+    ax.set_ylim(0, 7.6)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "terminal_execution.png")

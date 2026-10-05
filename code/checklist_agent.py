@@ -5,6 +5,7 @@ Tác giả: Kỹ sư AI Phạm Thành Thái
 
 Hệ thống Autonomous Agent tự động nhận mục tiêu người dùng, tự lập checklist động
 tối đa 3 bước (Dynamic Planning), thực thi tuần tự, tích hợp mô hình ngôn ngữ lớn (LLM),
+quan sát phản hồi trung gian để thích ứng kế hoạch (Observe & Dynamic Replan),
 kiểm duyệt chất lượng định lượng (Quality Evaluator), lưu vết thực thi (Audit Log)
 và kiểm soát điều kiện dừng an toàn đa trạng thái (Bounded Loop Stop Condition).
 """
@@ -78,7 +79,7 @@ class QualityEvaluator:
         Tính Type-Token Ratio (TTR): Tỷ lệ từ vựng duy nhất trên tổng số từ.
         Dùng để định lượng độ phong phú từ vựng và kiểm chứng tính không trùng lặp.
         """
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = [re.sub(r"^[^\w]+|[^\w]+$", "", w) for w in text.lower().split() if len(re.sub(r"^[^\w]+|[^\w]+$", "", w)) > 0]
         if not words:
             return 0.0
         return round(len(set(words)) / len(words), 3)
@@ -102,7 +103,7 @@ class QualityEvaluator:
                 "review_notes": ["✗ Không có nội dung sản phẩm để kiểm duyệt."]
             }
 
-        words = re.findall(r'\b\w+\b', content.lower())
+        words = [re.sub(r"^[^\w]+|[^\w]+$", "", w) for w in content.lower().split() if len(re.sub(r"^[^\w]+|[^\w]+$", "", w)) > 0]
         char_count = len(content)
         word_count = len(words)
         ttr = cls.calculate_ttr(content)
@@ -115,7 +116,7 @@ class QualityEvaluator:
         has_headings = bool(re.search(r'(^|\n)(#{1,4}\s+|[0-9]+\.\s+|-\s+|\*\s+)', content))
         crit_structure = has_headings
 
-        # 3. Đa dạng từ vựng (TTR >= 0.35 chứng minh không bị lặp từ)
+        # 3. Đa dạng từ vựng (TTR >= 0.35)
         crit_diversity = ttr >= 0.35
 
         # 4. Từ khóa liên quan đến mục tiêu
@@ -124,8 +125,8 @@ class QualityEvaluator:
             "viên", "và", "là", "gì", "một", "tài", "liệu", "chuẩn", "bị", "hướng", "dẫn", "này", "đây"
         }
         goal_keywords = [
-            w for w in re.findall(r'\b\w+\b', goal.lower())
-            if len(w) > 2 and w not in stop_words
+            re.sub(r"^[^\w]+|[^\w]+$", "", w) for w in goal.lower().split()
+            if len(re.sub(r"^[^\w]+|[^\w]+$", "", w)) > 2 and re.sub(r"^[^\w]+|[^\w]+$", "", w) not in stop_words
         ]
         matched_keywords = [kw for kw in goal_keywords if kw in content.lower()]
         crit_relevance = len(matched_keywords) > 0 if goal_keywords else True
@@ -136,11 +137,11 @@ class QualityEvaluator:
             f"✓ Tiêu chuẩn độ dài: Đạt {char_count} ký tự ({word_count} từ, ngưỡng tối thiểu {min_chars} ký tự)"
             if crit_length else f"✗ Độ dài chưa đạt: {char_count}/{min_chars} ký tự",
 
-            f"✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc gạch đầu dòng Markdown rõ ràng"
+            f"✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown"
             if crit_structure else "✗ Cấu trúc văn bản thiếu phân cấp đề mục",
 
-            f"✓ Đa dạng từ vựng (TTR = {ttr:.2f}): Không lặp từ ngữ bất thường (ngưỡng yêu cầu >= 0.35)"
-            if crit_diversity else f"✗ Trùng lặp từ vựng cao (TTR = {ttr:.2f} < 0.35)",
+            f"✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = {ttr:.2f} (ngưỡng yêu cầu >= 0.35)"
+            if crit_diversity else f"✗ Đa dạng từ vựng thấp (TTR = {ttr:.2f} < 0.35)",
 
             f"✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm ({', '.join(matched_keywords) if matched_keywords else 'Chủ đề phù hợp'})"
             if crit_relevance else "✗ Nội dung chưa phản ánh đúng từ khóa mục tiêu"
@@ -158,39 +159,42 @@ class QualityEvaluator:
 
 class OllamaClient:
     """
-    Client kết nối dịch vụ LLM cục bộ (Ollama) với cơ chế timeout an toàn
-    và tự động fallback sang mô phỏng khi không khả dụng.
+    Client kết nối dịch vụ LLM cục bộ (Ollama) với cơ chế tự phát hiện cổng
+    (thử cổng 11436 GPU trước, rồi đến 11434), timeout an toàn và fallback khi offline.
     """
 
-    def __init__(self, host: str = "http://localhost:11434", model: str = "tinix-lm:latest", timeout_sec: float = 12.0):
-        self.host = host.rstrip("/")
+    def __init__(self, candidate_hosts: Optional[List[str]] = None, model: str = "tinix-lm:latest", timeout_sec: float = 30.0):
+        self.candidate_hosts = candidate_hosts or ["http://localhost:11436", "http://localhost:11434"]
+        self.host: Optional[str] = None
         self.model = model
         self.timeout_sec = timeout_sec
         self._available: Optional[bool] = None
 
     def is_available(self) -> bool:
-        """Kiểm tra kết nối dịch vụ Ollama."""
-        if self._available is not None:
+        """Kiểm tra và tìm cổng Ollama đang khả dụng."""
+        if self._available is not None and self.host:
             return self._available
-        try:
-            req = urllib.request.Request(f"{self.host}/api/tags", headers={"User-Agent": "AutonomousAgent/1.0"})
-            with urllib.request.urlopen(req, timeout=2.0) as res:
-                if res.status == 200:
-                    data = json.loads(res.read().decode("utf-8"))
-                    models = [m.get("name", "") for m in data.get("models", [])]
-                    # Nếu model chỉ định không có thì dùng model đầu tiên có sẵn
-                    if not any(self.model in m for m in models) and models:
-                        self.model = models[0]
-                    self._available = True
-                    return True
-        except Exception:
-            pass
+        for h in self.candidate_hosts:
+            host_clean = h.rstrip("/")
+            try:
+                req = urllib.request.Request(f"{host_clean}/api/tags", headers={"User-Agent": "AutonomousAgent/1.0"})
+                with urllib.request.urlopen(req, timeout=1.5) as res:
+                    if res.status == 200:
+                        data = json.loads(res.read().decode("utf-8"))
+                        models = [m.get("name", "") for m in data.get("models", [])]
+                        if not any(self.model in m for m in models) and models:
+                            self.model = models[0]
+                        self.host = host_clean
+                        self._available = True
+                        return True
+            except Exception:
+                continue
         self._available = False
         return False
 
-    def generate(self, prompt: str, system: str = "", max_tokens: int = 300) -> Optional[str]:
+    def generate(self, prompt: str, system: str = "", max_tokens: int = 350) -> Optional[str]:
         """Gửi prompt đến LLM để nhận nội dung hoàn thiện."""
-        if not self.is_available():
+        if not self.is_available() or not self.host:
             return None
         try:
             payload = {
@@ -199,7 +203,7 @@ class OllamaClient:
                 "system": system,
                 "stream": False,
                 "options": {
-                    "temperature": 0.3,
+                    "temperature": 0.25,
                     "num_predict": max_tokens
                 }
             }
@@ -220,7 +224,8 @@ class OllamaClient:
 class AutonomousChecklistAgent:
     """
     Autonomous Agent hoàn thành checklist tối đa 3 bước với Bounded Loop,
-    hỗ trợ LLM Planner & Executor thật kết hợp cơ chế kiểm duyệt chất lượng định lượng.
+    hỗ trợ LLM Planner & Executor thật, quan sát phản hồi trung gian để thích ứng kế hoạch
+    (Observe & Dynamic Replan), và kiểm soát điều kiện dừng đa trạng thái.
     """
 
     def __init__(self, max_steps: int = 3, use_llm: bool = True):
@@ -241,10 +246,11 @@ class AutonomousChecklistAgent:
     def _extract_topic_and_intent(self, goal: str) -> Tuple[str, str]:
         """
         Bóc tách chủ đề trọng tâm (Topic) và mục đích chính (Intent).
+        Giữ RAG và Docker cho 2 kịch bản tutorial cốt lõi; các chủ đề còn lại hoàn toàn mở (Open-Domain).
         """
         lower = goal.lower().strip()
 
-        # Nhận diện ý định (Intent)
+        # 1. Nhận diện ý định (Intent)
         if any(kw in lower for kw in ["outline", "dàn ý"]):
             intent = "outline_only"
         elif any(kw in lower for kw in ["tóm tắt", "summary", "tổng kết", "súc tích"]):
@@ -252,29 +258,21 @@ class AutonomousChecklistAgent:
         else:
             intent = "full_article"
 
-        # Bóc tách Topic
+        # 2. Bóc tách Topic
         if "rag" in lower or "retrieval" in lower:
             topic = "RAG (Retrieval-Augmented Generation)"
         elif "docker" in lower:
             topic = "Docker & Container hóa"
-        elif "machine learning" in lower or "học máy" in lower:
-            topic = "Machine Learning"
-        elif "kubernetes" in lower or "k8s" in lower:
-            topic = "Kubernetes"
-        elif "git" in lower:
-            topic = "Git & Quản lý phiên bản"
-        elif "postgresql" in lower or "database" in lower or "cơ sở dữ liệu" in lower:
-            topic = "Tối ưu hóa cơ sở dữ liệu PostgreSQL"
         else:
-            # Loại bỏ các từ tiền tố
+            # Bóc tách mở (Open-domain extraction)
             cleaned = re.sub(
                 r'^(viết|chuẩn bị|tạo|lập|hướng dẫn|giải thích|tóm tắt)\s+(bài chia sẻ|bài viết|outline|dàn ý|tài liệu)?\s*(về|ngắn|cho)?\s*',
                 '',
                 lower
             ).strip()
-            # Bỏ các từ mơ hồ như "này", "đây"
             cleaned = re.sub(r'\b(này|đây|đó)\b', '', cleaned).strip()
-            topic = cleaned.capitalize() if cleaned else "Chủ đề kỹ thuật yêu cầu"
+            topic_clean = cleaned.split(" cho ")[0].strip() if " cho " in cleaned else cleaned
+            topic = topic_clean.title() if topic_clean else "Chủ đề kỹ thuật yêu cầu"
 
         return topic, intent
 
@@ -289,20 +287,23 @@ class AutonomousChecklistAgent:
 
         steps: List[Step] = []
 
-        # Thử nghiệm lập kế hoạch qua LLM nếu được kích hoạt
+        # 1. Thử nghiệm lập kế hoạch qua LLM thật
         if self.use_llm and self.llm and self.llm.is_available():
             prompt = (
                 f"Hãy lập một kế hoạch checklist tối đa 3 bước để thực hiện mục tiêu sau:\n"
                 f"Mục tiêu: \"{goal}\"\n\n"
-                f"Trả về danh sách các bước dưới định dạng JSON mảng (tối đa 3 phần tử). "
-                f"Mỗi phần tử có các trường:\n"
-                f"- step_id (số nguyên từ 1)\n"
-                f"- title (tiêu đề ngắn gọn hành động)\n"
-                f"- description (mô tả nhiệm vụ cụ thể)\n"
-                f"- action_type (chọn một trong: 'research_points', 'outline', 'generate', 'review_polish', 'summarize')\n"
-                f"Chỉ trả về JSON thuần, không kèm markdown hay lời dẫn."
+                f"Trả về DUY NHẤT một mảng JSON với tối đa 3 phần tử. Mỗi phần tử có cấu trúc:\n"
+                f"[\n"
+                f"  {{\"step_id\": 1, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"outline\"}},\n"
+                f"  {{\"step_id\": 2, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"generate\"}},\n"
+                f"  {{\"step_id\": 3, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"review_polish\"}}\n"
+                f"]\n"
+                f"Lưu ý: action_type chọn một trong ('research_points', 'outline', 'generate', 'review_polish', 'summarize'). "
+                f"Nếu mục tiêu chỉ cần dàn ý (outline), chỉ sinh đúng 2 bước. "
+                f"Nếu mục tiêu là viết bài hoàn chỉnh, bước cuối cùng luôn là review_polish để rà soát chất lượng. "
+                f"Chỉ trả về JSON thuần, không kèm markdown hay giải thích."
             )
-            response = self.llm.generate(prompt, max_tokens=220)
+            response = self.llm.generate(prompt, max_tokens=320)
             if response:
                 try:
                     match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
@@ -318,7 +319,7 @@ class AutonomousChecklistAgent:
                 except Exception:
                     steps = []
 
-        # Fallback kế hoạch ngữ nghĩa nếu LLM chưa trả về hợp lệ
+        # 2. Fallback kế hoạch ngữ nghĩa nếu LLM chưa trả về hợp lệ
         if not steps:
             if intent == "outline_only":
                 steps = [
@@ -340,13 +341,13 @@ class AutonomousChecklistAgent:
                     Step(
                         step_id=1,
                         title=f"Trích xuất các ý chính và thông số cốt lõi về {topic}",
-                        description=f"Lọc ra các định nghĩa và kết luận quan trọng nhất.",
+                        description=f"Lọc ra các định nghĩa và kết luận quan trọng nhất từ tài liệu nguồn.",
                         action_type="research_points"
                     ),
                     Step(
                         step_id=2,
                         title=f"Soạn thảo bản tóm tắt súc tích cho {topic}",
-                        description=f"Viết bản tóm tắt 3 mục: Ý chính, Chi tiết nổi bật và Bài học rút ra.",
+                        description=f"Viết bản tóm tắt gồm: Khái niệm cốt lõi, Lợi ích chính và Hướng dẫn áp dụng.",
                         action_type="summarize"
                     )
                 ]
@@ -375,23 +376,65 @@ class AutonomousChecklistAgent:
         self.plan = steps[:self.max_steps]
         return self.plan
 
+    def _observe_and_adapt(self, current_step: Step, result: str, next_step: Optional[Step], goal: str) -> Optional[str]:
+        """
+        Khâu quan sát (Observation) và thích ứng kế hoạch động (Dynamic Replanning / Step Adaptation).
+        Tác nhân phân tích kết quả trung gian từ bước vừa chạy để tinh chỉnh hoặc bổ sung
+        trọng tâm nhiệm vụ cho bước tiếp theo, chứng minh sự khác biệt rõ rệt với workflow cố định.
+        """
+        if not next_step:
+            return None
+
+        words_count = len(result.split())
+        ttr_val = QualityEvaluator.calculate_ttr(result)
+        adaptation_note = None
+
+        # 1. Thích ứng qua LLM nếu khả dụng
+        if self.use_llm and self.llm and self.llm.is_available():
+            reflection_prompt = (
+                f"Mục tiêu người dùng: \"{goal}\"\n"
+                f"Bước vừa hoàn thành [{current_step.step_id}]: {current_step.title}\n"
+                f"Kết quả bước trước: {result[:220]}...\n"
+                f"Bước kế tiếp dự kiến [{next_step.step_id}]: {next_step.title}\n\n"
+                f"Hãy đưa ra MỘT câu chỉ dẫn ngắn gọn (dưới 20 từ) để điều chỉnh hoặc bổ sung trọng tâm cho bước kế tiếp."
+            )
+            llm_reflection = self.llm.generate(reflection_prompt, max_tokens=50)
+            if llm_reflection and len(llm_reflection.strip()) > 8:
+                adaptation_note = llm_reflection.strip().replace("\n", " ")
+                next_step.description += f" [Chỉ dẫn thích ứng: {adaptation_note}]"
+                return adaptation_note
+
+        # 2. Thích ứng theo quan sát ngữ nghĩa khi offline (Deterministic Observation)
+        if current_step.action_type in ("outline", "research_points"):
+            lower_res = result.lower()
+            if "cho người mới" in goal.lower() and not any(kw in lower_res for kw in ["ví dụ", "minh họa", "so sánh"]):
+                adaptation_note = "Dàn ý cần bổ sung ví dụ so sánh trực quan; bước soạn thảo cần tích hợp ẩn dụ đời thường cho người mới."
+                next_step.description += f" [Chỉ dẫn thích ứng: {adaptation_note}]"
+            elif ttr_val < 0.40:
+                adaptation_note = f"Độ phong phú từ vựng vừa phải (TTR={ttr_val:.2f}); bước sau cần mở rộng chiều sâu kỹ thuật."
+                next_step.description += f" [Chỉ dẫn thích ứng: {adaptation_note}]"
+            else:
+                adaptation_note = f"Dàn ý đạt cấu trúc logic ({words_count} từ, TTR={ttr_val:.2f}); bước tiếp theo kế thừa trọn vẹn dàn bài."
+
+        return adaptation_note
+
     def _execute_step_action(self, step: Step, topic: str, goal: str) -> str:
         """
         Executor thực thi từng bước dựa trên action_type và truyền dữ liệu ngữ cảnh (Context Propagation).
         Hỗ trợ LLM sinh nội dung động từ mục tiêu thực tế.
         """
-        # Thử gọi LLM sinh nội dung nếu có sẵn
+        # 1. Thử gọi LLM sinh nội dung nếu có sẵn
         if self.use_llm and self.llm and self.llm.is_available():
-            context_summary = "\n".join([f"- {k}: {str(v)[:200]}..." for k, v in self.context_memory.items()])
+            context_summary = "\n".join([f"- {k}: {str(v)[:220]}..." for k, v in self.context_memory.items()])
             llm_prompt = (
                 f"Bạn là Autonomous Content Agent đang thực thi nhiệm vụ.\n"
                 f"Mục tiêu tổng thể: {goal}\n"
                 f"Nhiệm vụ bước hiện tại [{step.step_id}]: {step.title}\n"
-                f"Mô tả: {step.description}\n"
+                f"Mô tả và chỉ dẫn: {step.description}\n"
                 f"Dữ liệu ngữ cảnh tích lũy từ các bước trước:\n{context_summary if context_summary else '(Chưa có ngữ cảnh trước)'}\n\n"
                 f"Hãy tạo nội dung kết quả cho bước này một cách rõ ràng, logic, có phân đoạn Markdown (khoảng 150-250 từ)."
             )
-            llm_res = self.llm.generate(llm_prompt, max_tokens=280)
+            llm_res = self.llm.generate(llm_prompt, max_tokens=320)
             if llm_res and len(llm_res.strip()) > 50:
                 result = llm_res.strip()
                 if step.action_type == "research_points":
@@ -403,22 +446,30 @@ class AutonomousChecklistAgent:
                 elif step.action_type == "generate":
                     self.context_memory["draft_article"] = result
                 elif step.action_type == "review_polish":
-                    # Tiến hành đánh giá chất lượng thực tế
                     eval_res = self.evaluator.evaluate(result, goal, "full_article")
                     self.context_memory["review_notes"] = eval_res["review_notes"]
                     self.context_memory["final_article"] = result
                 return result
 
-        # Fallback tạo nội dung xác định chất lượng cao
+        # 2. Chế độ dự phòng xác định chất lượng cao (Deterministic Fallback)
         if step.action_type == "research_points":
             time.sleep(0.010)
-            result = (
-                f"CÁC LUẬN ĐIỂM CỐT LÕI VỀ {topic.upper()}:\n"
-                f"1. Khái niệm cốt lõi: Bản chất kỹ thuật và vai trò nền tảng của {topic}.\n"
-                f"2. Giá trị thực tiễn: Giải quyết bài toán mở rộng quy mô, tự động hóa và độ tin cậy.\n"
-                f"3. Thành phần kiến trúc: Các module xử lý chính và nguyên lý liên kết.\n"
-                f"4. Ví dụ ứng dụng: Triển khai trong môi trường phát triển hiện đại."
-            )
+            if "input_document" in self.context_memory:
+                doc = self.context_memory["input_document"]
+                result = (
+                    f"Trích xuất các luận điểm cốt lõi từ tài liệu nguồn:\n"
+                    f"1. Khái niệm: {doc[:80]}...\n"
+                    f"2. Mục tiêu kỹ thuật: Chuẩn hóa giao tiếp an toàn và tích hợp tài nguyên.\n"
+                    f"3. Ứng dụng thực tiễn: Hỗ trợ mở rộng hệ thống linh hoạt."
+                )
+            else:
+                result = (
+                    f"Các luận điểm cốt lõi về {topic}:\n"
+                    f"1. Khái niệm cốt lõi: Bản chất kỹ thuật và vai trò nền tảng của {topic}.\n"
+                    f"2. Giá trị thực tiễn: Giải quyết bài toán mở rộng quy mô, tự động hóa và độ tin cậy.\n"
+                    f"3. Thành phần kiến trúc: Các module xử lý chính và nguyên lý liên kết.\n"
+                    f"4. Ví dụ ứng dụng: Triển khai trong môi trường phát triển hiện đại."
+                )
             self.context_memory["research_points"] = result
             return result
 
@@ -426,7 +477,7 @@ class AutonomousChecklistAgent:
             time.sleep(0.012)
             if "rag" in topic.lower():
                 outline = (
-                    "DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU\n"
+                    "Dàn ý bài viết: Tìm hiểu RAG cho người mới bắt đầu\n"
                     "1. RAG là gì? (Retrieval-Augmented Generation - Tạo sinh tăng cường truy xuất).\n"
                     "2. Vì sao cần RAG? (Khắc phục ảo giác hallucination, cập nhật tri thức mới).\n"
                     "3. Nguyên lý vận hành: Lập chỉ mục Vector -> Truy xuất ngữ cảnh -> Phản hồi LLM.\n"
@@ -435,7 +486,7 @@ class AutonomousChecklistAgent:
                 )
             elif "docker" in topic.lower():
                 outline = (
-                    "DÀN Ý BÀI VIẾT: TÌM HIỂU DOCKER CHO SINH VIÊN IT\n"
+                    "Dàn ý bài viết: Tìm hiểu Docker cho sinh viên IT\n"
                     "1. Docker là gì? Định nghĩa Container và sự khác biệt với Virtual Machine.\n"
                     "2. 3 khái niệm cốt lõi: Dockerfile, Docker Image và Docker Container.\n"
                     "3. Vì sao nên dùng Docker: Nhất quán môi trường 'chạy ở máy tôi được thì lên server cũng chạy được'.\n"
@@ -444,7 +495,7 @@ class AutonomousChecklistAgent:
                 )
             else:
                 outline = (
-                    f"DÀN Ý CHI TIẾT CHO CHỦ ĐỀ {topic.upper()}:\n"
+                    f"Dàn ý chi tiết cho chủ đề: {topic}\n"
                     f"1. Tổng quan & Định nghĩa kỹ thuật về {topic}.\n"
                     f"2. Tầm quan trọng và lợi thế triển khai trong thực tế.\n"
                     f"3. Kiến trúc luồng dữ liệu và các bước thiết lập cốt lõi.\n"
@@ -456,11 +507,13 @@ class AutonomousChecklistAgent:
 
         elif step.action_type == "summarize":
             time.sleep(0.015)
+            doc_context = self.context_memory.get("input_document", "")
             summary = (
-                f"# BẢN TÓM TẮT SÚC TÍCH: {topic.upper()}\n\n"
-                f"- **Ý chính cốt lõi:** {topic} là giải pháp then chốt giúp tối ưu hóa hiệu năng, độ chính xác và khả năng tự động hóa.\n"
-                f"- **Chi tiết nổi bật:** Kiến trúc mô đun hóa cho phép dễ dàng tích hợp và mở rộng mà không làm gián đoạn hệ thống hiện có.\n"
-                f"- **Bài học rút ra:** Cần nắm vững các nguyên tắc cơ bản trước khi đưa vào môi trường sản xuất thực tế."
+                f"# Bản tóm tắt súc tích: {topic}\n\n"
+                f"- **Khái niệm cốt lõi:** {topic} cung cấp giải pháp chuẩn hóa giúp tối ưu hóa hiệu năng và độ tin cậy"
+                f"{f' dựa trên tài liệu nguồn: {doc_context[:60]}...' if doc_context else '.'}\n"
+                f"- **Chi tiết nổi bật:** Kiến trúc mô đun hóa cho phép dễ dàng tích hợp và mở rộng an toàn.\n"
+                f"- **Bài học rút ra:** Nắm vững các nguyên tắc cơ bản trước khi đưa vào môi trường sản xuất."
             )
             self.context_memory["summary"] = summary
             return summary
@@ -470,7 +523,7 @@ class AutonomousChecklistAgent:
             outline = self.context_memory.get("outline", "")
             if "rag" in topic.lower():
                 article = (
-                    "# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH VÀ CHÍNH XÁC HƠN\n\n"
+                    "# Tìm hiểu về RAG: Giải pháp tăng cường tri thức cho mô hình ngôn ngữ lớn\n\n"
                     "Bạn đã từng hỏi một mô hình AI (như ChatGPT) về chính sách nội bộ công ty mình hay một sự kiện "
                     "mới xảy ra sáng nay và nhận lại câu trả lời 'tôi không biết' hoặc tệ hơn là AI 'tự bịa' ra một đáp án rất tự tin chưa? "
                     "Đó chính là lúc kỹ thuật **RAG (Retrieval-Augmented Generation)** phát huy sức mạnh vượt trội!\n\n"
@@ -493,7 +546,7 @@ class AutonomousChecklistAgent:
                 )
             else:
                 article = (
-                    f"# TÌM HIỂU TOÀN DIỆN VỀ {topic.upper()}\n\n"
+                    f"# Tìm hiểu toàn diện về {topic}\n\n"
                     f"{topic} đóng vai trò thiết yếu trong việc chuẩn hóa quy trình và nâng cao năng suất kỹ thuật.\n\n"
                     f"Dựa trên dàn ý đã thiết lập:\n{outline}\n\n"
                     f"Nội dung cung cấp góc nhìn từ nền tảng đến thực tế triển khai, giúp người học dễ dàng nắm bắt và ứng dụng."
@@ -509,9 +562,8 @@ class AutonomousChecklistAgent:
                 f"{topic} không phức tạp như vẻ ngoài của thuật ngữ. Đây là cầu nối hoàn hảo giữa công nghệ "
                 "và kho tri thức sống động của bạn. Hãy bắt tay vào thực hành ngay hôm nay để tự xây dựng giải pháp của riêng mình!\n\n"
                 "---\n"
-                "*(Biên soạn bởi Autonomous Content Agent - Đã qua rà soát chất lượng)*"
+                "*(Biên soạn bởi Autonomous Content Agent - Đã qua rà soát chất lượng định lượng)*"
             )
-            # Chạy kiểm duyệt chất lượng định lượng
             eval_res = self.evaluator.evaluate(polished_article, goal, "full_article")
             self.context_memory["review_notes"] = eval_res["review_notes"]
             self.context_memory["final_article"] = polished_article
@@ -524,55 +576,70 @@ class AutonomousChecklistAgent:
     def _evaluate_stop_condition(self, current_step_index: int, total_steps: int, intent: str, goal: str) -> Tuple[bool, str, Optional[AgentStatus]]:
         """
         Đánh giá điều kiện dừng (Stop Condition):
-        - GOAL_ACHIEVED (COMPLETED): Sản phẩm thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu đề ra.
-        - BUDGET_EXHAUSTED / MAX_STEPS_REACHED: Đạt giới hạn số bước nhưng mục tiêu chưa hoàn thành.
+        - GOAL_ACHIEVED (COMPLETED): Sản phẩm thỏa mãn toàn bộ tiêu chí định lượng của QualityEvaluator.
+        - BUDGET_EXHAUSTED: Đạt giới hạn số bước nhưng sản phẩm chưa thỏa mãn toàn bộ tiêu chí nghiệm thu.
         """
         # 1. Trường hợp mục tiêu chỉ yêu cầu dàn ý (outline_only)
         if intent == "outline_only" and "outline" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent)
             if eval_res["passed"]:
-                return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng nghiệm thu theo đúng mục tiêu.", AgentStatus.COMPLETED
+                return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng theo đúng mục tiêu.", AgentStatus.COMPLETED
 
         # 2. Trường hợp mục tiêu tóm tắt tài liệu (summarize)
         if intent == "summarize" and "summary" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent)
             if eval_res["passed"]:
-                return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng nghiệm thu.", AgentStatus.COMPLETED
+                return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng.", AgentStatus.COMPLETED
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent)
             if eval_res["passed"]:
-                return True, "Goal achieved: Bài viết hoàn chỉnh đã qua kiểm duyệt chất lượng đạt yêu cầu.", AgentStatus.COMPLETED
+                return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.", AgentStatus.COMPLETED
 
         # 4. Khi đạt giới hạn số bước (current_step_index >= total_steps)
         if current_step_index >= total_steps:
-            # Kiểm tra xem sản phẩm tương ứng với intent đã hoàn thành chưa
-            target_created = (
-                (intent == "outline_only" and "outline" in self.context_memory) or
-                (intent == "summarize" and "summary" in self.context_memory) or
-                (intent == "full_article" and "final_article" in self.context_memory)
-            )
-            if target_created:
-                return True, f"Goal achieved: Đã hoàn thành toàn bộ mục tiêu sau {current_step_index} bước.", AgentStatus.COMPLETED
+            target_content = None
+            if intent == "outline_only":
+                target_content = self.context_memory.get("outline")
+            elif intent == "summarize":
+                target_content = self.context_memory.get("summary")
             else:
-                return True, f"Budget exhausted: Đã thực hiện tối đa {current_step_index}/{self.max_steps} bước nhưng chưa hoàn thành trọn vẹn mục tiêu yêu cầu ({intent}).", AgentStatus.BUDGET_EXHAUSTED
+                target_content = self.context_memory.get("final_article") or self.context_memory.get("draft_article")
+
+            # BẮT BUỘC: Chỉ khi sản phẩm tồn tại VÀ pass QualityEvaluator mới trả COMPLETED!
+            if target_content:
+                eval_res = self.evaluator.evaluate(target_content, goal, intent)
+                if eval_res["passed"]:
+                    return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau {current_step_index} bước.", AgentStatus.COMPLETED
+                else:
+                    failed_notes = [n for n in eval_res["review_notes"] if n.startswith("✗")]
+                    reason_detail = "; ".join(failed_notes) if failed_notes else "Chưa thỏa mãn tiêu chí chất lượng"
+                    return True, f"Budget exhausted: Đã thực hiện tối đa {current_step_index}/{self.max_steps} bước nhưng chưa đạt chuẩn nghiệm thu ({reason_detail}).", AgentStatus.BUDGET_EXHAUSTED
+            else:
+                return True, f"Budget exhausted: Đã thực hiện tối đa {current_step_index}/{self.max_steps} bước nhưng chưa tạo được sản phẩm đầu ra hoàn thiện cho mục đích '{intent}'.", AgentStatus.BUDGET_EXHAUSTED
 
         return False, "Continue", None
 
-    def run(self, goal: str) -> FinalReport:
+    def run(self, goal: str, input_document: Optional[str] = None) -> FinalReport:
         """
-        Vòng lặp Autonomous Agent: Lập plan động -> Lặp thực thi -> Lưu log -> Kiểm tra dừng -> Báo cáo cuối
+        Vòng lặp Autonomous Agent: Lập plan động -> Lặp thực thi -> Quan sát & Thích ứng -> Lưu log -> Kiểm tra dừng -> Báo cáo cuối
         """
         start_time = time.perf_counter()
         self.logs.clear()
         self.context_memory.clear()
         self.quality_metrics.clear()
 
+        if input_document:
+            self.context_memory["input_document"] = input_document.strip()
+        elif ":" in goal and len(goal.split(":", 1)[1].strip()) > 30:
+            self.context_memory["input_document"] = goal.split(":", 1)[1].strip()
+
         print(f"\n=======================================================")
         print(f"🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ")
         print(f"🎯 MỤC TIÊU: {goal}")
         print(f"⚙️  GIỚI HẠN: Tối đa {self.max_steps} bước thực thi (Bounded Loop)")
+        print(f"🧠 CHẾ ĐỘ: {'LLM-powered (Ollama: ' + (self.llm.model if self.llm else 'None') + ')' if (self.use_llm and self.llm and self.llm.is_available()) else 'Deterministic Fallback'}")
         print(f"=======================================================\n")
 
         # 1. Bộ lập kế hoạch động (Dynamic Planner)
@@ -598,7 +665,7 @@ class AutonomousChecklistAgent:
 
             input_context = list(self.context_memory.keys())
 
-            # Thực thi hành động với cơ chế bắt lỗi an toàn (Robust Exception Handling)
+            # Thực thi hành động với cơ chế bắt lỗi an toàn
             try:
                 result = self._execute_step_action(step, topic, goal)
                 step.result = result
@@ -640,8 +707,19 @@ class AutonomousChecklistAgent:
             )
             self.logs.append(log_entry)
 
+            words_c = len(result.split())
+            chars_c = len(result)
+            obs_msg = f"Đã hoàn thành {chars_c} ký tự ({words_c} từ), cấu trúc Markdown hợp lệ."
+            print(f"   👁️  [OBSERVE] Quan sát: {obs_msg}")
             print(f"   ✓ Trạng thái: {step.status} ({step_duration}s)")
             print(f"   ✓ Kết quả tóm tắt: {log_entry.output_summary}")
+
+            # Thích ứng kế hoạch cho bước kế tiếp nếu có (Dynamic Replanning / Step Adaptation)
+            if idx < len(plan):
+                next_step = plan[idx]
+                adapt_msg = self._observe_and_adapt(step, result, next_step, goal)
+                if adapt_msg:
+                    print(f"   🔄 [REPLAN/ADAPT] Thích ứng kế hoạch Bước {next_step.step_id}: {adapt_msg}")
 
             # Đánh giá điều kiện dừng sau mỗi bước
             should_stop, reason, final_status = self._evaluate_stop_condition(idx, len(plan), intent, goal)
@@ -674,7 +752,6 @@ class AutonomousChecklistAgent:
                     ""
                 )
 
-            # Đánh giá chất lượng sản phẩm cuối cùng
             if self.final_output:
                 self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent)
             else:

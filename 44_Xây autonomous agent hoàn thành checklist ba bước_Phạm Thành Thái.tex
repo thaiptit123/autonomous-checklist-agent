@@ -199,7 +199,7 @@
 
 Trong làn sóng phát triển của Trí tuệ Nhân tạo hiện đại, khái niệm \textbf{AI Agent} đã có bước chuyển mình ngoạn mục từ những chuỗi câu lệnh tĩnh (Chains/Workflows) sang các hệ thống tự hành (\textbf{Autonomous Systems}). Một tác nhân tự hành hướng mục tiêu không chỉ thực thi một chuỗi hướng dẫn cố định được lập trình sẵn mà sở hữu khả năng tự phân tích mục tiêu (Goal-driven Planning), tự chia nhỏ nhiệm vụ thành các bước khả thi, tuần tự thực thi, truyền dữ liệu ngữ cảnh giữa các chặng và tự đánh giá để kích hoạt điều kiện dừng (\textbf{Stop Condition}) an toàn.
 
-Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng trọn vẹn một \textbf{Autonomous Checklist Agent} với giới hạn hữu hạn (\textbf{Bounded Loop}) tối đa ba bước. Chúng ta sẽ lấy kịch bản thực tế rất trực quan và gần gũi: \textit{Người dùng nhập yêu cầu viết một bài chia sẻ ngắn giải thích RAG (Retrieval-Augmented Generation) cho người mới bắt đầu}. Hệ thống tác nhân sẽ tự động lập checklist gồm 3 bước logic (Lên dàn ý $\rightarrow$ Viết nội dung $\rightarrow$ Rà soát \& Hoàn thiện), lần lượt thực thi thông qua mô hình ngôn ngữ lớn (LLM cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}), ghi lại nhật ký (\textbf{Step Logs}) minh bạch và xuất ra báo cáo cuối cùng (\textbf{Final Report}).
+Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng trọn vẹn một \textbf{Autonomous Checklist Agent} với giới hạn hữu hạn (\textbf{Bounded Loop}) tối đa ba bước. Chúng ta sẽ lấy kịch bản thực tế rất trực quan và gần gũi: \textit{Người dùng nhập yêu cầu viết một bài chia sẻ ngắn giải thích RAG (Retrieval-Augmented Generation) cho người mới bắt đầu}. Hệ thống tác nhân sẽ tự động lập checklist gồm 3 bước logic (Lên dàn ý $\rightarrow$ Viết nội dung $\rightarrow$ Rà soát \& Hoàn thiện), lần lượt thực thi thông qua mô hình ngôn ngữ lớn (LLM cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}), ghi lại nhật ký (\textbf{nhật ký từng bước}) minh bạch và xuất ra báo cáo cuối cùng (\textbf{báo cáo tổng kết}).
 
 \hypertarget{bai-viet-nay-danh-cho-ai}{%
 \section*{Bài viết này dành cho ai?}\label{bai-viet-nay-danh-cho-ai}}
@@ -222,9 +222,9 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{Kiến thức đạt được:} Nắm vững kiến trúc cốt lõi của một hệ thống Autonomous Agent: bộ lập kế hoạch (Planner), bộ thực thi tuần tự (Executor), bộ nhớ trạng thái ngữ cảnh (State Memory), bộ điều phối vòng lặp hữu hạn (Bounded Loop Controller) và bộ đánh giá điều kiện dừng (Stop Condition Evaluator). Phân biệt ranh giới rõ ràng giữa quy trình cứng (Hardcoded Workflow) và tác nhân tự thích ứng (Autonomous Agent).
+  \textbf{Kiến thức đạt được:} Nắm vững kiến trúc cốt lõi của một hệ thống Autonomous Agent: bộ lập kế hoạch (Planner), bộ thực thi tuần tự (Executor), bộ nhớ trạng thái ngữ cảnh (bộ nhớ trạng thái (context memory)), bộ điều phối vòng lặp hữu hạn (Bounded Loop Controller) và bộ đánh giá điều kiện dừng (Stop Condition Evaluator). Phân biệt ranh giới rõ ràng giữa quy trình cứng (Hardcoded Workflow) và tác nhân tự thích ứng (Autonomous Agent).
 \item
-  \textbf{Sản phẩm đầu ra:} Xây dựng thành công script \texttt{checklist\_agent.py} hoàn chỉnh. Chạy thành công ca kiểm thử tạo bài viết chia sẻ về RAG với đầy đủ 3 thành phần đầu ra bắt buộc theo tiêu chuẩn: \textbf{kế hoạch ban đầu} (Initial Plan), \textbf{nhật ký từng bước} (Step Execution Logs) và \textbf{báo cáo tổng kết} (Final Report) kèm nội dung bài viết đã nghiệm thu xuất ra tệp tin \texttt{agent\_final\_report.json}.
+  \textbf{Sản phẩm đầu ra:} Xây dựng thành công script \texttt{checklist\_agent.py} hoàn chỉnh. Chạy thành công ca kiểm thử tạo bài viết chia sẻ về RAG với đầy đủ 3 thành phần đầu ra bắt buộc theo tiêu chuẩn: \textbf{kế hoạch ban đầu} (Initial Plan), \textbf{nhật ký từng bước} (Step Execution Logs) và \textbf{báo cáo tổng kết} (báo cáo tổng kết) kèm nội dung bài viết đã nghiệm thu xuất ra tệp tin \texttt{agent\_final\_report.json}.
 \end{itemize}
 
 \vspace*{\fill}
@@ -256,8 +256,8 @@ AI Guru x TiniX
 \raggedright \textbf{Goal-driven Planning}\strut & \raggedright Cơ chế lập kế hoạch hướng mục tiêu. Thay vì tuân theo các bước cố định, tác nhân tiếp nhận mục tiêu và xác định danh sách công việc (checklist) phù hợp trong giới hạn an toàn.\strut \tabularnewline \hline
 \raggedright \textbf{Bounded Loop}\strut & \raggedright Vòng lặp thực thi có giới hạn chặn trên (ví dụ \texttt{max\_steps = 3}). Đây là cơ chế chốt chặn an toàn bắt buộc trong hệ thống tự hành để triệt tiêu nguy cơ vòng lặp vô hạn (Infinite Loop) gây tốn kém chi phí token hoặc treo máy.\strut \tabularnewline \hline
 \raggedright \textbf{Stop Condition (Điều kiện dừng)}\strut & \raggedright Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}).\strut \tabularnewline \hline
-\raggedright \textbf{Context Propagation}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
-\raggedright \textbf{Step Logs \& Final Report}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
+\raggedright \textbf{cơ chế truyền ngữ cảnh}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
+\raggedright \textbf{nhật ký từng bước \& báo cáo tổng kết}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -288,10 +288,10 @@ Ngược lại, \textbf{Autonomous Agent} hoạt động dựa trên vòng lặp
 Một hệ thống Autonomous Checklist Agent chuẩn mực được cấu thành từ 5 bộ phận hữu cơ:
 \begin{itemize}
     \item \textbf{Tiếp nhận mục tiêu (Goal Ingestion):} Nhận câu lệnh hoặc bài toán từ người dùng (ví dụ: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}).
-    \item \textbf{Bộ lập kế hoạch động (Dynamic Planner):} Sử dụng LLM phân tích ý định và sản sinh danh sách công việc (Checklist) với ràng buộc nghiêm ngặt: độ dài checklist không vượt quá \texttt{max\_steps} ($\le 3$ bước).
-    \item \textbf{Bộ thực thi tuần tự (Sequential Executor):} Chịu trách nhiệm thực thi từng bước (sinh dàn ý, phát triển bài viết, rà soát chất lượng) dựa trên ngữ cảnh tích lũy từ các bước trước.
-    \item \textbf{Bộ nhớ trạng thái ngữ cảnh (State Memory):} Đóng vai trò cầu nối dữ liệu, tích lũy kết quả của các bước trước đó để làm đầu vào cho các bước tiếp theo.
-    \item \textbf{Bộ đánh giá dừng và báo cáo (Stop Evaluator \& Reporter):} Giám sát vòng lặp, kiểm soát điều kiện dừng an toàn và tổng hợp toàn bộ tiến trình thành báo cáo nghiệm thu cuối cùng.
+    \item \textbf{Bộ lập kế hoạch động (bộ lập kế hoạch động (planner)):} Sử dụng LLM phân tích ý định và sản sinh danh sách công việc (Checklist) với ràng buộc nghiêm ngặt: độ dài checklist không vượt quá \texttt{max\_steps} ($\le 3$ bước).
+    \item \textbf{Bộ thực thi tuần tự (bộ thực thi tuần tự (executor)):} Chịu trách nhiệm thực thi từng bước (sinh dàn ý, phát triển bài viết, rà soát chất lượng) dựa trên ngữ cảnh tích lũy từ các bước trước.
+    \item \textbf{Bộ nhớ trạng thái ngữ cảnh (bộ nhớ trạng thái (context memory)):} Đóng vai trò cầu nối dữ liệu, tích lũy kết quả của các bước trước đó để làm đầu vào cho các bước tiếp theo.
+    \item \textbf{Bộ đánh giá dừng và báo cáo (bộ đánh giá điều kiện dừng \& Reporter):} Giám sát vòng lặp, kiểm soát điều kiện dừng an toàn và tổng hợp toàn bộ tiến trình thành báo cáo nghiệm thu cuối cùng.
 \end{itemize}
 
 \section{Thiết kế checklist tự động và cơ chế quản lý trạng thái}\label{thiet-ke-checklist}
@@ -306,16 +306,16 @@ Thay vì hardcode cứng nhắc luôn luôn là 3 bước, tác nhân xác đị
     \item \textbf{Bước 3: Rà soát, kiểm tra độ rõ ràng và hoàn thiện (Action: \texttt{review\_polish}).} Đóng vai trò người biên tập khó tính: kiểm tra xem bài viết có quá tải thuật ngữ với người mới không, có bị lặp ý không, bổ sung lời kết và nghiệm thu chất lượng.
 \end{itemize}
 
-\textit{Lưu ý kỹ thuật về tính tự hành (Autonomy) của Planner:} Hệ thống tích hợp trực tiếp mô hình ngôn ngữ lớn (LLM Engine cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}) làm bộ não cho cả Dynamic Planner và Executor. Planner sinh kế hoạch JSON linh hoạt trực tiếp từ mục tiêu người dùng, còn Executor sinh nội dung ngữ cảnh động kèm bộ kiểm duyệt chất lượng định lượng \texttt{QualityEvaluator}. Hệ thống đồng thời tích hợp cơ chế fallback dự phòng để đảm bảo tính sẵn sàng cao khi môi trường chạy offline.
+\textit{Lưu ý kỹ thuật về tính tự hành (Autonomy) của Planner:} Hệ thống tích hợp trực tiếp mô hình ngôn ngữ lớn (LLM Engine cục bộ qua Ollama API: \texttt{tinix-lm:latest} hoặc \texttt{qwen2.5:7b}) làm bộ não cho cả bộ lập kế hoạch động (planner) và Executor. Planner sinh kế hoạch JSON linh hoạt trực tiếp từ mục tiêu người dùng, còn Executor sinh nội dung ngữ cảnh động kèm bộ kiểm duyệt chất lượng định lượng \texttt{QualityEvaluator}. Hệ thống đồng thời tích hợp cơ chế fallback dự phòng để đảm bảo tính sẵn sàng cao khi môi trường chạy offline.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/state_flow_diagram.png}
-    \caption{Luồng truyền dữ liệu qua State Memory và cơ chế rà soát điều kiện dừng ở từng bước}
+    \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái (context memory) và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
 
-\subsection{2. Cơ chế truyền trạng thái (Context Propagation)}
+\subsection{2. Cơ chế truyền trạng thái (cơ chế truyền ngữ cảnh)}
 Như minh họa ở Hình \ref{fig:state_flow}, tính liên tục của tác nhân phụ thuộc hoàn toàn vào việc chia sẻ bộ nhớ \texttt{context\_memory}:
 \begin{itemize}
     \item Khi Bước 1 kết thúc, kết quả được gắn vào khóa \texttt{context\_memory["outline"]}.
@@ -347,7 +347,7 @@ Nhờ đó, tác nhân vừa có tính linh hoạt tự hành, vừa tăng khả
 
 Toàn bộ hệ thống được đóng gói gọn gàng trong tệp \texttt{checklist\_agent.py} với cấu trúc hướng đối tượng rõ ràng, sử dụng triệt để thư viện tiêu chuẩn của Python để đảm bảo tính gọn nhẹ và tương thích cao nhất.
 
-\subsection{1. Định nghĩa các cấu trúc dữ liệu cốt lõi (Data Models)}
+\subsection{1. Định nghĩa các cấu trúc dữ liệu cốt lõi}
 Chúng ta sử dụng \texttt{dataclass} và \texttt{Enum} để định nghĩa kiểu dữ liệu chặt chẽ cho trạng thái, từng bước trong kế hoạch, nhật ký thực thi và báo cáo cuối cùng:
 
 \begin{Shaded}
@@ -395,7 +395,7 @@ Chúng ta sử dụng \texttt{dataclass} và \texttt{Enum} để định nghĩa 
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{2. Bộ kiểm duyệt chất lượng định lượng (QualityEvaluator) và LLM Client}
+\subsection{2. Bộ kiểm định chất lượng định lượng và kết nối mô hình ngôn ngữ lớn}
 Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{QualityEvaluator} tính toán trực tiếp các chỉ số kỹ thuật và kết nối mô hình ngôn ngữ lớn qua \texttt{OllamaClient}:
 
 \begin{Shaded}
@@ -452,14 +452,15 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn."}\NormalTok{, AgentStatus.COMPLETED}
         \CommentTok{# 2. Hết ngân sách bước thực thi (BUDGET_EXHAUSTED)}
         \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{>=}\NormalTok{ total:}
-\NormalTok{            target_met }\OperatorTok{=}\NormalTok{ (intent }\OperatorTok{==} \StringTok{"outline_only"} \KeywordTok{and} \StringTok{"outline"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory) }\KeywordTok{or} \StringTok{"final_article"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory}
-            \ControlFlowTok{if}\NormalTok{ target_met: }\ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved."}\NormalTok{, AgentStatus.COMPLETED}
-            \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{f"Budget exhausted: Hết bước nhưng chưa đạt \{intent\}."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
+\NormalTok{            target }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"final_article"}\NormalTok{) }\KeywordTok{or} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"outline"}\NormalTok{)}
+            \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent)[}\StringTok{"passed"}\NormalTok{]:}
+                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Đạt chuẩn chất lượng."}\NormalTok{, AgentStatus.COMPLETED}
+            \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
         \ControlFlowTok{return} \ConstantTok{False}\NormalTok{, }\StringTok{"Continue"}\NormalTok{, }\ConstantTok{None}
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{4. Vòng lặp thực thi tự hành (Execution Loop)}
+\subsection{4. Vòng lặp thực thi tự hành}
 Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc tự động khép kín kèm cơ chế bắt lỗi an toàn:
 
 \begin{Shaded}
@@ -493,20 +494,20 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực Autonomous Agent}\label{thuc-nghiem}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
-Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Dynamic Planner nhận diện mục đích là tạo bài viết đầy đủ, từ đó sinh checklist 3 bước (Outline $\rightarrow$ Write $\rightarrow$ Review) và lần lượt thực thi như thể hiện ở Hình \ref{fig:terminal}.
+Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. planner nhận diện mục đích là tạo bài viết đầy đủ, từ đó sinh checklist 3 bước (Outline $\rightarrow$ Write $\rightarrow$ Review) và lần lượt thực thi như thể hiện ở Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.78\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.68\textwidth]{images/terminal_execution.png}
     \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
     \label{fig:terminal}
 \end{figure}
 
-Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra:
+Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
-    \item \textbf{Lập kế hoạch động (Dynamic Planning):} Phân tích từ khóa \textit{"RAG"} và ý định \textit{"bài chia sẻ"}, Agent tự động cấu trúc hóa danh sách 3 bước với định danh hành vi rõ ràng (\texttt{outline}, \texttt{generate}, \texttt{review\_polish}).
-    \item \textbf{Thực thi và truyền dữ liệu (Context Propagation):} Bước 1 mất 0.012s tạo dàn ý; Bước 2 mất 0.025s phát triển bản nháp hoàn chỉnh; Bước 3 mất 0.020s thực hiện rà soát và chạy kiểm định chất lượng định lượng bằng \texttt{QualityEvaluator} (TTR = 0.58, độ dài 2,231 ký tự, đạt 4/4 tiêu chuẩn chất lượng).
-    \item \textbf{Dừng thông minh (Stop Condition):} Sau khi hoàn thành Bước 3, bộ đánh giá nhận diện \texttt{final\_article} đã tồn tại trong \texttt{context\_memory} và kích hoạt điều kiện dừng \texttt{Goal achieved}.
+    \item \textbf{Lập kế hoạch động qua LLM (Dynamic Planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
+    \item \textbf{Quan sát \& Thích ứng kế hoạch (Observe \& Dynamic Replan):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Thực thi LLM thật \& Kiểm định dừng (Real Execution \& Quality Gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị Outline Docker (Tự xác định 2 bước \& Dừng sớm)}
@@ -521,17 +522,13 @@ Khi nhận yêu cầu này:
         \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
         \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
     \end{enumerate}
-    \item \textbf{Kích hoạt Stop Condition sớm:} Ngay khi Bước 2 hoàn thành, bộ đánh giá điều kiện dừng nhận thấy:
-    \begin{center}
-    \texttt{intent == "outline\_only" and "outline" in self.context\_memory}
-    \end{center}
-    Hệ thống lập tức kích hoạt điều kiện dừng với thông điệp: \textit{"Goal achieved: Dàn ý hoàn chỉnh đã được tạo thành công theo đúng mục tiêu."} Agent dừng ngay sau khi mục tiêu hoàn thành, tránh thực thi thêm bước không cần thiết.
+    \item \textbf{Kích hoạt Stop Condition sớm:} Ngay khi Bước 2 hoàn thành, bộ thẩm định \texttt{QualityEvaluator} trực tiếp đánh giá sản phẩm dàn ý (kiểm tra độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa.
 \end{itemize}
 
 Điều này minh họa khả năng thích ứng của hệ thống: không phải bài toán nào cũng ép buộc chạy hết 3 bước, mà Agent biết khi nào nhiệm vụ đã hoàn thành để chủ động dừng lại.
 
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
-Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa bản nháp sau Bước 2 và bản hoàn thiện sau Bước 3 nhờ cơ chế Context Propagation:
+Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa bản nháp sau Bước 2 và bản hoàn thiện sau Bước 3 nhờ cơ chế cơ chế truyền ngữ cảnh:
 
 \renewcommand{\arraystretch}{1.3}
 \begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
@@ -546,18 +543,18 @@ Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt v�
 \endhead
 Đã có định nghĩa cơ bản và 3 chặng Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation. & Bổ sung thêm ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay lập tức. \strut \tabularnewline \hline
 Kết thúc đột ngột ở phần mô tả kỹ thuật, người đọc chưa biết bước tiếp theo nên bắt đầu từ đâu. & Bổ sung mục Lời kết thực tế: hướng dẫn người mới bắt đầu với thư viện mã nguồn mở (ChromaDB, Qdrant kết hợp LangChain).\strut \tabularnewline \hline
-\raggedright Chưa được kiểm chứng tính nhất quán về thuật ngữ.\strut & \raggedright Đã qua kiểm định định lượng bằng \texttt{QualityEvaluator}: TTR = 0.58 (ngưỡng $\ge 0.35$ chứng minh không trùng lặp từ), độ dài 2,231 ký tự, chuẩn hóa cấu trúc Markdown phân cấp.\strut \tabularnewline \hline
+\raggedright Chưa qua khâu quan sát và thẩm định chất lượng định lượng.\strut & \raggedright Đã qua kiểm định định lượng bằng \texttt{QualityEvaluator}: TTR = 0.59 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 
 
-\subsection{4. Kiểm thử toàn diện 7 kịch bản biên và xử lý lỗi (Comprehensive Test Suite)}
-Nhằm đảm bảo hệ thống phản ứng nhất quán và chính xác trước mọi tình huống thực tế (bao gồm các ca biên và sự cố), bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 7 kịch bản kiểm tra nghiêm ngặt:
+\subsection{4. Kiểm thử toàn diện 9 kịch bản đánh giá năng lực tự hành}
+Nhằm chứng minh năng lực thực tế của Agent qua cả chế độ LLM và Fallback, bộ kiểm thử \texttt{eval\_agent.py} được thiết kế với 9 kịch bản bao phủ toàn diện:
 
-\renewcommand{\arraystretch}{1.05}
-\begin{longtable}{|p{0.05\textwidth}|p{0.34\textwidth}|p{0.21\textwidth}|p{0.28\textwidth}|}
-\caption{Kết quả kiểm thử 7 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
+\renewcommand{\arraystretch}{0.95}
+\begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
+\caption{Kết quả kiểm thử 9 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -566,18 +563,20 @@ Nhằm đảm bảo hệ thống phản ứng nhất quán và chính xác trư�
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
 \endhead
-1 & Viết bài RAG hoàn chỉnh (3 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Đạt 4 tiêu chuẩn) \\ \hline
+1 & Viết bài RAG với LLM thật (\texttt{use\_llm=True}) & \texttt{COMPLETED} & \texttt{Goal achieved} (10.25s, TTR=0.59) \\ \hline
 2 & Chuẩn bị outline Docker (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
-3 & Tóm tắt tài liệu MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Bản tóm tắt súc tích) \\ \hline
-4 & Hết bước chưa đạt mục tiêu (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm COMPLETED) \\ \hline
-5 & Mục tiêu mở tùy ý (Tối ưu PostgreSQL) & \texttt{COMPLETED} & \texttt{Goal achieved} (Thích ứng linh hoạt) \\ \hline
-6 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
-7 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASSED} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
+3 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Bám sát tài liệu nguồn) \\ \hline
+4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
+5 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
+6 & Mục tiêu mở hoàn toàn (Apache Kafka) & \texttt{COMPLETED} & \texttt{Goal achieved} (Không hardcode topic) \\ \hline
+7 & Quan sát \& Thích ứng kế hoạch động & \texttt{PASSED} & \texttt{Adaptive Plan} (Bước 1 chỉnh Bước 2) \\ \hline
+8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
+9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASSED} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 
-\section{Phân tích Báo cáo Cuối Cùng (Final Report) và Nhật ký Bước (Step Logs)}\label{phan-tich-bao-cao}
+\section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
 
 Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp tin \texttt{agent\_final\_report.json}. Dưới đây là cấu trúc tệp tin kiểm toán thực tế được sinh ra:
 
@@ -585,24 +584,22 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \begin{Highlighting}[]
 \NormalTok{\{}
 \NormalTok{  }\DataTypeTok{"goal"}\NormalTok{: }\StringTok{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết đã được tạo và rà soát hoàn tất theo đúng mục tiêu."}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định các ý chính cần giải thích về RAG"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết nội dung bài chia sẻ hoàn chỉnh"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Rà soát, kiểm tra độ rõ ràng và hoàn thiện bài viết"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định nội dung cơ bản của RAG"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết và chỉnh sửa bài chia sẻ"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{0.012}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"DÀN Ý BÀI VIẾT: TÌM HIỂU RAG CHO NGƯỜI MỚI BẮT ĐẦU..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{0.025}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{0.018}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{, }\StringTok{"draft_article"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# BẬT MÍ VỀ RAG: 'VŨ KHÍ TỐI THƯỢNG' GIÚP AI THÔNG MINH..."}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{2.567}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? (Giới thiệu cơ bản) RAG là phương pháp kết hợp..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{2.479}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý bài chia sẻ ngắn: RAG là gì? 1. Mở đầu..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{2.537}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? Một cách giải thích đơn giản cho người mới..."}\NormalTok{\}}
 \NormalTok{  ],}
-\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{0.056}
+\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{10.25}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
