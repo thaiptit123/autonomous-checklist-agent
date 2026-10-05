@@ -6,7 +6,7 @@ Tài liệu hướng dẫn và mã nguồn thực hành thuộc series chuyên s
 - **Mục tiêu:** Xây dựng Autonomous Checklist Agent cho phép người dùng nhập mục tiêu nhỏ (ví dụ: *Viết bài chia sẻ giải thích RAG cho người mới bắt đầu*).
 - **Cơ chế cốt lõi:**
   - Tự động phân tích mục tiêu và lập checklist tối đa 3 bước (Dynamic Planning qua LLM `tinix-lm:latest` / Ollama GPU cục bộ kết hợp Fallback an toàn).
-  - Vòng lặp quan sát và thích ứng kế hoạch (**Observe & Adaptive Planning**): Sau mỗi bước thực thi, tác nhân quan sát kết quả trung gian để điều chỉnh chỉ dẫn thực thi cho các bước kế tiếp.
+  - Vòng lặp quan sát và thích ứng bước kế tiếp (**Observe & Adapt**): Sau mỗi bước thực thi, tác nhân quan sát kết quả trung gian để điều chỉnh chỉ dẫn thực thi cho các bước kế tiếp.
   - Thực thi tuần tự (Sequential Execution) và truyền trạng thái qua State Memory.
   - Kiểm soát giới hạn vòng lặp hữu hạn (Bounded Loop $\le$ 3 bước).
   - Đánh giá chất lượng định lượng chặt chẽ (**Automated Quality Evaluator**: TTR đa dạng từ vựng $\ge 0.35$, độ dài ký tự/từ, cấu trúc Markdown, từ khóa trọng tâm).

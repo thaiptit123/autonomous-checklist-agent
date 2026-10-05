@@ -280,7 +280,7 @@ Mô hình này (thường thấy trong các sequential chain cơ bản) hoạt �
 
 Ngược lại, \textbf{tác nhân tự hành (autonomous agent)} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt tạo nên tính tự hành chính là:
 \begin{enumerate}
-    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Ở chế độ LLM, Planner và Executor được sinh động trực tiếp từ mục tiêu; cơ chế fallback deterministic chỉ đóng vai trò dự phòng an toàn khi LLM không khả dụng.
+    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Ở chế độ LLM, Planner và Executor được sinh trực tiếp từ mục tiêu; cơ chế fallback deterministic chỉ đóng vai trò dự phòng an toàn khi LLM không khả dụng.
     \item \textbf{Chủ động đánh giá điều kiện dừng:} Sau mỗi bước thực thi, tác nhân tự kiểm tra xem kết quả hiện tại đã thỏa mãn mục tiêu chưa. Nếu đã đạt (\texttt{Goal Achieved}), nó chủ động ra lệnh \textbf{dừng ngay lập tức} mà không cần chạy cố các bước thừa.
 \end{enumerate}
 
@@ -306,7 +306,7 @@ Với kịch bản này, bộ lập kế hoạch tự động phân tích mục 
     \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
 \end{itemize}
 
-\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, Planner và Executor được sinh động trực tiếp từ mục tiêu người dùng; cơ chế dự phòng tổng hợp cấu trúc xác định (Deterministic Structural Synthesis) từ bộ nhớ ngữ cảnh chỉ đóng vai trò chốt chặn an toàn khi LLM không khả dụng hoặc ngoại tuyến.
+\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, Planner và Executor được sinh trực tiếp từ mục tiêu người dùng; cơ chế dự phòng tổng hợp cấu trúc xác định (Deterministic Structural Synthesis) từ bộ nhớ ngữ cảnh chỉ đóng vai trò chốt chặn an toàn khi LLM không khả dụng hoặc ngoại tuyến.
 
 \begin{figure}[H]
     \centering
@@ -499,7 +499,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{                stop_reason }\OperatorTok{=} \StringTok{f"Execution failed: Lỗi tại bước \{step.step_id\} - \{e\}"}
                 \ControlFlowTok{break}
 
-            \CommentTok{# Thích ứng kế hoạch cho bước kế tiếp (Observe & Adaptive Planning)}
+            \CommentTok{# Thích ứng bước kế tiếp (Observe & Adapt)}
             \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{<} \BuiltInTok{len}\NormalTok{(plan): }\VariableTok{self}\NormalTok{._observe_and_adapt(step, result, plan[idx], goal)}
 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
@@ -532,7 +532,7 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
-    \item \textbf{Quan sát và thích ứng kế hoạch (Observe \& Adaptive Planning):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 (2.57s) và Bước 2 (2.48s), Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), chứng minh sự linh hoạt khác biệt hoàn toàn với chuỗi workflow cứng.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (2.54s, tổng thời gian 10.25s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.59 (ngưỡng $\ge 0.35$), độ dài 1,056 ký tự (223 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
@@ -594,7 +594,7 @@ Nhằm chứng minh năng lực thực tế của tác nhân qua cả chế đ�
 4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
 5 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
 6 & Mục tiêu mở hoàn toàn (Apache Kafka) & \texttt{COMPLETED} & \texttt{Goal achieved} (Xử lý ngoài chủ đề mẫu) \\ \hline
-7 & Quan sát \& Thích ứng kế hoạch động & \texttt{PASS (Observe)} & \texttt{Adaptive Plan} (Bước 1 chỉnh Bước 2) \\ \hline
+7 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
 8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
 9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
 \hline

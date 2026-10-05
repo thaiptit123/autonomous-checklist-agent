@@ -713,7 +713,7 @@ class AutonomousChecklistAgent:
             print(f"   ✓ Trạng thái: {step.status} ({step_duration}s)")
             print(f"   ✓ Kết quả tóm tắt: {log_entry.output_summary}")
 
-            # Thích ứng kế hoạch cho bước kế tiếp nếu có (Dynamic Replanning / Step Adaptation)
+            # Thích ứng bước kế tiếp (Observe & Adapt)
             if idx < len(plan):
                 next_step = plan[idx]
                 adapt_msg = self._observe_and_adapt(step, result, next_step, goal)
