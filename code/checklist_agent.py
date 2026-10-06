@@ -86,7 +86,7 @@ class QualityEvaluator:
         return round(len(set(words)) / len(words), 3)
 
     @classmethod
-    def evaluate(cls, content: str, goal: str, intent: str) -> Dict[str, Any]:
+    def evaluate(cls, content: str, goal: str, intent: str, llm_client: Optional['OllamaClient'] = None) -> Dict[str, Any]:
         """
         Kiểm định 4 tiêu chí chất lượng kỹ thuật:
         1. Độ dài ký tự/từ (Length Sufficiency)
@@ -147,6 +147,45 @@ class QualityEvaluator:
             f"✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm ({', '.join(matched_keywords) if matched_keywords else 'Chủ đề phù hợp'})"
             if crit_relevance else "✗ Nội dung chưa phản ánh đúng từ khóa mục tiêu"
         ]
+
+        # 5. Kiểm tra lỗi ngữ nghĩa cơ bản (Cắt xén câu, Hallucination từ khóa)
+        content_stripped = content.strip()
+        crit_complete_sentence = not (
+            content_stripped.endswith(",") or 
+            content_stripped.endswith("và") or 
+            content_stripped.endswith("hoặc") or 
+            content_stripped.endswith("là") or
+            "..." in content_stripped[-5:]
+        )
+        if not crit_complete_sentence:
+            review_notes.append("✗ Lỗi ngữ nghĩa: Phát hiện câu bị cắt xén (cut-off sentence) ở cuối văn bản.")
+            passed = False
+            
+        # 6. Mở rộng đánh giá bằng LLM-as-a-judge (Nếu môi trường hỗ trợ)
+        llm_passed = True
+        if llm_client and llm_client.is_available():
+            judge_prompt = (
+                f"Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness), "
+                f"Tính bám sát (Groundedness) và Tính toàn vẹn (Completeness).\n\n"
+                f"Mục tiêu: {goal}\n"
+                f"Văn bản:\n{content[:1000]}...\n\n"
+                f"Trả về DUY NHẤT một chuỗi JSON: {{\"passed\": true/false, \"reason\": \"...\"}}."
+            )
+            llm_eval = llm_client.generate(judge_prompt, max_tokens=100)
+            if llm_eval:
+                try:
+                    match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
+                    if match:
+                        judge_res = json.loads(match.group(0))
+                        llm_passed = judge_res.get("passed", True)
+                        if not llm_passed:
+                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Không đạt chuẩn ngữ nghĩa')}")
+                        else:
+                            review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
+                except Exception:
+                    pass
+
+        passed = passed and crit_complete_sentence and llm_passed
 
         return {
             "passed": passed,
@@ -453,7 +492,7 @@ class AutonomousChecklistAgent:
                 elif step.action_type == "generate":
                     self.context_memory["draft_article"] = result
                 elif step.action_type == "review_polish":
-                    eval_res = self.evaluator.evaluate(result, goal, "full_article")
+                    eval_res = self.evaluator.evaluate(result, goal, "full_article", self.llm)
                     self.context_memory["review_notes"] = eval_res["review_notes"]
                     self.context_memory["final_article"] = result
                 return result
@@ -564,7 +603,7 @@ class AutonomousChecklistAgent:
                 f"Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, "
                 f"bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của {topic} trong thực tiễn."
             )
-            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article")
+            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article", self.llm)
             self.context_memory["review_notes"] = eval_res["review_notes"]
             self.context_memory["final_article"] = polished_article
             return polished_article
@@ -581,19 +620,19 @@ class AutonomousChecklistAgent:
         """
         # 1. Trường hợp mục tiêu chỉ yêu cầu dàn ý (outline_only)
         if intent == "outline_only" and "outline" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent)
+            eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent, self.llm)
             if eval_res["passed"]:
                 return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng theo đúng mục tiêu.", AgentStatus.COMPLETED
 
         # 2. Trường hợp mục tiêu tóm tắt tài liệu (summarize)
         if intent == "summarize" and "summary" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent)
+            eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent, self.llm)
             if eval_res["passed"]:
                 return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng.", AgentStatus.COMPLETED
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent)
+            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm)
             if eval_res["passed"]:
                 return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.", AgentStatus.COMPLETED
 
@@ -609,7 +648,7 @@ class AutonomousChecklistAgent:
 
             # BẮT BUỘC: Chỉ khi sản phẩm tồn tại VÀ pass QualityEvaluator mới trả COMPLETED!
             if target_content:
-                eval_res = self.evaluator.evaluate(target_content, goal, intent)
+                eval_res = self.evaluator.evaluate(target_content, goal, intent, self.llm)
                 if eval_res["passed"]:
                     return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau {current_step_index} bước.", AgentStatus.COMPLETED
                 else:
@@ -655,13 +694,17 @@ class AutonomousChecklistAgent:
         stop_reason = ""
         steps_executed = 0
 
-        # 2. Vòng lặp thực thi tuần tự có giới hạn (Bounded Execution Loop)
-        for idx, step in enumerate(plan, 1):
+        # 2. Vòng lặp thực thi tự chủ (Autonomous Execution Loop)
+        action_queue = plan.copy()
+        consecutive_failures = 0
+
+        while action_queue and steps_executed < self.max_steps:
+            step = action_queue.pop(0)
             step_start = time.perf_counter()
             step.status = "IN_PROGRESS"
             steps_executed += 1
 
-            print(f"\n▶️  [BƯỚC {step.step_id}/{len(plan)}] Đang thực hiện: {step.title}...")
+            print(f"\n▶️  [BƯỚC {step.step_id}] Đang thực hiện: {step.title}...")
 
             input_context = list(self.context_memory.keys())
 
@@ -670,10 +713,11 @@ class AutonomousChecklistAgent:
                 result = self._execute_step_action(step, topic, goal)
                 step.result = result
                 step.status = "COMPLETED"
+                consecutive_failures = 0
             except Exception as e:
                 step.status = "FAILED"
-                self.status = AgentStatus.FAILED
-                stop_reason = f"Execution failed: Lỗi tại bước {step.step_id} - {str(e)}"
+                consecutive_failures += 1
+                
                 step_duration = round(time.perf_counter() - step_start, 3)
                 log_entry = StepLog(
                     step_id=step.step_id,
@@ -687,7 +731,21 @@ class AutonomousChecklistAgent:
                 )
                 self.logs.append(log_entry)
                 print(f"   ✗ Trạng thái: FAILED ({step_duration}s) - {str(e)}")
-                break
+                
+                if consecutive_failures >= 2:
+                    self.status = AgentStatus.FAILED
+                    stop_reason = f"Execution failed: Tiến trình bị kẹt do liên tiếp thất bại ({str(e)})."
+                    break
+                else:
+                    print(f"   🔄 [RETRY] Tự động thử lại hành động do lỗi.")
+                    retry_step = Step(
+                        step_id=step.step_id,
+                        title=f"[RETRY] {step.title}",
+                        description=f"Thử lại bước trước do lỗi: {str(e)}. " + step.description,
+                        action_type=step.action_type
+                    )
+                    action_queue.insert(0, retry_step)
+                    continue
 
             step_duration = round(time.perf_counter() - step_start, 3)
 
@@ -715,14 +773,14 @@ class AutonomousChecklistAgent:
             print(f"   ✓ Kết quả tóm tắt: {log_entry.output_summary}")
 
             # Thích ứng bước kế tiếp (Observe & Adapt)
-            if idx < len(plan):
-                next_step = plan[idx]
+            if action_queue:
+                next_step = action_queue[0]
                 adapt_msg = self._observe_and_adapt(step, result, next_step, goal)
                 if adapt_msg:
                     print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
 
             # Đánh giá điều kiện dừng sau mỗi bước
-            should_stop, reason, final_status = self._evaluate_stop_condition(idx, len(plan), intent, goal)
+            should_stop, reason, final_status = self._evaluate_stop_condition(steps_executed, self.max_steps, intent, goal)
             if should_stop:
                 stop_reason = reason
                 if final_status:
@@ -753,7 +811,7 @@ class AutonomousChecklistAgent:
                 )
 
             if self.final_output:
-                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent)
+                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent, self.llm)
             else:
                 self.quality_metrics = {"passed": False, "review_notes": ["Không có sản phẩm đầu ra."]}
 

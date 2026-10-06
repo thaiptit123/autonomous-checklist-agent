@@ -30,7 +30,20 @@ Bai44/
     └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
 ```
 
-## 3. Hướng dẫn chạy thử nghiệm
+## 3. Hướng dẫn tái tạo môi trường (Reproduction Steps)
+Để đảm bảo khả năng tái tạo kết quả (reproducibility) với Integration Tests, vui lòng thiết lập môi trường Ollama cục bộ:
+
+1. **Cài đặt Ollama**: Tải và cài đặt tại [ollama.com](https://ollama.com). Đảm bảo service chạy ở port mặc định `11434` hoặc `11436` (GPU).
+2. **Kéo mô hình (Pull model)**:
+   ```bash
+   # Nếu bạn có model tinix-lm
+   ollama pull tinix-lm:latest
+   
+   # HOẶC sử dụng fallback model llama3.2/phi3 (Agent có tính năng tự nhận diện model khả dụng)
+   ollama pull qwen2.5:3b
+   ```
+3. **Cài đặt thư viện Python**: (Không yêu cầu thư viện ngoài, chỉ dùng chuẩn của Python 3.8+).
+
 Chạy tác nhân tự hành:
 ```bash
 python3 code/checklist_agent.py
