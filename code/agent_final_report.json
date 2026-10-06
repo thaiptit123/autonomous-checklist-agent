@@ -4,95 +4,33 @@
   "steps_executed": 3,
   "status": "COMPLETED",
   "stop_reason": "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.",
-  "plan": [
-    {
-      "step_id": 1,
-      "title": "Xác định nội dung cơ bản của RAG",
-      "description": "Tìm hiểu định nghĩa, nguyên lý hoạt động và lợi ích chính của RAG (Retrieval-Augmented Generation) dành cho người mới bắt đầu.",
-      "action_type": "research_points",
-      "status": "COMPLETED",
-      "result": "# RAG là gì? (Giới thiệu cơ bản)\n\n**RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữa **truy vấn thông tin** và **tạo nội dung** để tạo ra các câu trả lời chính xác, đáng tin cậy hơn.\n\n**Nguyên lý hoạt động**:  \nKhi một mô hình AI nhận được câu hỏi, thay vì chỉ dựa vào dữ liệu đã học trước đó (như trong các mô hình ngôn ngữ thông thường), RAG sẽ:  \n1. **Truy vấn** một cơ sở dữ liệu (ví dụ: tài liệu, sách, bài báo) để tìm kiếm thông tin liên quan.  \n2. **Lấy ra** những đoạn văn hoặc thông tin phù hợp.  \n3. **Dùng thông tin đó** để hỗ trợ mô hình tạo ra câu trả lời tự nhiên, chính xác hơn.\n\n**Lợi ích chính**:  \n- Câu trả lời được **cập nhật theo thời gian thực**, không bị lỗi do dữ liệu cũ.  \n- Giảm nguy cơ **\"tạo giả mạo\"** (hallucination) – tình trạng mô hình tạo ra thông tin không đúng.  \n- Tăng tính **đáng tin cậy** và **phù hợp** với các lĩnh vực chuyên môn.\n\n**Đối tượng phù hợp**:  \nRAG rất hữu ích cho các ứng dụng như trợ lý ảo, hệ thống trả lời câu hỏi, hoặc hỗ trợ học tập – nơi cần độ chính xác"
-    },
-    {
-      "step_id": 2,
-      "title": "Dàn ý bài chia sẻ ngắn",
-      "description": "Lập dàn ý gồm 3-4 phần: mở đầu, giải thích RAG đơn giản, ví dụ minh họa, kết luận ngắn gọn. [Chỉ dẫn thích ứng: Tập trung vào việc giải thích RAG bằng ví dụ đơn giản, gần gũi với người mới.]",
-      "action_type": "outline",
-      "status": "COMPLETED",
-      "result": "# Dàn ý bài chia sẻ ngắn: Giải thích RAG cho người mới bắt đầu\n\n**1. Mở đầu**  \nChào bạn! Bạn có bao giờ tự hỏi: \"Làm sao máy tính có thể trả lời câu hỏi một cách chính xác và phù hợp?\" Hôm nay, mình sẽ giải thích một công nghệ giúp điều đó – đó là **RAG** (Retrieval-Augmented Generation), một cách tiếp cận đơn giản nhưng hiệu quả để giúp máy tạo nội dung thông minh hơn.\n\n**2. Giải thích RAG đơn giản**  \nRAG là sự kết hợp giữa hai bước: **truy vấn thông tin** (tìm kiếm dữ liệu liên quan) và **tạo nội dung** (dùng dữ liệu đó để viết câu trả lời). Thay vì \"đoán\" câu trả lời, RAG sẽ tìm kiếm thông tin thực tế trước khi tạo câu trả lời – giúp câu trả lời chính xác và đáng tin cậy hơn.\n\n**3. Ví dụ minh họa**  \nGiả sử bạn hỏi: \"Màu nào là màu phổ biến nhất ở Việt Nam?\" Thay vì tự nghĩ, RAG sẽ tìm kiếm dữ liệu thực tế (ví dụ: khảo sát màu sắc trong thiết kế đồ họa) rồi dùng dữ liệu đó để trả lời – như một người bạn biết nhiều thông tin thực tế.\n\n**4. Kết luận ngắn gọn**  \nRAG giúp máy tính \"học\" từ dữ liệu thực tế để trả lời câu hỏi –"
-    },
-    {
-      "step_id": 3,
-      "title": "Viết và chỉnh sửa bài chia sẻ",
-      "description": "Viết bài hoàn chỉnh theo dàn ý, đảm bảo ngôn ngữ dễ hiểu, ngắn gọn và phù hợp với người mới bắt đầu, sau đó kiểm tra lại nội dung và độ rõ ràng. [Chỉ dẫn thích ứng: Tập trung vào việc giải thích RAG bằng ngôn ngữ đơn giản, gần gũi, dễ hiểu.]",
-      "action_type": "review_polish",
-      "status": "COMPLETED",
-      "result": "# RAG là gì? Một cách giải thích đơn giản cho người mới bắt đầu\n\nChào bạn! Bạn có bao giờ tự hỏi: \"Làm sao máy tính có thể trả lời câu hỏi một cách chính xác và phù hợp?\" Hôm nay, mình sẽ giải thích một cách đơn giản, gần gũi về **RAG** – một công nghệ giúp máy tính trả lời câu hỏi thông minh hơn.\n\n**RAG** (Retrieval-Augmented Generation) là sự kết hợp giữa **truy vấn thông tin** và **tạo nội dung**. Nghĩa là, thay vì chỉ dựa vào dữ liệu đã học trước, máy tính sẽ:\n\n1. **Truy vấn** – Tìm kiếm thông tin liên quan từ các nguồn bên ngoài (như Wikipedia, tài liệu, bài báo…).  \n2. **Tạo nội dung** – Dựa trên thông tin vừa tìm được, máy tính sẽ tự viết câu trả lời phù hợp.\n\nVí dụ: Nếu bạn hỏi \"Tại sao mặt trời mọc mỗi ngày?\", RAG sẽ tìm kiếm thông tin về chuyển động của Trái Đất, rồi dùng dữ liệu đó để trả lời một cách chính xác, dễ hiểu.\n\nĐiều tuyệt vời ở đây là RAG giúp máy tính **không ghi nhớ sai**, không tạo ra thông tin \"ảo\". Câu trả lời luôn dựa trên dữ liệu thực tế, nên đáng tin cậy hơn.\n\nRAG không phải là công nghệ siêu kỳ bí – nó chỉ đơn"
-    }
-  ],
-  "execution_logs": [
-    {
-      "step_id": 1,
-      "step_title": "Xác định nội dung cơ bản của RAG",
-      "timestamp": "2026-10-05 09:33:51",
-      "duration_sec": 2.567,
-      "input_context_keys": [],
-      "output_summary": "# RAG là gì? (Giới thiệu cơ bản)  **RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữa **truy vấn th...",
-      "status": "COMPLETED",
-      "details": {
-        "action_type": "research_points",
-        "output_length_chars": 1037
-      }
-    },
-    {
-      "step_id": 2,
-      "step_title": "Dàn ý bài chia sẻ ngắn",
-      "timestamp": "2026-10-05 09:33:54",
-      "duration_sec": 2.479,
-      "input_context_keys": [
-        "research_points"
-      ],
-      "output_summary": "# Dàn ý bài chia sẻ ngắn: Giải thích RAG cho người mới bắt đầu  **1. Mở đầu**   Chào bạn! Bạn có bao giờ tự hỏi: \"Làm sa...",
-      "status": "COMPLETED",
-      "details": {
-        "action_type": "outline",
-        "output_length_chars": 1043
-      }
-    },
-    {
-      "step_id": 3,
-      "step_title": "Viết và chỉnh sửa bài chia sẻ",
-      "timestamp": "2026-10-05 09:33:57",
-      "duration_sec": 2.537,
-      "input_context_keys": [
-        "research_points",
-        "outline"
-      ],
-      "output_summary": "# RAG là gì? Một cách giải thích đơn giản cho người mới bắt đầu  Chào bạn! Bạn có bao giờ tự hỏi: \"Làm sao máy tính có t...",
-      "status": "COMPLETED",
-      "details": {
-        "action_type": "review_polish",
-        "output_length_chars": 1056
-      }
-    }
-  ],
-  "final_output": "# RAG là gì? Một cách giải thích đơn giản cho người mới bắt đầu\n\nChào bạn! Bạn có bao giờ tự hỏi: \"Làm sao máy tính có thể trả lời câu hỏi một cách chính xác và phù hợp?\" Hôm nay, mình sẽ giải thích một cách đơn giản, gần gũi về **RAG** – một công nghệ giúp máy tính trả lời câu hỏi thông minh hơn.\n\n**RAG** (Retrieval-Augmented Generation) là sự kết hợp giữa **truy vấn thông tin** và **tạo nội dung**. Nghĩa là, thay vì chỉ dựa vào dữ liệu đã học trước, máy tính sẽ:\n\n1. **Truy vấn** – Tìm kiếm thông tin liên quan từ các nguồn bên ngoài (như Wikipedia, tài liệu, bài báo…).  \n2. **Tạo nội dung** – Dựa trên thông tin vừa tìm được, máy tính sẽ tự viết câu trả lời phù hợp.\n\nVí dụ: Nếu bạn hỏi \"Tại sao mặt trời mọc mỗi ngày?\", RAG sẽ tìm kiếm thông tin về chuyển động của Trái Đất, rồi dùng dữ liệu đó để trả lời một cách chính xác, dễ hiểu.\n\nĐiều tuyệt vời ở đây là RAG giúp máy tính **không ghi nhớ sai**, không tạo ra thông tin \"ảo\". Câu trả lời luôn dựa trên dữ liệu thực tế, nên đáng tin cậy hơn.\n\nRAG không phải là công nghệ siêu kỳ bí – nó chỉ đơn",
+  "execution_logs": [],
   "quality_metrics": {
     "passed": true,
-    "char_count": 1056,
-    "word_count": 223,
-    "ttr": 0.587,
+    "char_count": 2515,
+    "word_count": 482,
+    "ttr": 0.56,
     "matched_keywords": [
       "giải",
       "thích",
       "rag"
     ],
     "review_notes": [
-      "✓ Tiêu chuẩn độ dài: Đạt 1056 ký tự (223 từ, ngưỡng tối thiểu 250 ký tự)",
+      "✓ Tiêu chuẩn độ dài: Đạt 2515 ký tự (482 từ, ngưỡng tối thiểu 250 ký tự)",
       "✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown",
-      "✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.59 (ngưỡng yêu cầu >= 0.35)",
+      "✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.56 (ngưỡng yêu cầu >= 0.35)",
       "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, thích, rag)"
     ]
   },
-  "total_duration_sec": 10.249
+  "total_duration_sec": 480.773,
+  "reproducibility": {
+    "model": "tinix-lm:latest",
+    "temperature": 0.25,
+    "seed": null,
+    "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
+    "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
+    "judge_prompt": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
+    "python_version": "3.8.10",
+    "os": "linux"
+  }
 }

@@ -490,17 +490,19 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{        topic, intent }\OperatorTok{=} \VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
         \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING}
 
-        \ControlFlowTok{for}\NormalTok{ idx, step }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(plan, }\DecValTok{1}\NormalTok{):}
+        \NormalTok{action_queue }\OperatorTok{=}\NormalTok{ plan.copy()}
+        \ControlFlowTok{while}\NormalTok{ action_queue }\KeywordTok{and}\NormalTok{ steps_executed }\OperatorTok{<} \VariableTok{self}\NormalTok{.max_steps:}
+            \NormalTok{step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}
             \ControlFlowTok{try}\NormalTok{:}
 \NormalTok{                result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal)}
 \NormalTok{                step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"COMPLETED"}
-            \ControlFlowTok{except} \DataTypeTok{Exception} \KeywordTok{as}\NormalTok{ e:}
-\NormalTok{                step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED}
-\NormalTok{                stop_reason }\OperatorTok{=} \StringTok{f"Execution failed: Lỗi tại bước \{step.step_id\} - \{e\}"}
-                \ControlFlowTok{break}
-
-            \CommentTok{# Thích ứng bước kế tiếp (Observe & Adapt)}
-            \ControlFlowTok{if}\NormalTok{ idx }\OperatorTok{<} \BuiltInTok{len}\NormalTok{(plan): }\VariableTok{self}\NormalTok{._observe_and_adapt(step, result, plan[idx], goal)}
+            \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
+\NormalTok{                consecutive_failures }\OperatorTok{+=} \DecValTok{1}
+                \ControlFlowTok{if}\NormalTok{ consecutive_failures }\OperatorTok{>=} \DecValTok{2}\NormalTok{:}
+\NormalTok{                    step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED}
+\NormalTok{                    stop_reason }\OperatorTok{=} \StringTok{f"Lỗi liên tiếp"}; \ControlFlowTok{break}
+\NormalTok{                action_queue.insert(}\DecValTok{0}\NormalTok{, step); }\ControlFlowTok{continue}
+            \ControlFlowTok{if}\NormalTok{ action_queue: }\VariableTok{self}\NormalTok{._observe_and_adapt(step, result, action_queue[}\DecValTok{0}\NormalTok{], goal)}
 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop:}
@@ -579,7 +581,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 10 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 11 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -649,7 +651,7 @@ Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bư�
 
 Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự có quản lý trạng thái $\rightarrow$ Giới hạn số bước an toàn $\rightarrow$ Điều kiện dừng chuẩn xác}.
 
-Thông qua bài học này, bạn đã tự tay thiết kế và vận hành thành công một Autonomous Checklist Agent giải quyết bài toán viết bài chia sẻ RAG cho người mới bắt đầu. Mô hình khép kín này là nền tảng tối quan trọng giúp bạn tự tin bước vào những bài toán phức tạp hơn như Multi-Agent Systems, Hierarchical Planning và Graph-based Autonomous Workflows trong tương lai.
+Thông qua bài học này, bạn đã thiết kế và vận hành thành công hệ thống Bounded Checklist Agent có khả năng tự phục hồi (Resilience) để giải quyết bài toán viết bài chia sẻ RAG cho người mới bắt đầu. Mô hình khép kín này là nền tảng tối quan trọng giúp bạn tự tin bước vào những bài toán phức tạp hơn như Multi-Agent Systems, Hierarchical Planning và Graph-based Autonomous Workflows trong tương lai.
 
 \textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):}\\
 Toàn bộ mã nguồn \texttt{checklist\_agent.py}, bộ kiểm thử \texttt{eval\_agent.py}, script sinh ảnh \texttt{generate\_assets.py} cùng báo cáo \texttt{agent\_final\_report.json} được lưu trữ công khai tại GitHub: \\

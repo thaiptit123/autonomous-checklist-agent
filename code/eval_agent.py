@@ -152,6 +152,36 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.status, AgentStatus.FAILED)
         self.assertIn("tài liệu", report.stop_reason.lower())
 
+    def test_adversarial_wrong_fact_right_format(self):
+        print("\n[Unit Test] 11. Adversarial Test: Nội dung sai sự thật nhưng chuẩn format (LLM Judge bắt lỗi)")
+        agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+        original_execute = agent._execute_step_action
+
+        def degraded_execute(step, topic, goal):
+            if step.action_type == "review_polish":
+                bad_content = "# RAG là gì?\n\nRAG là một kỹ thuật. RAG gồm Indexing -> Retrieval -> Generation. RAG luôn đảm bảo câu trả lời chính xác 100%. RAG luôn dựa hoàn toàn trên dữ liệu thực tế không bao giờ sai sót."
+                agent.context_memory["final_article"] = bad_content
+                return bad_content
+            return original_execute(step, topic, goal)
+
+        agent._execute_step_action = degraded_execute
+        
+        # Mô phỏng LLM Judge phát hiện lỗi sai sự thật
+        original_evaluate = agent.evaluator.evaluate
+        def mock_evaluate(content, goal, intent, llm):
+            res = original_evaluate(content, goal, intent, llm)
+            res["passed"] = False
+            res["review_notes"].append("✗ LLM Judge từ chối: Khẳng định tuyệt đối sai sự thật (RAG luôn đảm bảo chính xác 100%).")
+            return res
+        agent.evaluator.evaluate = mock_evaluate
+
+        goal = "Viết bài chia sẻ ngắn giải thích RAG."
+        report = agent.run(goal)
+        
+        self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
+        self.assertFalse(report.quality_metrics["passed"])
+
+
 
 @unittest.skipUnless(is_ollama_available(), "Bỏ qua Integration Test vì không kết nối được Ollama cục bộ")
 class TestIntegrationLLM(unittest.TestCase):

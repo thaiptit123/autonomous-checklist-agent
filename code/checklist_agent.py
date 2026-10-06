@@ -66,6 +66,7 @@ class FinalReport:
     final_output: str
     quality_metrics: Dict[str, Any]
     total_duration_sec: float
+    reproducibility: Dict[str, Any]
 
 
 class QualityEvaluator:
@@ -822,6 +823,17 @@ class AutonomousChecklistAgent:
             else:
                 self.status = AgentStatus.BUDGET_EXHAUSTED
 
+        reproducibility = {
+            "model": self.llm.model if self.llm and self.llm.is_available() else "deterministic_fallback",
+            "temperature": 0.25,
+            "seed": None, # Ollama mặc định không có seed cố định trừ khi cấu hình
+            "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
+            "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
+            "judge_prompt": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
+            "python_version": sys.version.split()[0],
+            "os": sys.platform
+        }
+
         report = FinalReport(
             goal=goal,
             total_steps_planned=len(plan),
@@ -829,10 +841,11 @@ class AutonomousChecklistAgent:
             status=self.status,
             stop_reason=stop_reason,
             plan=[asdict(s) for s in plan],
-            execution_logs=[asdict(l) for l in self.logs],
+            execution_logs=[], # Omitting logs to keep report concise for PDF
             final_output=self.final_output,
             quality_metrics=self.quality_metrics,
-            total_duration_sec=total_duration
+            total_duration_sec=total_duration,
+            reproducibility=reproducibility
         )
 
         self._print_final_report(report)
