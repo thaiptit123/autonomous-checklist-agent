@@ -40,7 +40,7 @@ Bai44/
    # Nếu bạn có model tinix-lm
    ollama pull tinix-lm:latest
    
-   # HOẶC sử dụng fallback model llama3.2/phi3 (Agent có tính năng tự nhận diện model khả dụng)
+   # HOẶC sử dụng fallback model qwen2.5:3b (Agent có tính năng tự nhận diện model khả dụng)
    ollama pull qwen2.5:3b
    ```
 3. **Cài đặt thư viện Python**: (Không yêu cầu thư viện ngoài, chỉ dùng chuẩn của Python 3.8+).

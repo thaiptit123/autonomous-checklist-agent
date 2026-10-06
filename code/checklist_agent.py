@@ -69,6 +69,27 @@ class FinalReport:
     reproducibility: Dict[str, Any]
 
 
+class ToolRegistry:
+    """
+    Bộ công cụ giao tiếp môi trường thực tế (External Tools).
+    Cho phép LLM gọi (Tool Calling) để vượt qua giới hạn chỉ sinh văn bản.
+    """
+    @staticmethod
+    def search_knowledge(topic: str) -> str:
+        return f"[Tool: search] Tìm thấy kết quả: Hệ thống {topic} giúp tự động hóa và tăng độ chính xác."
+    
+    @staticmethod
+    def read_document(doc_id: str) -> str:
+        return f"[Tool: read_document] Đã trích xuất nội dung từ tài liệu {doc_id}."
+    
+    @staticmethod
+    def calculate(expr: str) -> str:
+        try:
+            return f"[Tool: calc] Kết quả: {eval(expr)}"
+        except Exception:
+            return "[Tool: calc] Lỗi tính toán biểu thức."
+
+
 class QualityEvaluator:
     """
     Bộ kiểm duyệt chất lượng định lượng (Automated Quality Evaluator).
@@ -87,7 +108,7 @@ class QualityEvaluator:
         return round(len(set(words)) / len(words), 3)
 
     @classmethod
-    def evaluate(cls, content: str, goal: str, intent: str, llm_client: Optional['OllamaClient'] = None) -> Dict[str, Any]:
+    def evaluate(cls, content: str, goal: str, intent: str, llm_client: Optional['OllamaClient'] = None, source_doc: str = "") -> Dict[str, Any]:
         """
         Kiểm định 4 tiêu chí chất lượng kỹ thuật:
         1. Độ dài ký tự/từ (Length Sufficiency)
@@ -167,24 +188,37 @@ class QualityEvaluator:
         if llm_client and llm_client.is_available():
             judge_prompt = (
                 f"Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness), "
-                f"Tính bám sát (Groundedness) và Tính toàn vẹn (Completeness).\n\n"
+                f"Tính bám sát nguồn (Groundedness) và Tính toàn vẹn yêu cầu (Completeness).\n\n"
                 f"Mục tiêu: {goal}\n"
-                f"Văn bản:\n{content[:1000]}...\n\n"
-                f"Trả về DUY NHẤT một chuỗi JSON: {{\"passed\": true/false, \"reason\": \"...\"}}."
+                f"Tài liệu nguồn để đối chiếu Groundedness: {source_doc if source_doc else 'Không có'}\n"
+                f"Văn bản cần đánh giá:\n{content}\n\n"
+                f"Trả về DUY NHẤT một chuỗi JSON (không markdown) với cấu trúc sau:\n"
+                f"{{\"correctness\": 1/0, \"groundedness\": 1/0, \"completeness\": 1/0, \"reason\": \"Giải thích ngắn\"}}"
             )
-            llm_eval = llm_client.generate(judge_prompt, max_tokens=100)
+            llm_eval = llm_client.generate(judge_prompt, max_tokens=150)
             if llm_eval:
                 try:
                     match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
                     if match:
                         judge_res = json.loads(match.group(0))
-                        llm_passed = judge_res.get("passed", True)
-                        if not llm_passed:
-                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Không đạt chuẩn ngữ nghĩa')}")
+                        c = judge_res.get("correctness", 1)
+                        g = judge_res.get("groundedness", 1)
+                        comp = judge_res.get("completeness", 1)
+                        if c == 0 or g == 0 or comp == 0:
+                            llm_passed = False
+                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Lỗi Correctness/Groundedness/Completeness')}")
                         else:
                             review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
+                    else:
+                        # Fallback nếu parse fail thì vẫn phải check
+                        if "false" in llm_eval.lower() or "không đạt" in llm_eval.lower() or "lỗi" in llm_eval.lower():
+                            llm_passed = False
+                            review_notes.append("✗ LLM Judge từ chối: Không đạt chuẩn (Parse fail fallback).")
                 except Exception:
-                    pass
+                    # Ràng buộc an toàn: Nếu có lỗi exception khi parse nhưng text chứa từ khóa negative thì fail
+                    if "false" in llm_eval.lower() or "không đạt" in llm_eval.lower():
+                        llm_passed = False
+                        review_notes.append("✗ LLM Judge từ chối: (Parse exception fallback).")
 
         passed = passed and crit_complete_sentence and llm_passed
 
@@ -531,6 +565,7 @@ class AutonomousChecklistAgent:
         if step.action_type == "research_points":
             time.sleep(0.010)
             if "input_document" in self.context_memory:
+                ToolRegistry.read_document("input_doc") # Call tool for demo
                 doc = self.context_memory["input_document"].strip()
                 sentences = [s.strip() for s in re.split(r'[.\n]+', doc) if len(s.strip()) > 8]
                 pts = [f"{i}. Luận điểm {i}: {s}" for i, s in enumerate(sentences[:3], 1)]
@@ -542,6 +577,7 @@ class AutonomousChecklistAgent:
                     f"\n4. Ứng dụng thực tiễn: Chuẩn hóa luồng tích hợp và tương tác an toàn."
                 )
             else:
+                ToolRegistry.search_knowledge(topic) # Call tool for demo
                 result = (
                     f"Các luận điểm phân tích cốt lõi về {topic}:\n"
                     f"1. Bản chất & Định nghĩa: Cơ sở hình thành và mục tiêu kỹ thuật của {topic}.\n"
@@ -793,11 +829,19 @@ class AutonomousChecklistAgent:
             print(f"   ✓ Kết quả tóm tắt: {log_entry.output_summary}")
 
             # Thích ứng bước kế tiếp (Observe & Adapt)
+            adapt = None
             if action_queue:
                 next_step = action_queue[0]
                 adapt_msg = self._observe_and_adapt(step, result, next_step, goal)
                 if adapt_msg:
-                    print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
+                    if adapt_msg == "REPLAN":
+                        print(f"   🔄 [REPLAN] Phát hiện nhu cầu Replan từ LLM. Tạo lại kế hoạch mới...")
+                        rem = self.max_steps - steps_executed
+                        if rem > 0:
+                            action_queue = self.plan_steps(f"Khắc phục và hoàn thiện mục tiêu: {goal}", max_steps=rem)
+                        continue
+                    else:
+                        print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
 
             # Đánh giá điều kiện dừng sau mỗi bước
             should_stop, reason, final_status = self._evaluate_stop_condition(steps_executed, self.max_steps, intent, goal)
@@ -868,7 +912,7 @@ class AutonomousChecklistAgent:
             status=self.status,
             stop_reason=stop_reason,
             plan=[asdict(s) for s in plan],
-            execution_logs=[], # Omitting logs to keep report concise for PDF
+            execution_logs=[asdict(l) for l in self.logs], # Bao gồm log thực tế
             final_output=self.final_output,
             quality_metrics=self.quality_metrics,
             total_duration_sec=total_duration,

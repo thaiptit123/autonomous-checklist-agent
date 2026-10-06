@@ -155,25 +155,27 @@ class TestUnitOffline(unittest.TestCase):
     def test_adversarial_wrong_fact_right_format(self):
         print("\n[Unit Test] 11. Adversarial Test: Nội dung sai sự thật nhưng chuẩn format (LLM Judge bắt lỗi)")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+        # Bật mock LLM để kiểm thử logic Evaluator thay vì monkeypatch evaluate
+        agent.use_llm = True
+        agent.llm = OllamaClient()
+        agent.llm.is_available = lambda: True
+        
+        # Mock executor để trả về content sai sự thật
         original_execute = agent._execute_step_action
-
         def degraded_execute(step, topic, goal):
             if step.action_type == "review_polish":
                 bad_content = "# RAG là gì?\n\nRAG là một kỹ thuật. RAG gồm Indexing -> Retrieval -> Generation. RAG luôn đảm bảo câu trả lời chính xác 100%. RAG luôn dựa hoàn toàn trên dữ liệu thực tế không bao giờ sai sót."
                 agent.context_memory["final_article"] = bad_content
                 return bad_content
             return original_execute(step, topic, goal)
-
         agent._execute_step_action = degraded_execute
         
-        # Mô phỏng LLM Judge phát hiện lỗi sai sự thật
-        original_evaluate = agent.evaluator.evaluate
-        def mock_evaluate(content, goal, intent, llm):
-            res = original_evaluate(content, goal, intent, llm)
-            res["passed"] = False
-            res["review_notes"].append("✗ LLM Judge từ chối: Khẳng định tuyệt đối sai sự thật (RAG luôn đảm bảo chính xác 100%).")
-            return res
-        agent.evaluator.evaluate = mock_evaluate
+        # Mock LLM sinh ra phán quyết từ chối correctness
+        def mock_generate(prompt, max_tokens=100):
+            if "Đánh giá chất lượng văn bản" in prompt:
+                return '{"correctness": 0, "groundedness": 1, "completeness": 1, "reason": "Khẳng định tuyệt đối sai sự thật (RAG luôn đảm bảo chính xác 100%)"}'
+            return "Mock response"
+        agent.llm.generate = mock_generate
 
         goal = "Viết bài chia sẻ ngắn giải thích RAG."
         report = agent.run(goal)
@@ -184,26 +186,32 @@ class TestUnitOffline(unittest.TestCase):
     def test_adversarial_missing_content(self):
         print("\n[Unit Test] 12. Adversarial Test: Thiếu nội dung bắt buộc (LLM Judge bắt lỗi)")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
-        orig_eval = agent.evaluator.evaluate
-        def mock_eval(c, g, i, l):
-            res = orig_eval(c, g, i, l)
-            res["passed"] = False
-            res["review_notes"].append("✗ LLM Judge từ chối: Thiếu định nghĩa cơ bản về RAG.")
-            return res
-        agent.evaluator.evaluate = mock_eval
+        agent.use_llm = True
+        agent.llm = OllamaClient()
+        agent.llm.is_available = lambda: True
+        
+        def mock_generate(prompt, max_tokens=100):
+            if "Đánh giá chất lượng văn bản" in prompt:
+                return '{"correctness": 1, "groundedness": 1, "completeness": 0, "reason": "Thiếu định nghĩa cơ bản về RAG"}'
+            return ""
+        agent.llm.generate = mock_generate
+        
         report = agent.run("Viết bài giải thích RAG")
         self.assertFalse(report.quality_metrics["passed"])
 
     def test_adversarial_not_grounded(self):
         print("\n[Unit Test] 13. Adversarial Test: Nội dung hallucination không bám sát (Not Grounded)")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
-        orig_eval = agent.evaluator.evaluate
-        def mock_eval(c, g, i, l):
-            res = orig_eval(c, g, i, l)
-            res["passed"] = False
-            res["review_notes"].append("✗ LLM Judge từ chối: Not Grounded (bịa đặt thông tin).")
-            return res
-        agent.evaluator.evaluate = mock_eval
+        agent.use_llm = True
+        agent.llm = OllamaClient()
+        agent.llm.is_available = lambda: True
+        
+        def mock_generate(prompt, max_tokens=100):
+            if "Đánh giá chất lượng văn bản" in prompt:
+                return '{"correctness": 1, "groundedness": 0, "completeness": 1, "reason": "Bịa đặt thông tin không có trong source"}'
+            return ""
+        agent.llm.generate = mock_generate
+        
         report = agent.run("Viết bài giải thích RAG")
         self.assertFalse(report.quality_metrics["passed"])
 
