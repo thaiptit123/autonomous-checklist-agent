@@ -413,7 +413,7 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \end{Shaded}
 
 \subsection{3. Tích hợp ToolRegistry để giao tiếp môi trường thực tế}
-Để vượt qua giới hạn chỉ sinh văn bản, hệ thống tích hợp bộ công cụ thật cho phép LLM gọi (Tool Calling):
+Để vượt qua giới hạn chỉ sinh văn bản, hệ thống tích hợp khung ToolRegistry mô phỏng để minh họa khả năng mở rộng sang Tool Calling trong thực tế:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -587,14 +587,11 @@ Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt v�
 \endhead
 Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
 Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
-Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 1.056 ký tự (223 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
-\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.59 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
+Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 2.515 ký tự (482 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
+\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.56 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
-\vspace{-0.5em}
-\noindent\textit{*(Ghi chú: Các chỉ số định lượng TTR = 0.59 và 1.056 ký tự được ghi nhận từ một phiên chạy thực nghiệm minh họa của LLM)*}
-
 
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
