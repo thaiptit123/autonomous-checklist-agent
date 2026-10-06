@@ -181,6 +181,32 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
+    def test_adversarial_missing_content(self):
+        print("\n[Unit Test] 12. Adversarial Test: Thiếu nội dung bắt buộc (LLM Judge bắt lỗi)")
+        agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+        orig_eval = agent.evaluator.evaluate
+        def mock_eval(c, g, i, l):
+            res = orig_eval(c, g, i, l)
+            res["passed"] = False
+            res["review_notes"].append("✗ LLM Judge từ chối: Thiếu định nghĩa cơ bản về RAG.")
+            return res
+        agent.evaluator.evaluate = mock_eval
+        report = agent.run("Viết bài giải thích RAG")
+        self.assertFalse(report.quality_metrics["passed"])
+
+    def test_adversarial_not_grounded(self):
+        print("\n[Unit Test] 13. Adversarial Test: Nội dung hallucination không bám sát (Not Grounded)")
+        agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+        orig_eval = agent.evaluator.evaluate
+        def mock_eval(c, g, i, l):
+            res = orig_eval(c, g, i, l)
+            res["passed"] = False
+            res["review_notes"].append("✗ LLM Judge từ chối: Not Grounded (bịa đặt thông tin).")
+            return res
+        agent.evaluator.evaluate = mock_eval
+        report = agent.run("Viết bài giải thích RAG")
+        self.assertFalse(report.quality_metrics["passed"])
+
 
 
 @unittest.skipUnless(is_ollama_available(), "Bỏ qua Integration Test vì không kết nối được Ollama cục bộ")
@@ -206,3 +232,5 @@ if __name__ == "__main__":
     print("🚀 KHỞI CHẠY TEST SUITE (UNIT TESTS & INTEGRATION TESTS)")
     print("=" * 68)
     unittest.main(verbosity=2)
+
+

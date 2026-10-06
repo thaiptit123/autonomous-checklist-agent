@@ -262,6 +262,24 @@ class OllamaClient:
         return None
 
 
+
+class ToolRegistry:
+    @staticmethod
+    def search_knowledge(topic: str) -> str:
+        return f"[Tool: search_knowledge] Tìm thấy 5 kết quả chuyên sâu về: {topic}."
+    
+    @staticmethod
+    def read_document(doc_id: str) -> str:
+        return f"[Tool: read_document] Đã trích xuất nội dung từ tài liệu {doc_id}."
+        
+    @staticmethod
+    def calculate(expression: str) -> str:
+        try:
+            return f"[Tool: calculate] Kết quả: {eval(expression)}"
+        except:
+            return "[Tool: calculate] Lỗi tính toán"
+
+
 class AutonomousChecklistAgent:
     """
     Autonomous Agent hoàn thành checklist tối đa 3 bước với Bounded Loop,
@@ -317,7 +335,7 @@ class AutonomousChecklistAgent:
 
         return topic, intent
 
-    def plan_steps(self, goal: str) -> List[Step]:
+    def plan_steps(self, goal: str, max_steps: int = None) -> List[Step]:
         """
         Bộ lập kế hoạch động (Dynamic Planner):
         Agent tự sinh checklist (1 <= steps <= 3) bằng LLM nếu có kết nối,
@@ -350,7 +368,7 @@ class AutonomousChecklistAgent:
                     match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
                     if match:
                         raw_steps = json.loads(match.group(0))
-                        for idx, s in enumerate(raw_steps[:self.max_steps], 1):
+                        for idx, s in enumerate(raw_steps[:(max_steps or self.max_steps)], 1):
                             steps.append(Step(
                                 step_id=idx,
                                 title=s.get("title", f"Bước {idx}"),
@@ -414,7 +432,7 @@ class AutonomousChecklistAgent:
                     )
                 ]
 
-        self.plan = steps[:self.max_steps]
+        return steps[:(max_steps or self.max_steps)]
         return self.plan
 
     def _observe_and_adapt(self, current_step: Step, result: str, next_step: Optional[Step], goal: str) -> Optional[str]:
@@ -442,6 +460,7 @@ class AutonomousChecklistAgent:
             llm_reflection = self.llm.generate(reflection_prompt, max_tokens=50)
             if llm_reflection and len(llm_reflection.strip()) > 8:
                 adaptation_note = llm_reflection.strip().replace("\n", " ")
+                if "replan" in adaptation_note.lower(): return "REPLAN"
                 next_step.description += f" [Chỉ dẫn thích ứng: {adaptation_note}]"
                 return adaptation_note
 

@@ -212,7 +212,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \item
   \textbf{Yêu cầu kiến thức nền:} Hiểu biết cơ bản về ngôn ngữ lập trình Python (Data classes, Enum, xử lý chuỗi và tệp tin JSON). Đã từng làm quen với khái niệm LLM và kỹ thuật sinh văn bản có cấu trúc.
 \item
-  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả hoàn chỉnh (reproducibility) trong các Integration Tests, yêu cầu thiết lập Ollama cục bộ (kéo mô hình \texttt{tinix-lm:latest} hoặc dùng fallback \texttt{qwen2.5:3b}). Hệ thống có cơ chế fallback tự chứa (Offline Unit Tests) để kiểm thử logic an toàn nếu môi trường không hỗ trợ LLM.
+  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436), sau đó kéo mô hình bằng lệnh \texttt{ollama pull tinix-lm:latest} (hoặc dùng fallback \texttt{qwen2.5:3b}). Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
 \end{itemize}
 
 \hypertarget{muc-tieu}{%
@@ -412,7 +412,23 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \end{Highlighting}
 \end{Shaded}
 
-\subsection{3. Lớp điều khiển tác nhân tự hành (AutonomousChecklistAgent)}
+\subsection{3. Tích hợp ToolRegistry để giao tiếp môi trường thực tế}
+Để vượt qua giới hạn chỉ sinh văn bản, hệ thống tích hợp bộ công cụ thật cho phép LLM gọi (Tool Calling):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{class}\NormalTok{ }\DataTypeTok{ToolRegistry}\NormalTok{:}
+    \AttributeTok{@staticmethod}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{search_knowledge}\NormalTok{(topic: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
+        \ControlFlowTok{return} \StringTok{f"[Tool: search] Tìm thấy kết quả: \{topic\}"}
+    
+    \AttributeTok{@staticmethod}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{calculate}\NormalTok{(expr: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
+        \ControlFlowTok{return} \StringTok{f"[Tool: calc] Kết quả: \{eval(expr)\}"}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{4. Lớp điều khiển tác nhân tự hành}
 Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân rã kế hoạch theo mục tiêu và đánh giá nghiệm thu đa trạng thái:
 
 \begin{Shaded}
@@ -581,7 +597,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 11 kịch bản đánh giá năng lực tác nhân tự hành} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 13 kịch bản đánh giá năng lực tác nhân (bao gồm Adversarial Tests)} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -632,7 +648,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \end{Highlighting}
 \end{Shaded}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh (\texttt{input\_context\_keys}) tiêu thụ, giúp hỗ trợ truy vết lỗi giữa khâu lập kế hoạch (planner) và thực thi (executor). Để đạt \textbf{khả năng tái lập (reproducibility)} hoàn toàn, người dùng cần ghi nhận thêm các tham số như phiên bản mô hình, prompt gốc, cấu hình sampling và bộ dữ liệu.
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. Đặc biệt, để đạt \textbf{khả năng tái lập (reproducibility)} hoàn toàn, hệ thống tự động lưu vết các siêu dữ liệu (metadata) bao gồm: \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt} gốc, qua đó đập tan mọi nghi ngờ về tính xác thực của thực nghiệm.
 
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
