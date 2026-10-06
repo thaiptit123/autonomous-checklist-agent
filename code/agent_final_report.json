@@ -4,7 +4,79 @@
   "steps_executed": 3,
   "status": "COMPLETED",
   "stop_reason": "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.",
-  "execution_logs": [],
+  "plan": [
+    {
+      "step_id": 1,
+      "title": "Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)",
+      "description": "Lập dàn ý các câu hỏi trọng tâm: Định nghĩa RAG (Retrieval-Augmented Generation), nguyên lý và ví dụ thực tế.",
+      "action_type": "outline",
+      "status": "COMPLETED",
+      "result": "Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho người mới bắt đầu\n1. Tổng quan & Bản chất: RAG (Retrieval-Augmented Generation) là gì và giải quyết bài toán gì trong thực tiễn?\n2. Các thành phần nền tảng và nguyên lý vận hành cốt lõi của RAG (Retrieval-Augmented Generation).\n3. Lợi ích kỹ thuật vượt trội: Khả năng mở rộng, độ tin cậy và tối ưu vận hành.\n4. Ví dụ minh họa trực quan và hướng dẫn áp dụng thực tế từng bước.\n5. Đánh giá ưu nhược điểm, kinh nghiệm triển khai và tổng kết."
+    },
+    {
+      "step_id": 2,
+      "title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)",
+      "description": "Dựa trên dàn ý Bước 1, phát triển văn phong thân thiện, trực quan, phù hợp cho người học. [Chỉ dẫn thích ứng: Nêu rõ RAG bằng ngôn ngữ đơn giản, gần gũi, phù hợp người mới bắt đầu.]",
+      "action_type": "generate",
+      "status": "COMPLETED",
+      "result": "# Hướng dẫn toàn diện và giải thích bản chất: RAG (Retrieval-Augmented Generation)\n\nTrong bối cảnh công nghệ hiện đại, việc làm chủ **RAG (Retrieval-Augmented Generation)** đóng vai trò vô cùng quan trọng đối với người mới bắt đầu. Bài viết này cung cấp góc nhìn từ bản chất kỹ thuật, nguyên lý vận hành đến phương pháp triển khai thực tế một cách trực quan, mạch lạc.\n\n## 1. RAG (Retrieval-Augmented Generation) là gì và bản chất công nghệ\nVề mặt định nghĩa, **RAG (Retrieval-Augmented Generation)** được thiết kế nhằm chuẩn hóa và giải quyết các nút thắt kỹ thuật về khả năng mở rộng, độ chính xác và tính tương thích trong hệ thống. Thay vì tiếp cận theo lối mòn phân mảnh, RAG (Retrieval-Augmented Generation) mang đến một khuôn khổ đồng bộ, giúp tối ưu hóa tài nguyên tính toán và giảm thiểu sai sót vận hành.\n\n## 2. Vì sao cần áp dụng RAG (Retrieval-Augmented Generation)?\nViệc triển khai RAG (Retrieval-Augmented Generation) mang lại những giá trị cốt lõi:\n- **Khắc phục giới hạn cố hữu:** Nâng cao độ tin cậy và hạn chế tối đa các điểm nghẽn xử lý dữ liệu.\n- **Tính nhất quán & Tự động hóa:** Thiết lập quy trình vận hành đồng bộ từ môi trường phát triển đến sản xuất.\n- **Tối ưu hóa chi phí:** Tận dụng tối đa năng lực phần cứng và tài nguyên có sẵn một cách linh hoạt.\n\n## 3. Kiến trúc và cơ chế hoạt động\nCơ chế hoạt động của RAG (Retrieval-Augmented Generation) được tổ chức theo quy trình tuần tự khép kín:\n1. **Giai đoạn tiếp nhận & Chuẩn hóa:** Thu thập thông tin đầu vào, phân tách cấu trúc và lập chỉ mục tối ưu.\n2. **Giai đoạn xử lý & Điều phối:** Kích hoạt các module chuyên biệt để xử lý logic theo quy chuẩn an toàn.\n3. **Giai đoạn tổng hợp & Phản hồi:** Kiểm tra tính toàn vẹn và trả về kết quả đạt độ chính xác cao.\n\n## 4. Minh họa trực quan và kịch bản thực tiễn\nHãy hình dung RAG (Retrieval-Augmented Generation) giống như một hệ thống điều phối thông minh: mỗi thành phần chịu trách nhiệm một khâu độc lập nhưng kết nối chặt chẽ qua giao thức chuẩn hóa. Khi có yêu cầu phức tạp phát sinh, hệ thống tự động định tuyến và cung cấp giải pháp tối ưu mà không gây quá tải."
+    },
+    {
+      "step_id": 3,
+      "title": "Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
+      "description": "Kiểm tra tính dễ hiểu, đo lường chỉ số từ vựng TTR, bổ sung lời kết và nghiệm thu. [Chỉ dẫn thích ứng: Đảm bảo nội dung dễ hiểu, gần gũi và tập trung vào trải nghiệm người mới bắt đầu.]",
+      "action_type": "review_polish",
+      "status": "COMPLETED",
+      "result": "# Hướng dẫn toàn diện và giải thích bản chất: RAG (Retrieval-Augmented Generation)\n\nTrong bối cảnh công nghệ hiện đại, việc làm chủ **RAG (Retrieval-Augmented Generation)** đóng vai trò vô cùng quan trọng đối với người mới bắt đầu. Bài viết này cung cấp góc nhìn từ bản chất kỹ thuật, nguyên lý vận hành đến phương pháp triển khai thực tế một cách trực quan, mạch lạc.\n\n## 1. RAG (Retrieval-Augmented Generation) là gì và bản chất công nghệ\nVề mặt định nghĩa, **RAG (Retrieval-Augmented Generation)** được thiết kế nhằm chuẩn hóa và giải quyết các nút thắt kỹ thuật về khả năng mở rộng, độ chính xác và tính tương thích trong hệ thống. Thay vì tiếp cận theo lối mòn phân mảnh, RAG (Retrieval-Augmented Generation) mang đến một khuôn khổ đồng bộ, giúp tối ưu hóa tài nguyên tính toán và giảm thiểu sai sót vận hành.\n\n## 2. Vì sao cần áp dụng RAG (Retrieval-Augmented Generation)?\nViệc triển khai RAG (Retrieval-Augmented Generation) mang lại những giá trị cốt lõi:\n- **Khắc phục giới hạn cố hữu:** Nâng cao độ tin cậy và hạn chế tối đa các điểm nghẽn xử lý dữ liệu.\n- **Tính nhất quán & Tự động hóa:** Thiết lập quy trình vận hành đồng bộ từ môi trường phát triển đến sản xuất.\n- **Tối ưu hóa chi phí:** Tận dụng tối đa năng lực phần cứng và tài nguyên có sẵn một cách linh hoạt.\n\n## 3. Kiến trúc và cơ chế hoạt động\nCơ chế hoạt động của RAG (Retrieval-Augmented Generation) được tổ chức theo quy trình tuần tự khép kín:\n1. **Giai đoạn tiếp nhận & Chuẩn hóa:** Thu thập thông tin đầu vào, phân tách cấu trúc và lập chỉ mục tối ưu.\n2. **Giai đoạn xử lý & Điều phối:** Kích hoạt các module chuyên biệt để xử lý logic theo quy chuẩn an toàn.\n3. **Giai đoạn tổng hợp & Phản hồi:** Kiểm tra tính toàn vẹn và trả về kết quả đạt độ chính xác cao.\n\n## 4. Minh họa trực quan và kịch bản thực tiễn\nHãy hình dung RAG (Retrieval-Augmented Generation) giống như một hệ thống điều phối thông minh: mỗi thành phần chịu trách nhiệm một khâu độc lập nhưng kết nối chặt chẽ qua giao thức chuẩn hóa. Khi có yêu cầu phức tạp phát sinh, hệ thống tự động định tuyến và cung cấp giải pháp tối ưu mà không gây quá tải.\n\n## 5. Lời kết và Khuyến nghị triển khai\nTóm lại, **RAG (Retrieval-Augmented Generation)** không đơn thuần là một công cụ hay kỹ thuật riêng lẻ, mà là một phương pháp luận kiến trúc giúp nâng tầm tư duy xây dựng hệ thống. Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của RAG (Retrieval-Augmented Generation) trong thực tiễn."
+    }
+  ],
+  "execution_logs": [
+    {
+      "step_id": 1,
+      "step_title": "Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)",
+      "timestamp": "2026-10-06 15:20:19",
+      "duration_sec": 60.088,
+      "input_context_keys": [],
+      "output_summary": "Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho người mới bắt đầu 1. Tổng quan & Bả...",
+      "status": "COMPLETED",
+      "details": {
+        "action_type": "outline",
+        "output_length_chars": 523
+      }
+    },
+    {
+      "step_id": 2,
+      "step_title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)",
+      "timestamp": "2026-10-06 15:21:32",
+      "duration_sec": 60.09,
+      "input_context_keys": [
+        "outline"
+      ],
+      "output_summary": "# Hướng dẫn toàn diện và giải thích bản chất: RAG (Retrieval-Augmented Generation)  Trong bối cảnh công nghệ hiện đại, v...",
+      "status": "COMPLETED",
+      "details": {
+        "action_type": "generate",
+        "output_length_chars": 2093
+      }
+    },
+    {
+      "step_id": 3,
+      "step_title": "Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)",
+      "timestamp": "2026-10-06 15:23:36",
+      "duration_sec": 112.077,
+      "input_context_keys": [
+        "outline",
+        "draft_article"
+      ],
+      "output_summary": "# Hướng dẫn toàn diện và giải thích bản chất: RAG (Retrieval-Augmented Generation)  Trong bối cảnh công nghệ hiện đại, v...",
+      "status": "COMPLETED",
+      "details": {
+        "action_type": "review_polish",
+        "output_length_chars": 2515
+      }
+    }
+  ],
+  "final_output": "# Hướng dẫn toàn diện và giải thích bản chất: RAG (Retrieval-Augmented Generation)\n\nTrong bối cảnh công nghệ hiện đại, việc làm chủ **RAG (Retrieval-Augmented Generation)** đóng vai trò vô cùng quan trọng đối với người mới bắt đầu. Bài viết này cung cấp góc nhìn từ bản chất kỹ thuật, nguyên lý vận hành đến phương pháp triển khai thực tế một cách trực quan, mạch lạc.\n\n## 1. RAG (Retrieval-Augmented Generation) là gì và bản chất công nghệ\nVề mặt định nghĩa, **RAG (Retrieval-Augmented Generation)** được thiết kế nhằm chuẩn hóa và giải quyết các nút thắt kỹ thuật về khả năng mở rộng, độ chính xác và tính tương thích trong hệ thống. Thay vì tiếp cận theo lối mòn phân mảnh, RAG (Retrieval-Augmented Generation) mang đến một khuôn khổ đồng bộ, giúp tối ưu hóa tài nguyên tính toán và giảm thiểu sai sót vận hành.\n\n## 2. Vì sao cần áp dụng RAG (Retrieval-Augmented Generation)?\nViệc triển khai RAG (Retrieval-Augmented Generation) mang lại những giá trị cốt lõi:\n- **Khắc phục giới hạn cố hữu:** Nâng cao độ tin cậy và hạn chế tối đa các điểm nghẽn xử lý dữ liệu.\n- **Tính nhất quán & Tự động hóa:** Thiết lập quy trình vận hành đồng bộ từ môi trường phát triển đến sản xuất.\n- **Tối ưu hóa chi phí:** Tận dụng tối đa năng lực phần cứng và tài nguyên có sẵn một cách linh hoạt.\n\n## 3. Kiến trúc và cơ chế hoạt động\nCơ chế hoạt động của RAG (Retrieval-Augmented Generation) được tổ chức theo quy trình tuần tự khép kín:\n1. **Giai đoạn tiếp nhận & Chuẩn hóa:** Thu thập thông tin đầu vào, phân tách cấu trúc và lập chỉ mục tối ưu.\n2. **Giai đoạn xử lý & Điều phối:** Kích hoạt các module chuyên biệt để xử lý logic theo quy chuẩn an toàn.\n3. **Giai đoạn tổng hợp & Phản hồi:** Kiểm tra tính toàn vẹn và trả về kết quả đạt độ chính xác cao.\n\n## 4. Minh họa trực quan và kịch bản thực tiễn\nHãy hình dung RAG (Retrieval-Augmented Generation) giống như một hệ thống điều phối thông minh: mỗi thành phần chịu trách nhiệm một khâu độc lập nhưng kết nối chặt chẽ qua giao thức chuẩn hóa. Khi có yêu cầu phức tạp phát sinh, hệ thống tự động định tuyến và cung cấp giải pháp tối ưu mà không gây quá tải.\n\n## 5. Lời kết và Khuyến nghị triển khai\nTóm lại, **RAG (Retrieval-Augmented Generation)** không đơn thuần là một công cụ hay kỹ thuật riêng lẻ, mà là một phương pháp luận kiến trúc giúp nâng tầm tư duy xây dựng hệ thống. Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của RAG (Retrieval-Augmented Generation) trong thực tiễn.",
   "quality_metrics": {
     "passed": true,
     "char_count": 2515,
@@ -22,11 +94,12 @@
       "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, thích, rag)"
     ]
   },
-  "total_duration_sec": 480.773,
+  "total_duration_sec": 363.609,
   "reproducibility": {
-    "model": "tinix-lm:latest",
+    "model_version": "tinix-lm:latest",
     "temperature": 0.25,
-    "seed": null,
+    "seed": 42,
+    "git_commit": "a4c5c7e",
     "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
     "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
     "judge_prompt": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
