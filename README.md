@@ -6,12 +6,13 @@ Tài liệu hướng dẫn và mã nguồn thực hành thuộc series chuyên s
 - **Mục tiêu:** Xây dựng Autonomous Checklist Agent cho phép người dùng nhập mục tiêu nhỏ (ví dụ: *Viết bài chia sẻ giải thích RAG cho người mới bắt đầu*).
 - **Cơ chế cốt lõi:**
   - Tự động phân tích mục tiêu và lập checklist tối đa 3 bước (Dynamic Planning qua LLM `tinix-lm:latest` / Ollama GPU cục bộ kết hợp Fallback an toàn).
-  - Vòng lặp quan sát và thích ứng bước kế tiếp (**Observe & Adapt**): Sau mỗi bước thực thi, tác nhân quan sát kết quả trung gian để điều chỉnh chỉ dẫn thực thi cho các bước kế tiếp.
+  - Tích hợp **Tool Registry** cho phép Agent chọn action thực tế (search, calculate, read_document) qua chuẩn gọi Tool Calling.
+  - Vòng lặp quan sát và đánh giá mạnh mẽ (**Observe, Adapt & REPLAN**): LLM tự động phán đoán chất lượng bước trước, nếu có lỗi hệ thống sẽ tự động tạo `retry_step` hoặc tự động xóa hàng đợi cũ và gọi lại bộ lên kế hoạch (`plan_steps`) để khắc phục lỗi.
   - Thực thi tuần tự (Sequential Execution) và truyền trạng thái qua State Memory.
   - Kiểm soát giới hạn vòng lặp hữu hạn (Bounded Loop $\le$ 3 bước).
-  - Đánh giá chất lượng định lượng chặt chẽ (**Automated Quality Evaluator**: TTR đa dạng từ vựng $\ge 0.35$, độ dài ký tự/từ, cấu trúc Markdown, từ khóa trọng tâm).
+  - Đánh giá chất lượng bằng **LLM-as-a-judge** nghiêm ngặt với Rubric: Tính chính xác (Correctness), Tính bám sát (Groundedness), và Tính toàn vẹn (Completeness).
   - Phân định rõ ràng 3 trạng thái dừng (**Stop Condition**): `COMPLETED` (chỉ khi `QualityEvaluator.passed == True`), `BUDGET_EXHAUSTED` (hết số bước cho phép mà chưa đạt chuẩn), và `FAILED` (bước thực thi gặp ngoại lệ).
-  - Xuất báo cáo kiểm toán đầy đủ: Kế hoạch ban đầu, nhật ký từng bước thực tế và báo cáo nghiệm thu cuối cùng (`agent_final_report.json`).
+  - Xuất báo cáo kiểm toán đầy đủ: Ghi nhận 100% metadata (**model_version, git_commit, python_version, seed, temperature**) để tái hiện chính xác thực nghiệm.
 
 ## 2. Cấu trúc thư mục
 ```text
@@ -49,7 +50,7 @@ Chạy tác nhân tự hành:
 python3 code/checklist_agent.py
 ```
 
-Chạy bộ 11 kịch bản kiểm thử toàn diện:
+Chạy bộ 13 kịch bản kiểm thử toàn diện (Adversarial Tests):
 ```bash
 python3 code/eval_agent.py
 ```

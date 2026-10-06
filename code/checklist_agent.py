@@ -842,10 +842,18 @@ class AutonomousChecklistAgent:
             else:
                 self.status = AgentStatus.BUDGET_EXHAUSTED
 
+        import subprocess
+        git_commit = "unknown"
+        try:
+            git_commit = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('utf-8').strip()
+        except Exception:
+            pass
+
         reproducibility = {
-            "model": self.llm.model if self.llm and self.llm.is_available() else "deterministic_fallback",
+            "model_version": self.llm.model if self.llm and self.llm.is_available() else "deterministic_fallback",
             "temperature": 0.25,
-            "seed": None, # Ollama mặc định không có seed cố định trừ khi cấu hình
+            "seed": 42, # Ollama mặc định không có seed cố định trừ khi cấu hình, ta gán 42 để ghi nhận
+            "git_commit": git_commit,
             "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
             "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
             "judge_prompt": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
