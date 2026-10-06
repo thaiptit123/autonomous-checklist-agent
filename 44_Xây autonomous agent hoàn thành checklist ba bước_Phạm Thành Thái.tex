@@ -338,7 +338,7 @@ Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ng�
 \begin{enumerate}
     \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không (ví dụ: mục tiêu viết bài đòi hỏi phải có \texttt{final\_article} và vượt qua kiểm định của \texttt{QualityEvaluator}). Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED} đại diện cho mục tiêu hoàn thành, tương đương \texttt{GOAL\_ACHIEVED}).
     \item \textbf{Trạng thái hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}):} Khi số bước thực thi đạt ngưỡng cho phép (ví dụ \texttt{max\_steps = 1} với mục tiêu viết bài, hệ thống mới chỉ xong dàn ý), tác nhân ngắt vòng lặp an toàn và ghi nhận trạng thái \texttt{BUDGET\_EXHAUSTED} chứ không báo nhầm là \texttt{COMPLETED}.
-    \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), hệ thống ngắt phiên làm việc ngay lập tức, chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
+    \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), Agent tự động thử lại một lần. Nếu lỗi liên tiếp vượt ngưỡng cho phép, hệ thống mới chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
 \end{enumerate}
 
 Nhờ đó, tác nhân vừa có tính linh hoạt tự hành, vừa tăng khả năng kiểm soát trong phạm vi các giới hạn được cấu hình.
@@ -652,7 +652,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \end{Highlighting}
 \end{Shaded}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống tự động lưu vết các siêu dữ liệu (metadata) bao gồm: \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, trạng thái \texttt{seed} và \texttt{prompt\_template\_summary}, qua đó minh bạch hóa quá trình thực nghiệm.
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống tự động lưu vết các siêu dữ liệu (metadata) bao gồm: \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, trạng thái \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết và đối chiếu thông tin (các tham số này được lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
 
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
