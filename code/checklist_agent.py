@@ -896,11 +896,11 @@ class AutonomousChecklistAgent:
         reproducibility = {
             "model_version": self.llm.model if self.llm and self.llm.is_available() else "deterministic_fallback",
             "temperature": 0.25,
-            "seed": 42, # Ollama mặc định không có seed cố định trừ khi cấu hình, ta gán 42 để ghi nhận
+            "seed": None, # Chưa cấu hình seed cố định cho Ollama
             "git_commit": git_commit,
-            "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
-            "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
-            "judge_prompt": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
+            "planner_prompt_template_summary": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
+            "executor_prompt_template_summary": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
+            "judge_prompt_template_summary": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
             "python_version": sys.version.split()[0],
             "os": sys.platform
         }
