@@ -219,6 +219,20 @@ class QualityEvaluator:
                     if "false" in llm_eval.lower() or "không đạt" in llm_eval.lower():
                         llm_passed = False
                         review_notes.append("✗ LLM Judge từ chối: (Parse exception fallback).")
+        else:
+            # Chế độ Deterministic Fallback Judge (khi LLM offline)
+            # 1. Correctness: Chặn các khẳng định tuyệt đối sai sự thật
+            if any(k in content.lower() for k in ["chính xác 100%", "tuyệt đối", "luôn luôn"]):
+                llm_passed = False
+                review_notes.append("✗ Deterministic Judge từ chối: Nội dung chứa khẳng định tuyệt đối đáng ngờ (Correctness failed).")
+            # 2. Completeness: Đảm bảo có định nghĩa cơ bản
+            elif intent == "full_article" and len(content.split()) < 150:
+                llm_passed = False
+                review_notes.append("✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).")
+            # 3. Groundedness: Đảm bảo bám sát nguồn nếu có
+            elif source_doc and not any(word in content.lower() for word in source_doc.lower().split()[:5] if len(word) > 3):
+                llm_passed = False
+                review_notes.append("✗ Deterministic Judge từ chối: Nội dung có dấu hiệu không bám sát nguồn (Groundedness failed).")
 
         passed = passed and crit_complete_sentence and llm_passed
 
