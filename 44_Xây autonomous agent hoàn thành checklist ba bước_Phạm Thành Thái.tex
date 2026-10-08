@@ -404,9 +404,12 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        matched_kws }\OperatorTok{=}\NormalTok{ [kw }\ControlFlowTok{for}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ goal_kws }\ControlFlowTok{if}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ content.lower()]}
 \NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
 \NormalTok{        }\CommentTok{# 5. Kiểm tra lỗi cắt xén câu (cut-off sentence)}
-\NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{))}
+\NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ (content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{)) }\KeywordTok{or} \StringTok{"..."} \KeywordTok{in}\NormalTok{ content.strip()[}\OperatorTok{-}\DecValTok{5}\NormalTok{:])}
 \NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Correctness, Groundedness, Completeness)}
-\NormalTok{        llm_passed }\OperatorTok{=} \ConstantTok{True} \CommentTok{# (Thực thi llm_client.generate và parse JSON)}
+\NormalTok{        llm_passed }\OperatorTok{=} \ConstantTok{True}
+\NormalTok{        }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{and}\NormalTok{ llm_client.is_available():}
+\NormalTok{            judge_res }\OperatorTok{=}\NormalTok{ json.loads(llm_client.generate(prompt))}
+\NormalTok{            llm_passed }\OperatorTok{=}\NormalTok{ judge_res.get(}\StringTok{"correctness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"completeness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"groundedness"}\NormalTok{, }\DecValTok{1}\NormalTok{)}
 \NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete }\KeywordTok{and}\NormalTok{ llm_passed}
         \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
 \end{Highlighting}
@@ -669,7 +672,7 @@ Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bư�
 
 \section{Kết luận}\label{ket-luan}
 
-Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự có quản lý trạng thái $\rightarrow$ Giới hạn số bước an toàn $\rightarrow$ Điều kiện dừng chuẩn xác}.
+Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát và Đánh giá (Observe \& Evaluate) $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
 
 Thông qua bài học này, bạn đã thiết kế và vận hành thành công hệ thống Bounded Checklist Agent có cơ chế xử lý lỗi và retry trong phạm vi giới hạn để giải quyết bài toán viết bài chia sẻ RAG cho người mới bắt đầu. Mô hình khép kín này là nền tảng tối quan trọng giúp bạn tự tin bước vào những bài toán phức tạp hơn như Multi-Agent Systems, Hierarchical Planning và Graph-based Autonomous Workflows trong tương lai.
 
