@@ -411,9 +411,11 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{            judge_res }\OperatorTok{=}\NormalTok{ json.loads(llm_client.generate(prompt))}
 \NormalTok{            llm_passed }\OperatorTok{=}\NormalTok{ judge_res.get(}\StringTok{"correctness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"completeness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"groundedness"}\NormalTok{, }\DecValTok{1}\NormalTok{)}
 \NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete }\KeywordTok{and}\NormalTok{ llm_passed}
-        \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
+\NormalTok{        return \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
 \end{Highlighting}
 \end{Shaded}
+
+\textit{*Lưu ý: Khi LLM Judge không khả dụng, hệ thống chuyển sang chế độ Deterministic Fallback Judge để kiểm định ngặt nghèo các tiêu chí cấu trúc/định lượng và nội dung rác, nhưng không coi đó là bằng chứng đầy đủ cho correctness hoặc groundedness.}
 
 \subsection{3. Thiết kế khung ToolRegistry làm điểm mở rộng}
 Để vượt qua giới hạn chỉ sinh văn bản, hệ thống tích hợp khung ToolRegistry mô phỏng giao tiếp với công cụ, được thiết kế làm điểm mở rộng cho Tool Calling thực tế:
@@ -601,7 +603,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 13 kịch bản đánh giá năng lực tác nhân (bao gồm Adversarial Tests)} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 14 kịch bản đánh giá năng lực tác nhân (bao gồm Adversarial Tests)} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -623,6 +625,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 11 & Sai sự thật nhưng đúng format (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
 12 & Thiếu nội dung bắt buộc (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
 13 & Nội dung bịa đặt, không bám sát (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
+14 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -638,17 +641,17 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định nội dung cơ bản của RAG"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết và chỉnh sửa bài chia sẻ"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định các ý chính và cấu trúc dàn ý..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Soạn thảo nội dung bài chia sẻ hoàn chỉnh..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Rà soát, kiểm định chất lượng và nghiệm thu..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [}
 \NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{60.088}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? (Giới thiệu cơ bản) RAG là phương pháp kết hợp..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{60.09}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý bài chia sẻ ngắn: RAG là gì? 1. Mở đầu..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{112.077}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? Một cách giải thích đơn giản cho người mới..."}\NormalTok{\}}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"Dàn ý chi tiết bài viết: Khám phá toàn diện RAG..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{60.09}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Hướng dẫn toàn diện và giải thích bản chất: RAG..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{112.077}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{, }\StringTok{"draft_article"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Hướng dẫn toàn diện và giải thích bản chất: RAG..."}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{363.609}
 \NormalTok{\}}

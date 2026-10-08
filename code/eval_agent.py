@@ -234,9 +234,10 @@ class TestUnitOffline(unittest.TestCase):
         
         # Test sẽ thất bại hoặc dừng sớm, nhưng quan trọng là log/queue có REPLAN
         report = agent.run("Viết bài chia sẻ ngắn.")
-        # Nếu replan xảy ra, status có thể là BUDGET_EXHAUSTED hoặc FAILED, nhưng steps_executed sẽ ghi nhận có bước REPLAN
-        # Không assert quá chặt vì ta chỉ cần chứng minh replan có xảy ra
+        # Nếu replan xảy ra, kế hoạch (plan) sẽ được thay thế bằng danh sách bước mới ("Bước Replan")
         self.assertIsNotNone(report)
+        replan_executed = any("Bước Replan" in step.title for step in report.plan)
+        self.assertTrue(replan_executed, "Action queue chưa được thay thế bằng kế hoạch mới từ REPLAN")
 
 
 
