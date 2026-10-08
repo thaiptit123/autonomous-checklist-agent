@@ -278,11 +278,7 @@ Mô hình này (thường thấy trong các sequential chain cơ bản) hoạt �
     \label{fig:architecture}
 \end{figure}
 
-Ngược lại, \textbf{tác nhân tự hành (autonomous agent)} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt tạo nên tính tự hành chính là:
-\begin{enumerate}
-    \item \textbf{Bộ lập kế hoạch sinh checklist trực tiếp từ mục tiêu:} Người dùng chỉ cung cấp mục tiêu (Goal). Ở chế độ LLM, planner sinh checklist động từ mục tiêu; executor sử dụng action trong checklist và gọi LLM để sinh kết quả cho từng bước; cơ chế dự phòng xác định (deterministic fallback) chỉ đóng vai trò an toàn khi LLM không khả dụng.
-    \item \textbf{Chủ động đánh giá điều kiện dừng:} Sau mỗi bước thực thi, tác nhân tự kiểm tra xem kết quả hiện tại đã thỏa mãn mục tiêu chưa. Nếu đã đạt (\texttt{Goal Achieved}), nó chủ động ra lệnh \textbf{dừng ngay lập tức} mà không cần chạy cố các bước thừa.
-\end{enumerate}
+Ngược lại, \textbf{tác nhân tự hành (autonomous agent)} hoạt động dựa trên vòng lặp phản hồi khép kín (Sense - Plan - Act - Observe - Evaluate). Điểm mấu chốt của tính tự hành là khả năng lựa chọn hành động dựa trên mục tiêu và trạng thái hiện tại, thực thi, quan sát kết quả, đánh giá và điều chỉnh hoặc lập lại kế hoạch trong giới hạn an toàn.
 
 \subsection{2. Năm thành phần cốt lõi của một Checklist Agent}
 Một hệ thống tác nhân tự hành hoàn chỉnh được cấu thành từ 5 bộ phận hữu cơ:
@@ -407,7 +403,11 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        goal_kws }\OperatorTok{=}\NormalTok{ [w }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ goal.lower().split() }\ControlFlowTok{if} \BuiltInTok{len}\NormalTok{(w) }\OperatorTok{>} \DecValTok{2} \KeywordTok{and}\NormalTok{ w }\KeywordTok{not} \KeywordTok{in}\NormalTok{ stop_words]}
 \NormalTok{        matched_kws }\OperatorTok{=}\NormalTok{ [kw }\ControlFlowTok{for}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ goal_kws }\ControlFlowTok{if}\NormalTok{ kw }\KeywordTok{in}\NormalTok{ content.lower()]}
 \NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
-\NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance}
+\NormalTok{        }\CommentTok{# 5. Kiểm tra lỗi cắt xén câu (cut-off sentence)}
+\NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{))}
+\NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Correctness, Groundedness, Completeness)}
+\NormalTok{        llm_passed }\OperatorTok{=} \ConstantTok{True} \CommentTok{# (Thực thi llm_client.generate và parse JSON)}
+\NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete }\KeywordTok{and}\NormalTok{ llm_passed}
         \ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
 \end{Highlighting}
 \end{Shaded}

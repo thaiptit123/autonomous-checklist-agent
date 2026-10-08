@@ -22,7 +22,7 @@ Bai44/
 ├── README.md
 ├── code/
 │   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe & Adapt)
-│   ├── eval_agent.py           # Bộ 11 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
+│   ├── eval_agent.py           # Bộ 13 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
 │   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM thực tế (~10.25s)
 └── images/
@@ -40,7 +40,7 @@ Bai44/
    # Nếu bạn có model tinix-lm
    ollama pull tinix-lm:latest
    
-   # HOẶC sử dụng fallback model qwen2.5:3b (Agent có tính năng tự nhận diện model khả dụng)
+   # HOẶC sử dụng fallback model qwen2.5:3b (Nếu tinix-lm:latest không tồn tại, Agent tự chọn model đầu tiên đang có trong Ollama, ví dụ qwen2.5:3b)
    ollama pull qwen2.5:3b
    ```
 3. **Cài đặt thư viện Python**: (Không yêu cầu thư viện ngoài, chỉ dùng chuẩn của Python 3.8+).
