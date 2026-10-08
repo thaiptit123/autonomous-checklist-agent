@@ -295,10 +295,10 @@ Một hệ thống tác nhân tự hành hoàn chỉnh được cấu thành t�
 \subsection{1. Kịch bản thực tế: Bài viết chia sẻ về RAG cho người mới bắt đầu}
 Để chứng minh năng lực tự hành một cách thuyết phục nhất, chúng ta chọn một tác vụ cụ thể, có ranh giới rõ ràng nhưng đòi hỏi chất lượng logic cao: \textbf{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. 
 
-Với kịch bản này, bộ lập kế hoạch tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}):
+Với kịch bản này, bộ lập kế hoạch tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}):
 \begin{itemize}
-    \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{research\_points}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG (Retrieval-Augmented Generation), vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
-    \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{outline}).} Kế thừa các luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần mạch lạc: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
+    \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{outline}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG (Retrieval-Augmented Generation), vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
+    \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{generate}).} Kế thừa các luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần mạch lạc: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
     \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
 \end{itemize}
 
@@ -547,7 +547,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
-Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{review\_polish}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
+Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
@@ -558,7 +558,7 @@ Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{
 
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
-    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{review\_polish}).
+    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{outline}), Bước 2 (\texttt{generate}), Bước 3 (\texttt{review\_polish}).
     \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), cho thấy hệ thống có khả năng thích ứng với kết quả trung gian thay vì chỉ thực thi một chuỗi bước cố định. Đặc biệt, nếu kết quả quan sát cho thấy kế hoạch hiện tại không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (tổng thời gian 363.609s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.56 (ngưỡng $\ge 0.35$), độ dài 2515 ký tự (482 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}

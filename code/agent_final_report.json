@@ -98,7 +98,7 @@
   "reproducibility": {
     "model_version": "tinix-lm:latest",
     "temperature": 0.25,
-    "seed": 42,
+    "seed": null,
     "git_commit": "a4c5c7e",
     "planner_prompt": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
     "executor_prompt": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",

@@ -24,7 +24,7 @@ Bai44/
 │   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe & Adapt)
 │   ├── eval_agent.py           # Bộ 14 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
-│   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM thực tế (~10.25s)
+│   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM thực tế (~363.609s)
 └── images/
     ├── architecture_diagram.png # Sơ đồ kiến trúc tổng thể tác nhân
     ├── state_flow_diagram.png   # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
