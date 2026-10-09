@@ -91,6 +91,8 @@ class ToolRegistry:
                 if isinstance(node, ast.Num):
                     return node.n
                 elif isinstance(node, ast.Constant):
+                    if not isinstance(node.value, (int, float, complex)):
+                        raise ValueError("Chỉ chấp nhận số")
                     return node.value
                 elif isinstance(node, ast.BinOp):
                     left = _safe_eval(node.left)
