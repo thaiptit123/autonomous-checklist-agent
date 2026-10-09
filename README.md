@@ -35,12 +35,9 @@ Bai44/
 Để đảm bảo khả năng tái tạo kết quả (reproducibility) với Integration Tests, vui lòng thiết lập môi trường Ollama cục bộ:
 
 1. **Cài đặt Ollama**: Tải và cài đặt tại [ollama.com](https://ollama.com). Đảm bảo service chạy ở port mặc định `11434` hoặc `11436` (GPU).
-2. **Kéo mô hình (Pull model)**:
+2. **Kéo mô hình dự phòng (Mặc định)**:
+   Mô hình `tinix-lm:latest` là mô hình nội bộ độc quyền không được publish public. Nếu không có quyền truy cập file `Modelfile` để build nội bộ, bạn có thể chạy Agent bằng mô hình thay thế mặc định:
    ```bash
-   # Nếu bạn có model tinix-lm (mô hình nội bộ, import bằng: ollama create tinix-lm:latest -f Modelfile)
-   ollama pull tinix-lm:latest
-   
-   # HOẶC sử dụng fallback model qwen2.5:3b (Nếu tinix-lm:latest không tồn tại, Agent tự chọn model đầu tiên đang có trong Ollama)
    ollama pull qwen2.5:3b
    ```
 3. **Cài đặt thư viện Python**: (Không yêu cầu thư viện ngoài, chỉ dùng chuẩn của Python 3.8+).

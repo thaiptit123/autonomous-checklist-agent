@@ -405,27 +405,34 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
 \NormalTok{        }\CommentTok{# 5. Kiểm tra lỗi cắt xén câu (cut-off sentence)}
 \NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ (content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{)) }\KeywordTok{or} \StringTok{"..."} \KeywordTok{in}\NormalTok{ content.strip()[}\OperatorTok{-}\DecValTok{5}\NormalTok{:])}
-\NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Correctness, Groundedness, Completeness)}
+\NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Chế độ fail-closed)}
 \NormalTok{        llm_passed }\OperatorTok{=} \ConstantTok{True}
+\NormalTok{        judge_verdict }\OperatorTok{=} \VariableTok{None}
 \NormalTok{        }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{and}\NormalTok{ llm_client.is_available():}
-\NormalTok{            judge_res }\OperatorTok{=}\NormalTok{ json.loads(llm_client.generate(prompt))}
-\NormalTok{            llm_passed }\OperatorTok{=}\NormalTok{ judge_res.get(}\StringTok{"correctness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"completeness"}\NormalTok{, }\DecValTok{1}\NormalTok{) }\KeywordTok{and}\NormalTok{ judge_res.get(}\StringTok{"groundedness"}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{            llm_eval }\OperatorTok{=}\NormalTok{ llm_client.generate(prompt)}
+\NormalTok{            }\ControlFlowTok{if}\NormalTok{ llm_eval }\KeywordTok{and}\NormalTok{ re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL):}
+\NormalTok{                judge_res }\OperatorTok{=}\NormalTok{ json.loads(re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL).group(}\DecValTok{0}\NormalTok{))}
+\NormalTok{                c, g, comp }\OperatorTok{=}\NormalTok{ judge_res.get(}\StringTok{"correctness"}\NormalTok{), judge_res.get(}\StringTok{"groundedness"}\NormalTok{), judge_res.get(}\StringTok{"completeness"}\NormalTok{)}
+\NormalTok{                }\ControlFlowTok{if} \DecValTok{0} \KeywordTok{in}\NormalTok{ (c, g, comp) }\KeywordTok{or} \VariableTok{None} \KeywordTok{in}\NormalTok{ (c, g, comp): llm_passed }\OperatorTok{=} \ConstantTok{False}
+\NormalTok{                judge_verdict }\OperatorTok{=}\NormalTok{ judge_res}
+\NormalTok{            }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{                llm_passed }\OperatorTok{=} \ConstantTok{False} \CommentTok{# Parse lỗi hoặc không có dữ liệu -> fail-closed}
 \NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete }\KeywordTok{and}\NormalTok{ llm_passed}
-\NormalTok{        return \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"matched_keywords"}\NormalTok{: matched_kws\}}
+\NormalTok{        return \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"judge_verdict"}\NormalTok{: judge_verdict\}}
 \end{Highlighting}
 \end{Shaded}
 
 \textit{*Lưu ý: Khi LLM Judge không khả dụng, hệ thống chuyển sang chế độ Deterministic Fallback Judge để kiểm định ngặt nghèo các tiêu chí cấu trúc/định lượng và nội dung rác, nhưng không coi đó là bằng chứng đầy đủ cho correctness hoặc groundedness.}
 
-\subsection{3. Thiết kế khung ToolRegistry làm điểm mở rộng}
-Để vượt qua giới hạn chỉ sinh văn bản, hệ thống tích hợp khung ToolRegistry mô phỏng giao tiếp với công cụ, được thiết kế làm điểm mở rộng cho Tool Calling thực tế:
+\subsection{3. Thiết kế khung ToolRegistry (Mock) làm điểm mở rộng}
+Hệ thống tích hợp \texttt{ToolRegistry} chủ yếu để làm điểm mở rộng cho phép bổ sung Tool Calling thực tế trong tương lai. Hiện tại, các công cụ \texttt{search\_knowledge} và \texttt{read\_document} chỉ trả về chuỗi mô phỏng giả lập. Công cụ \texttt{calculate} sử dụng \texttt{ast.literal\_eval} thay cho \texttt{eval} để đảm bảo tính an toàn:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{class}\NormalTok{ }\DataTypeTok{ToolRegistry}\NormalTok{:}
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{search_knowledge}\NormalTok{(topic: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
-        \ControlFlowTok{return} \StringTok{f"[Tool: search] Tìm thấy kết quả: \{topic\}"}
+        \ControlFlowTok{return} \StringTok{f"[Mock Tool: search] Đã mô phỏng tìm kiếm: \{topic\}"}
     
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{calculate}\NormalTok{(expr: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
@@ -607,7 +614,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 14 kịch bản (13 Offline Unit Tests đạt \& 1 Integration Test)} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 17 kịch bản (13 Offline Unit Tests đạt \& 4 Integration Tests)} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -616,22 +623,25 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
 \endhead
-\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Integration Test (Kết nối Ollama thực tế)}} \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Integration Tests (Kết nối Ollama thực tế)}} \\ \hline
 1 & Viết bài RAG với LLM thật (\texttt{use\_llm=True}) & \texttt{SKIPPED (nếu thiếu Ollama)} & Bỏ qua nếu thiếu model, chạy thành công nếu có Ollama \\ \hline
+2 & Adversarial (Real LLM): Kiểm tra lỗi Correctness & \texttt{SKIPPED (nếu thiếu Ollama)} & Bỏ qua nếu thiếu model, đánh fail (Correctness=0) \\ \hline
+3 & Adversarial (Real LLM): Kiểm tra lỗi Completeness & \texttt{SKIPPED (nếu thiếu Ollama)} & Bỏ qua nếu thiếu model, đánh fail (Completeness=0) \\ \hline
+4 & Adversarial (Real LLM): Kiểm tra lỗi Groundedness & \texttt{SKIPPED (nếu thiếu Ollama)} & Bỏ qua nếu thiếu model, đánh fail (Groundedness=0) \\ \hline
 \multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Offline Unit Tests (Mô phỏng LLM, đảm bảo luôn Pass)}} \\ \hline
-2 & Chuẩn bị outline Docker (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
-3 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Sử dụng tài liệu nguồn) \\ \hline
-4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
-5 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
-6 & Mục tiêu ngoài chủ đề mẫu (Apache Kafka - Fallback) & \texttt{COMPLETED} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
-7 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
-8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
-9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
-10 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{FAILED} & \texttt{Execution failed} (Chặn tạo nội dung giả) \\ \hline
-11 & Sai sự thật nhưng đúng format (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
-12 & Thiếu nội dung bắt buộc (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
-13 & Nội dung bịa đặt, không bám sát (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
-14 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
+5 & Chuẩn bị outline Docker (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
+6 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Sử dụng tài liệu nguồn) \\ \hline
+7 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
+8 & Kiểm duyệt từ chối (Chất lượng không đạt) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
+9 & Mục tiêu ngoài chủ đề mẫu (Apache Kafka - Fallback) & \texttt{COMPLETED} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
+10 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
+11 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
+12 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
+13 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{FAILED} & \texttt{Execution failed} (Chặn tạo nội dung giả) \\ \hline
+14 & Sai sự thật nhưng đúng format (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
+15 & Thiếu nội dung bắt buộc (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
+16 & Nội dung bịa đặt, không bám sát (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
+17 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}

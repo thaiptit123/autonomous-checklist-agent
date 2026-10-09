@@ -188,6 +188,8 @@ class QualityEvaluator:
             
         # 6. Mở rộng đánh giá bằng LLM-as-a-judge (Nếu môi trường hỗ trợ)
         llm_passed = True
+        judge_verdict = None
+        
         if llm_client and llm_client.is_available():
             judge_prompt = (
                 f"Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness), "
@@ -204,6 +206,7 @@ class QualityEvaluator:
                     match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
                     if match:
                         judge_res = json.loads(match.group(0))
+                        judge_verdict = judge_res
                         c = judge_res.get("correctness")
                         g = judge_res.get("groundedness")
                         comp = judge_res.get("completeness")
@@ -214,12 +217,15 @@ class QualityEvaluator:
                             review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
                     else:
                         llm_passed = False
+                        judge_verdict = {"error": "Parse fail fallback", "reason": "Không trả về định dạng JSON hợp lệ"}
                         review_notes.append("✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).")
                 except Exception as e:
                     llm_passed = False
+                    judge_verdict = {"error": "Parse exception", "reason": str(e)}
                     review_notes.append(f"✗ LLM Judge từ chối: Lỗi ngoại lệ khi parse JSON ({str(e)}).")
             else:
                 llm_passed = False
+                judge_verdict = {"error": "No response", "reason": "Model không trả về kết quả đánh giá"}
                 review_notes.append("✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.")
         else:
             # Chế độ Deterministic Fallback Judge (khi LLM offline)
@@ -244,6 +250,7 @@ class QualityEvaluator:
             "word_count": word_count,
             "ttr": ttr,
             "matched_keywords": matched_keywords,
+            "judge_verdict": judge_verdict,
             "review_notes": review_notes
         }
 
@@ -544,7 +551,7 @@ class AutonomousChecklistAgent:
                 elif step.action_type == "generate":
                     self.context_memory["draft_article"] = result
                 elif step.action_type == "review_polish":
-                    eval_res = self.evaluator.evaluate(result, goal, "full_article", self.llm)
+                    eval_res = self.evaluator.evaluate(result, goal, "full_article", self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
                     self.context_memory["review_notes"] = eval_res["review_notes"]
                     self.context_memory["final_article"] = result
                 return result
@@ -657,7 +664,7 @@ class AutonomousChecklistAgent:
                 f"Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, "
                 f"bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của {topic} trong thực tiễn."
             )
-            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article", self.llm, source_doc=self.context_memory.get("research_points", ""))
+            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article", self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             self.context_memory["review_notes"] = eval_res["review_notes"]
             self.context_memory["final_article"] = polished_article
             return polished_article
@@ -674,19 +681,19 @@ class AutonomousChecklistAgent:
         """
         # 1. Trường hợp mục tiêu chỉ yêu cầu dàn ý (outline_only)
         if intent == "outline_only" and "outline" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent, self.llm)
+            eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
                 return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng theo đúng mục tiêu.", AgentStatus.COMPLETED
 
         # 2. Trường hợp mục tiêu tóm tắt tài liệu (summarize)
         if intent == "summarize" and "summary" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent, self.llm)
+            eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
                 return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng.", AgentStatus.COMPLETED
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm, source_doc=self.context_memory.get("research_points", ""))
+            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
                 return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.", AgentStatus.COMPLETED
 
@@ -702,7 +709,7 @@ class AutonomousChecklistAgent:
 
             # BẮT BUỘC: Chỉ khi sản phẩm tồn tại VÀ pass QualityEvaluator mới trả COMPLETED!
             if target_content:
-                eval_res = self.evaluator.evaluate(target_content, goal, intent, self.llm)
+                eval_res = self.evaluator.evaluate(target_content, goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
                 if eval_res["passed"]:
                     return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau {current_step_index} bước.", AgentStatus.COMPLETED
                 else:
@@ -873,7 +880,7 @@ class AutonomousChecklistAgent:
                 )
 
             if self.final_output:
-                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent, self.llm, source_doc=self.context_memory.get("research_points", ""))
+                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             else:
                 self.quality_metrics = {"passed": False, "review_notes": ["Không có sản phẩm đầu ra."]}
 

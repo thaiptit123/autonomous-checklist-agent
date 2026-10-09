@@ -88,6 +88,12 @@
       "generation",
       "mô hình"
     ],
+    "judge_verdict": {
+      "correctness": 1,
+      "groundedness": 1,
+      "completeness": 1,
+      "reason": "Giải thích chính xác RAG với ví dụ dễ hiểu cho người mới bắt đầu"
+    },
     "review_notes": [
       "✓ Tiêu chuẩn độ dài: Đạt 1856 ký tự",
       "✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown",

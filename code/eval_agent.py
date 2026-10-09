@@ -258,6 +258,36 @@ class TestIntegrationLLM(unittest.TestCase):
         self.assertTrue(report.quality_metrics["passed"])
         self.assertGreater(report.total_duration_sec, 0.5)
 
+    def test_adversarial_integration_correctness(self):
+        print("\n[Integration Test] 2. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Sai bản chất)")
+        agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
+        adversarial_content = "RAG là một công cụ để nén ảnh JPEG và tăng tốc độ wifi. RAG không liên quan gì đến trí tuệ nhân tạo."
+        res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG", "full_article", agent.llm)
+        self.assertFalse(res["passed"])
+        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
+            self.assertEqual(res["judge_verdict"].get("correctness"), 0)
+
+    def test_adversarial_integration_completeness(self):
+        print("\n[Integration Test] 3. Adversarial (Real LLM): Kiểm tra lỗi Completeness (Thiếu yêu cầu)")
+        agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
+        adversarial_content = "RAG (Retrieval-Augmented Generation) là công nghệ kết hợp tìm kiếm và sinh văn bản."
+        # Quá ngắn, thiếu phân tích, ví dụ
+        res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG với ví dụ và ưu nhược điểm chi tiết", "full_article", agent.llm)
+        self.assertFalse(res["passed"])
+        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
+            self.assertEqual(res["judge_verdict"].get("completeness"), 0)
+
+    def test_adversarial_integration_groundedness(self):
+        print("\n[Integration Test] 4. Adversarial (Real LLM): Kiểm tra lỗi Groundedness (Bịa đặt nguồn)")
+        agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
+        source_doc = "Sản phẩm A chỉ hỗ trợ kết nối Bluetooth 4.0 và không có WiFi."
+        adversarial_content = "Sản phẩm A là thiết bị tiên tiến nhất hiện nay, trang bị WiFi 6 băng tần kép và Bluetooth 5.2, mang lại tốc độ vượt trội."
+        res = agent.evaluator.evaluate(adversarial_content, "Tóm tắt tính năng sản phẩm A", "summarize", agent.llm, source_doc=source_doc)
+        self.assertFalse(res["passed"])
+        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
+            self.assertEqual(res["judge_verdict"].get("groundedness"), 0)
+
+
 
 if __name__ == "__main__":
     print("\n" + "=" * 68)
