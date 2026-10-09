@@ -212,7 +212,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \item
   \textbf{Yêu cầu kiến thức nền:} Hiểu biết cơ bản về ngôn ngữ lập trình Python (Data classes, Enum, xử lý chuỗi và tệp tin JSON). Đã từng làm quen với khái niệm LLM và kỹ thuật sinh văn bản có cấu trúc.
 \item
-  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436), sau đó kéo mô hình bằng lệnh \texttt{ollama pull tinix-lm:latest}. \textit{Lưu ý: \texttt{tinix-lm} là mô hình nội bộ, bạn có thể tự tạo bằng lệnh \texttt{ollama create tinix-lm:latest -f Modelfile}}. Nếu model này không tồn tại nhưng Ollama có model khác (ví dụ: \texttt{qwen2.5:3b}), hệ thống tự chọn model khả dụng đầu tiên; nếu Ollama không khả dụng thì chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
+  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436). Do \texttt{tinix-lm:latest} là mô hình nội bộ độc quyền không được phát hành công khai (yêu cầu cấp quyền Modelfile), bạn có thể chạy Agent bằng mô hình thay thế mặc định bằng lệnh \texttt{ollama pull qwen2.5:3b}. Nếu không có model nào hoặc Ollama không khả dụng, hệ thống sẽ tự động chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
 \end{itemize}
 
 \hypertarget{muc-tieu}{%
@@ -390,7 +390,7 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
         \ControlFlowTok{return} \BuiltInTok{round}\NormalTok{(}\BuiltInTok{len}\NormalTok{(}\BuiltInTok{set}\NormalTok{(words)) }\OperatorTok{/} \BuiltInTok{len}\NormalTok{(words), }\DecValTok{3}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ words }\ControlFlowTok{else} \FloatTok{0.0}
 
     \AttributeTok{@classmethod}
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{evaluate}\NormalTok{(}\VariableTok{cls}\NormalTok{, content: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{]:}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{evaluate}\NormalTok{(}\VariableTok{cls}\NormalTok{, content: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, llm_client=}\VariableTok{None}\NormalTok{, source_doc: }\DataTypeTok{str}\NormalTok{=}\StringTok{""}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{]:}
         \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content: }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: }\ConstantTok{False}\NormalTok{, }\StringTok{"ttr"}\NormalTok{: }\FloatTok{0.0}\NormalTok{, }\StringTok{"char_count"}\NormalTok{: }\DecValTok{0}\NormalTok{\}}
 \NormalTok{        words }\OperatorTok{=}\NormalTok{ [re.sub(}\StringTok{r"^[^\textbackslash{}w]+|[^\textbackslash{}w]+$"}\NormalTok{, }\StringTok{""}\NormalTok{, w) }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ content.lower().split() }\ControlFlowTok{if}\NormalTok{ w]}
 \NormalTok{        ttr }\OperatorTok{=} \VariableTok{cls}\NormalTok{.calculate_ttr(content)}
@@ -425,22 +425,31 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \textit{*Lưu ý: Khi LLM Judge không khả dụng, hệ thống chuyển sang chế độ Deterministic Fallback Judge để kiểm định ngặt nghèo các tiêu chí cấu trúc/định lượng và nội dung rác, nhưng không coi đó là bằng chứng đầy đủ cho correctness hoặc groundedness.}
 
 \subsection{3. Thiết kế khung ToolRegistry (Mock) làm điểm mở rộng}
-Hệ thống tích hợp \texttt{ToolRegistry} chủ yếu để làm điểm mở rộng cho phép bổ sung Tool Calling thực tế trong tương lai. Hiện tại, các công cụ \texttt{search\_knowledge} và \texttt{read\_document} chỉ trả về chuỗi mô phỏng giả lập. Công cụ \texttt{calculate} sử dụng \texttt{ast.literal\_eval} thay cho \texttt{eval} để đảm bảo tính an toàn:
+Hệ thống tích hợp \texttt{ToolRegistry} chủ yếu để làm điểm mở rộng cho phép bổ sung Tool Calling thực tế trong tương lai. Hiện tại, các công cụ \texttt{search\_knowledge} và \texttt{read\_document} chỉ trả về chuỗi mô phỏng giả lập. Công cụ \texttt{calculate} sử dụng bộ phân tích biểu thức \texttt{ast} an toàn thay vì \texttt{eval()}, đảm bảo không thể thực thi mã độc:
 
 \begin{Shaded}
 \begin{Highlighting}[]
 \KeywordTok{class}\NormalTok{ }\DataTypeTok{ToolRegistry}\NormalTok{:}
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{search_knowledge}\NormalTok{(topic: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
-        \ControlFlowTok{return} \StringTok{f"[Mock Tool: search] Đã mô phỏng tìm kiếm: \{topic\}"}
+        \ControlFlowTok{return} \StringTok{f"[Mock Tool: search] Tìm thấy kết quả: \{topic\}"}
     
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{calculate}\NormalTok{(expr: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
         \ControlFlowTok{try}\NormalTok{:}
-            \NormalTok{node }\OperatorTok{=} \NormalTok{ast.parse(expr, mode=}\StringTok{'eval'}\NormalTok{)}
-            \ControlFlowTok{return} \StringTok{f"[Tool: calc] Kết quả: \{eval(compile(node, '<string>', 'eval'), \{'__builtins__': None\}, \{\})\}"}
-        \ControlFlowTok{except}\NormalTok{ Exception:}
-            \ControlFlowTok{return} \StringTok{"[Tool: calc] Lỗi tính toán biểu thức."}
+            \CommentTok{# Sử dụng bộ phân tích biểu thức số học chỉ cho phép các toán tử hợp lệ}
+            \KeywordTok{def}\NormalTok{ }\FunctionTok{_safe_eval}\NormalTok{(node):}
+                \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(node, ast.Num): }\ControlFlowTok{return}\NormalTok{ node.n}
+                \ControlFlowTok{elif} \BuiltInTok{isinstance}\NormalTok{(node, ast.BinOp):}
+                    \NormalTok{left, right }\OperatorTok{=}\NormalTok{ _safe_eval(node.left), _safe_eval(node.right)}
+                    \ControlFlowTok{if} \BuiltInTok{isinstance}\NormalTok{(node.op, ast.Add): }\ControlFlowTok{return}\NormalTok{ left }\OperatorTok{+}\NormalTok{ right}
+                    \CommentTok{# ... xử lý các toán tử hợp lệ khác ...}
+                \ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}\StringTok{"Toán tử không hợp lệ"}\NormalTok{)}
+            
+            \NormalTok{result }\OperatorTok{=}\NormalTok{ _safe_eval(ast.parse(expr, mode=}\StringTok{'eval'}\NormalTok{).body)}
+            \ControlFlowTok{return} \StringTok{f"[Mock Tool: calc] Kết quả: \{result\}"}
+        \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
+            \ControlFlowTok{return} \StringTok{"[Mock Tool: calc] Lỗi tính toán biểu thức."}
 \end{Highlighting}
 \end{Shaded}
 
@@ -571,7 +580,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \begin{enumerate}
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{outline}), Bước 2 (\texttt{generate}), Bước 3 (\texttt{review\_polish}).
     \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), cho thấy hệ thống có khả năng thích ứng với kết quả trung gian thay vì chỉ thực thi một chuỗi bước cố định. Đặc biệt, nếu kết quả quan sát cho thấy kế hoạch hiện tại không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
-    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (tổng thời gian 363.609s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.56 (ngưỡng $\ge 0.35$), độ dài 2515 ký tự (482 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
+    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (tổng thời gian 35.6s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.56 (ngưỡng $\ge 0.35$), độ dài 2515 ký tự (482 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}

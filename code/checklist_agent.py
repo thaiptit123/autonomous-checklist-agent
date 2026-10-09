@@ -77,20 +77,39 @@ class ToolRegistry:
     """
     @staticmethod
     def search_knowledge(topic: str) -> str:
-        return f"[Tool: search] Tìm thấy kết quả: Hệ thống {topic} giúp tự động hóa và tăng độ chính xác."
+        return f"[Mock Tool: search] Tìm thấy kết quả: {topic}"
     
     @staticmethod
     def read_document(doc_id: str) -> str:
-        return f"[Tool: read_document] Đã trích xuất nội dung từ tài liệu {doc_id}."
+        return f"[Mock Tool: read_document] Đã trích xuất nội dung từ tài liệu {doc_id}."
     
     @staticmethod
     def calculate(expr: str) -> str:
         try:
-            # Sử dụng ast.literal_eval thay vì eval() để tránh rủi ro thực thi mã độc
-            node = ast.parse(expr, mode='eval')
-            return f"[Tool: calc] Kết quả: {eval(compile(node, '<string>', 'eval'), {'__builtins__': None}, {})}"
+            # Sử dụng bộ phân tích biểu thức số học chỉ cho phép các toán tử hợp lệ
+            def _safe_eval(node):
+                if isinstance(node, ast.Num):
+                    return node.n
+                elif isinstance(node, ast.Constant):
+                    return node.value
+                elif isinstance(node, ast.BinOp):
+                    left = _safe_eval(node.left)
+                    right = _safe_eval(node.right)
+                    if isinstance(node.op, ast.Add): return left + right
+                    elif isinstance(node.op, ast.Sub): return left - right
+                    elif isinstance(node.op, ast.Mult): return left * right
+                    elif isinstance(node.op, ast.Div): return left / right
+                    elif isinstance(node.op, ast.Pow): return left ** right
+                elif isinstance(node, ast.UnaryOp):
+                    operand = _safe_eval(node.operand)
+                    if isinstance(node.op, ast.UAdd): return +operand
+                    elif isinstance(node.op, ast.USub): return -operand
+                raise ValueError("Toán tử không hợp lệ")
+
+            result = _safe_eval(ast.parse(expr, mode='eval').body)
+            return f"[Mock Tool: calc] Kết quả: {result}"
         except Exception:
-            return "[Tool: calc] Lỗi tính toán biểu thức."
+            return "[Mock Tool: calc] Lỗi tính toán biểu thức."
 
 
 class QualityEvaluator:
@@ -570,20 +589,22 @@ class AutonomousChecklistAgent:
         if step.action_type == "research_points":
             time.sleep(0.010)
             if "input_document" in self.context_memory:
-                ToolRegistry.read_document("input_doc") # Call tool for demo
+                tool_output = ToolRegistry.read_document("input_doc")
                 doc = self.context_memory["input_document"].strip()
                 sentences = [s.strip() for s in re.split(r'[.\n]+', doc) if len(s.strip()) > 8]
                 pts = [f"{i}. Luận điểm {i}: {s}" for i, s in enumerate(sentences[:3], 1)]
                 if not pts:
                     pts = [f"1. Khái niệm cốt lõi: {doc[:80]}..."]
                 result = (
+                    f"{tool_output}\n"
                     f"Trích xuất các luận điểm cốt lõi từ tài liệu nguồn ({topic}):\n" +
                     "\n".join(pts) +
                     f"\n4. Ứng dụng thực tiễn: Chuẩn hóa luồng tích hợp và tương tác an toàn."
                 )
             else:
-                ToolRegistry.search_knowledge(topic) # Call tool for demo
+                tool_output = ToolRegistry.search_knowledge(topic)
                 result = (
+                    f"{tool_output}\n"
                     f"Các luận điểm phân tích cốt lõi về {topic}:\n"
                     f"1. Bản chất & Định nghĩa: Cơ sở hình thành và mục tiêu kỹ thuật của {topic}.\n"
                     f"2. Động lực kiến trúc: Giải quyết thách thức mở rộng quy mô, tính nhất quán và độ tin cậy.\n"

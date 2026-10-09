@@ -263,9 +263,10 @@ class TestIntegrationLLM(unittest.TestCase):
         agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
         adversarial_content = "RAG là một công cụ để nén ảnh JPEG và tăng tốc độ wifi. RAG không liên quan gì đến trí tuệ nhân tạo."
         res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG", "full_article", agent.llm)
-        self.assertFalse(res["passed"])
-        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
-            self.assertEqual(res["judge_verdict"].get("correctness"), 0)
+        self.assertFalse(res["passed"], "Nội dung sai bản chất nhưng lại được pass.")
+        self.assertIsNotNone(res.get("judge_verdict"), "Không nhận được judge_verdict.")
+        self.assertNotIn("error", res["judge_verdict"], f"LLM Judge gặp lỗi: {res['judge_verdict']}")
+        self.assertEqual(res["judge_verdict"].get("correctness"), 0, "Judge không phát hiện lỗi correctness.")
 
     def test_adversarial_integration_completeness(self):
         print("\n[Integration Test] 3. Adversarial (Real LLM): Kiểm tra lỗi Completeness (Thiếu yêu cầu)")
@@ -273,9 +274,10 @@ class TestIntegrationLLM(unittest.TestCase):
         adversarial_content = "RAG (Retrieval-Augmented Generation) là công nghệ kết hợp tìm kiếm và sinh văn bản."
         # Quá ngắn, thiếu phân tích, ví dụ
         res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG với ví dụ và ưu nhược điểm chi tiết", "full_article", agent.llm)
-        self.assertFalse(res["passed"])
-        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
-            self.assertEqual(res["judge_verdict"].get("completeness"), 0)
+        self.assertFalse(res["passed"], "Nội dung thiếu yêu cầu nhưng lại được pass.")
+        self.assertIsNotNone(res.get("judge_verdict"), "Không nhận được judge_verdict.")
+        self.assertNotIn("error", res["judge_verdict"], f"LLM Judge gặp lỗi: {res['judge_verdict']}")
+        self.assertEqual(res["judge_verdict"].get("completeness"), 0, "Judge không phát hiện lỗi completeness.")
 
     def test_adversarial_integration_groundedness(self):
         print("\n[Integration Test] 4. Adversarial (Real LLM): Kiểm tra lỗi Groundedness (Bịa đặt nguồn)")
@@ -283,9 +285,10 @@ class TestIntegrationLLM(unittest.TestCase):
         source_doc = "Sản phẩm A chỉ hỗ trợ kết nối Bluetooth 4.0 và không có WiFi."
         adversarial_content = "Sản phẩm A là thiết bị tiên tiến nhất hiện nay, trang bị WiFi 6 băng tần kép và Bluetooth 5.2, mang lại tốc độ vượt trội."
         res = agent.evaluator.evaluate(adversarial_content, "Tóm tắt tính năng sản phẩm A", "summarize", agent.llm, source_doc=source_doc)
-        self.assertFalse(res["passed"])
-        if res.get("judge_verdict") and "error" not in res["judge_verdict"]:
-            self.assertEqual(res["judge_verdict"].get("groundedness"), 0)
+        self.assertFalse(res["passed"], "Nội dung không bám sát nguồn nhưng lại được pass.")
+        self.assertIsNotNone(res.get("judge_verdict"), "Không nhận được judge_verdict.")
+        self.assertNotIn("error", res["judge_verdict"], f"LLM Judge gặp lỗi: {res['judge_verdict']}")
+        self.assertEqual(res["judge_verdict"].get("groundedness"), 0, "Judge không phát hiện lỗi groundedness.")
 
 
 
