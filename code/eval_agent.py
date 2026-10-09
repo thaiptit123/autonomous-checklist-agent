@@ -152,8 +152,8 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.status, AgentStatus.FAILED)
         self.assertIn("tài liệu", report.stop_reason.lower())
 
-    def test_adversarial_wrong_fact_right_format(self):
-        print("\n[Unit Test] 11. Adversarial Test: Nội dung sai sự thật nhưng chuẩn format (LLM Judge bắt lỗi)")
+    def test_adversarial_plumbing_wrong_fact_right_format(self):
+        print("\n[Unit Test] 11. Judge Plumbing Test: Xử lý nội dung sai sự thật nhưng chuẩn format")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
         # Bật mock LLM để kiểm thử logic Evaluator thay vì monkeypatch evaluate
         agent.use_llm = True
@@ -183,8 +183,8 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
-    def test_adversarial_missing_content(self):
-        print("\n[Unit Test] 12. Adversarial Test: Thiếu nội dung bắt buộc (LLM Judge bắt lỗi)")
+    def test_adversarial_plumbing_missing_content(self):
+        print("\n[Unit Test] 12. Judge Plumbing Test: Xử lý nội dung thiếu bắt buộc")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
         agent.use_llm = True
         agent.llm = OllamaClient()
@@ -199,8 +199,8 @@ class TestUnitOffline(unittest.TestCase):
         report = agent.run("Viết bài giải thích RAG")
         self.assertFalse(report.quality_metrics["passed"])
 
-    def test_adversarial_not_grounded(self):
-        print("\n[Unit Test] 13. Adversarial Test: Nội dung hallucination không bám sát (Not Grounded)")
+    def test_adversarial_plumbing_not_grounded(self):
+        print("\n[Unit Test] 13. Judge Plumbing Test: Xử lý nội dung không bám sát (Not Grounded)")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
         agent.use_llm = True
         agent.llm = OllamaClient()

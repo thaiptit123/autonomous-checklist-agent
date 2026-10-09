@@ -212,7 +212,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \item
   \textbf{Yêu cầu kiến thức nền:} Hiểu biết cơ bản về ngôn ngữ lập trình Python (Data classes, Enum, xử lý chuỗi và tệp tin JSON). Đã từng làm quen với khái niệm LLM và kỹ thuật sinh văn bản có cấu trúc.
 \item
-  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436), sau đó kéo mô hình bằng lệnh \texttt{ollama pull tinix-lm:latest}. Nếu model này không tồn tại nhưng Ollama có model khác, hệ thống tự chọn model khả dụng đầu tiên; nếu Ollama không khả dụng thì chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
+  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436), sau đó kéo mô hình bằng lệnh \texttt{ollama pull tinix-lm:latest}. \textit{Lưu ý: \texttt{tinix-lm} là mô hình nội bộ, bạn có thể tự tạo bằng lệnh \texttt{ollama create tinix-lm:latest -f Modelfile}}. Nếu model này không tồn tại nhưng Ollama có model khác (ví dụ: \texttt{qwen2.5:3b}), hệ thống tự chọn model khả dụng đầu tiên; nếu Ollama không khả dụng thì chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
 \end{itemize}
 
 \hypertarget{muc-tieu}{%
@@ -429,7 +429,11 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
     
     \AttributeTok{@staticmethod}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{calculate}\NormalTok{(expr: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{str}\NormalTok{:}
-        \ControlFlowTok{return} \StringTok{f"[Tool: calc] Kết quả: \{eval(expr)\}"}
+        \ControlFlowTok{try}\NormalTok{:}
+            \NormalTok{node }\OperatorTok{=} \NormalTok{ast.parse(expr, mode=}\StringTok{'eval'}\NormalTok{)}
+            \ControlFlowTok{return} \StringTok{f"[Tool: calc] Kết quả: \{eval(compile(node, '<string>', 'eval'), \{'__builtins__': None\}, \{\})\}"}
+        \ControlFlowTok{except}\NormalTok{ Exception:}
+            \ControlFlowTok{return} \StringTok{"[Tool: calc] Lỗi tính toán biểu thức."}
 \end{Highlighting}
 \end{Shaded}
 
@@ -603,7 +607,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 14 kịch bản đánh giá năng lực tác nhân (bao gồm Adversarial Tests)} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 14 kịch bản (13 Offline Unit Tests đạt \& 1 Integration Test)} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -612,7 +616,9 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
 \endhead
-1 & Viết bài RAG với LLM thật (\texttt{use\_llm=True}) & \texttt{COMPLETED} & \texttt{Goal achieved} (363.609s, TTR=0.56) \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Integration Test (Kết nối Ollama thực tế)}} \\ \hline
+1 & Viết bài RAG với LLM thật (\texttt{use\_llm=True}) & \texttt{SKIPPED (nếu thiếu Ollama)} & Bỏ qua nếu thiếu model, chạy thành công nếu có Ollama \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Offline Unit Tests (Mô phỏng LLM, đảm bảo luôn Pass)}} \\ \hline
 2 & Chuẩn bị outline Docker (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
 3 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{COMPLETED} & \texttt{Goal achieved} (Sử dụng tài liệu nguồn) \\ \hline
 4 & Hết ngân sách bước (\texttt{max\_steps=1} viết bài) & \texttt{BUDGET\_EXHAUSTED} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
@@ -622,9 +628,9 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 8 & Sự cố thực thi (Action Exception) & \texttt{FAILED} & \texttt{Execution failed} (Ghi log lỗi) \\ \hline
 9 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
 10 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{FAILED} & \texttt{Execution failed} (Chặn tạo nội dung giả) \\ \hline
-11 & Sai sự thật nhưng đúng format (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
-12 & Thiếu nội dung bắt buộc (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
-13 & Nội dung bịa đặt, không bám sát (Adversarial) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
+11 & Sai sự thật nhưng đúng format (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
+12 & Thiếu nội dung bắt buộc (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
+13 & Nội dung bịa đặt, không bám sát (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
 14 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
 \hline
 \end{longtable}

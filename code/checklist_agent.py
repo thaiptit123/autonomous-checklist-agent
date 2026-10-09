@@ -20,6 +20,7 @@ import urllib.error
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field, asdict
 from enum import Enum
+import ast
 
 
 class AgentStatus(str, Enum):
@@ -71,8 +72,8 @@ class FinalReport:
 
 class ToolRegistry:
     """
-    Bộ công cụ giao tiếp môi trường thực tế (External Tools).
-    Cho phép LLM gọi (Tool Calling) để vượt qua giới hạn chỉ sinh văn bản.
+    Bộ công cụ giao tiếp môi trường thực tế (Mô phỏng).
+    Thiết kế làm điểm mở rộng cho Tool Calling thực tế để LLM tra cứu dữ liệu.
     """
     @staticmethod
     def search_knowledge(topic: str) -> str:
@@ -85,7 +86,9 @@ class ToolRegistry:
     @staticmethod
     def calculate(expr: str) -> str:
         try:
-            return f"[Tool: calc] Kết quả: {eval(expr)}"
+            # Sử dụng ast.literal_eval thay vì eval() để tránh rủi ro thực thi mã độc
+            node = ast.parse(expr, mode='eval')
+            return f"[Tool: calc] Kết quả: {eval(compile(node, '<string>', 'eval'), {'__builtins__': None}, {})}"
         except Exception:
             return "[Tool: calc] Lỗi tính toán biểu thức."
 
@@ -201,24 +204,23 @@ class QualityEvaluator:
                     match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
                     if match:
                         judge_res = json.loads(match.group(0))
-                        c = judge_res.get("correctness", 1)
-                        g = judge_res.get("groundedness", 1)
-                        comp = judge_res.get("completeness", 1)
-                        if c == 0 or g == 0 or comp == 0:
+                        c = judge_res.get("correctness")
+                        g = judge_res.get("groundedness")
+                        comp = judge_res.get("completeness")
+                        if c == 0 or g == 0 or comp == 0 or c is None or g is None or comp is None:
                             llm_passed = False
-                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Lỗi Correctness/Groundedness/Completeness')}")
+                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Lỗi Correctness/Groundedness/Completeness hoặc thiếu trường JSON')}")
                         else:
                             review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
                     else:
-                        # Fallback nếu parse fail thì vẫn phải check
-                        if "false" in llm_eval.lower() or "không đạt" in llm_eval.lower() or "lỗi" in llm_eval.lower():
-                            llm_passed = False
-                            review_notes.append("✗ LLM Judge từ chối: Không đạt chuẩn (Parse fail fallback).")
-                except Exception:
-                    # Ràng buộc an toàn: Nếu có lỗi exception khi parse nhưng text chứa từ khóa negative thì fail
-                    if "false" in llm_eval.lower() or "không đạt" in llm_eval.lower():
                         llm_passed = False
-                        review_notes.append("✗ LLM Judge từ chối: (Parse exception fallback).")
+                        review_notes.append("✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).")
+                except Exception as e:
+                    llm_passed = False
+                    review_notes.append(f"✗ LLM Judge từ chối: Lỗi ngoại lệ khi parse JSON ({str(e)}).")
+            else:
+                llm_passed = False
+                review_notes.append("✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.")
         else:
             # Chế độ Deterministic Fallback Judge (khi LLM offline)
             # 1. Correctness: Chặn các khẳng định tuyệt đối sai sự thật
@@ -308,24 +310,6 @@ class OllamaClient:
         except Exception as e:
             print(f"⚠️  [LLM Warning] Ollama generate error ({e}), chuyển sang chế độ fallback.")
         return None
-
-
-
-class ToolRegistry:
-    @staticmethod
-    def search_knowledge(topic: str) -> str:
-        return f"[Tool: search_knowledge] Tìm thấy 5 kết quả chuyên sâu về: {topic}."
-    
-    @staticmethod
-    def read_document(doc_id: str) -> str:
-        return f"[Tool: read_document] Đã trích xuất nội dung từ tài liệu {doc_id}."
-        
-    @staticmethod
-    def calculate(expression: str) -> str:
-        try:
-            return f"[Tool: calculate] Kết quả: {eval(expression)}"
-        except:
-            return "[Tool: calculate] Lỗi tính toán"
 
 
 class AutonomousChecklistAgent:
@@ -673,7 +657,7 @@ class AutonomousChecklistAgent:
                 f"Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, "
                 f"bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của {topic} trong thực tiễn."
             )
-            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article", self.llm)
+            eval_res = self.evaluator.evaluate(polished_article, goal, "full_article", self.llm, source_doc=self.context_memory.get("research_points", ""))
             self.context_memory["review_notes"] = eval_res["review_notes"]
             self.context_memory["final_article"] = polished_article
             return polished_article
@@ -702,7 +686,7 @@ class AutonomousChecklistAgent:
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
-            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm)
+            eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm, source_doc=self.context_memory.get("research_points", ""))
             if eval_res["passed"]:
                 return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.", AgentStatus.COMPLETED
 
@@ -889,7 +873,7 @@ class AutonomousChecklistAgent:
                 )
 
             if self.final_output:
-                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent, self.llm)
+                self.quality_metrics = self.evaluator.evaluate(self.final_output, goal, intent, self.llm, source_doc=self.context_memory.get("research_points", ""))
             else:
                 self.quality_metrics = {"passed": False, "review_notes": ["Không có sản phẩm đầu ra."]}
 
