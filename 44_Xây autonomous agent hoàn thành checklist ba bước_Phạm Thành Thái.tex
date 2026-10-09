@@ -679,7 +679,20 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{10.22}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{, }\StringTok{"draft_article"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
 \NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Hướng dẫn toàn diện và giải thích bản chất: RAG..."}\NormalTok{\}}
 \NormalTok{  ],}
-\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{35.6}
+\NormalTok{  }\DataTypeTok{"quality_metrics"}\NormalTok{: \{}
+\NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"char_count"}\NormalTok{: }\DecValTok{2100}\NormalTok{, }\DataTypeTok{"word_count"}\NormalTok{: }\DecValTok{420}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.612}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"matched_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
+\NormalTok{    }\DataTypeTok{"judge_verdict"}\NormalTok{: \{}
+\NormalTok{      }\DataTypeTok{"correctness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"groundedness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"completeness"}\NormalTok{: }\DecValTok{1}\NormalTok{,}
+\NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Bài viết giải thích rõ ràng khái niệm RAG, bám sát nội dung và đầy đủ các phần."}
+\NormalTok{    \}}
+\NormalTok{  \},}
+\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{35.6}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}
+\NormalTok{    }\DataTypeTok{"model_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"git_commit"}\NormalTok{: }\StringTok{"d2f38c1"}
+\NormalTok{  \}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
