@@ -36,7 +36,7 @@ Bai44/
 
 1. **Cài đặt Ollama**: Tải và cài đặt tại [ollama.com](https://ollama.com). Đảm bảo service chạy ở port mặc định `11434` hoặc `11436` (GPU).
 2. **Kéo mô hình dự phòng (Mặc định)**:
-   Mô hình `tinix-lm:latest` là mô hình nội bộ độc quyền không được publish public. Nếu không có quyền truy cập file `Modelfile` để build nội bộ, bạn có thể chạy Agent bằng mô hình thay thế mặc định:
+   Mô hình `tinix-lm:latest` là mô hình nội bộ độc quyền không được publish public (vui lòng liên hệ tác giả qua email admin@tinix.io để xin quyền truy cập ModelFile). Nếu không có quyền truy cập, bạn có thể chạy Agent bằng mô hình thay thế mặc định:
    ```bash
    ollama pull qwen2.5:3b
    ```

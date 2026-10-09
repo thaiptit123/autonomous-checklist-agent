@@ -212,7 +212,7 @@ Bài học thực hành chuyên sâu này sẽ hướng dẫn bạn xây dựng 
 \item
   \textbf{Yêu cầu kiến thức nền:} Hiểu biết cơ bản về ngôn ngữ lập trình Python (Data classes, Enum, xử lý chuỗi và tệp tin JSON). Đã từng làm quen với khái niệm LLM và kỹ thuật sinh văn bản có cấu trúc.
 \item
-  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436). Do \texttt{tinix-lm:latest} là mô hình nội bộ độc quyền không được phát hành công khai (yêu cầu cấp quyền Modelfile), bạn có thể chạy Agent bằng mô hình thay thế mặc định bằng lệnh \texttt{ollama pull qwen2.5:3b}. Nếu không có model nào hoặc Ollama không khả dụng, hệ thống sẽ tự động chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
+  \textbf{Yêu cầu hệ thống:} Máy tính cài đặt sẵn \textbf{Python 3.8+}. Để có thể tái tạo kết quả (reproducibility) trong các Integration Tests, yêu cầu cài đặt và khởi động Ollama cục bộ bằng lệnh \texttt{ollama serve} (cổng mặc định 11434, hoặc 11436). Do \texttt{tinix-lm:latest} là mô hình nội bộ độc quyền không được phát hành công khai (vui lòng liên hệ tác giả qua email admin@tinix.io để xin cấp quyền Modelfile), bạn có thể chạy Agent bằng mô hình thay thế mặc định bằng lệnh \texttt{ollama pull qwen2.5:3b}. Nếu không có model nào hoặc Ollama không khả dụng, hệ thống sẽ tự động chuyển sang Deterministic Fallback. Hệ thống lưu vết chi tiết siêu dữ liệu (metadata) môi trường để đảm bảo độ tin cậy.
 \end{itemize}
 
 \hypertarget{muc-tieu}{%
