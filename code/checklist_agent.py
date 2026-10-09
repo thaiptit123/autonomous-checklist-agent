@@ -229,9 +229,9 @@ class QualityEvaluator:
                         c = judge_res.get("correctness")
                         g = judge_res.get("groundedness")
                         comp = judge_res.get("completeness")
-                        if c == 0 or g == 0 or comp == 0 or c is None or g is None or comp is None:
+                        if c != 1 or g != 1 or comp != 1 or not isinstance(c, int) or not isinstance(g, int) or not isinstance(comp, int):
                             llm_passed = False
-                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Lỗi Correctness/Groundedness/Completeness hoặc thiếu trường JSON')}")
+                            review_notes.append(f"✗ LLM Judge từ chối: {judge_res.get('reason', 'Lỗi Correctness/Groundedness/Completeness hoặc sai định dạng giá trị (chỉ chấp nhận số 1)')}")
                         else:
                             review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
                     else:
@@ -260,6 +260,8 @@ class QualityEvaluator:
             elif source_doc and not any(word in content.lower() for word in source_doc.lower().split()[:5] if len(word) > 3):
                 llm_passed = False
                 review_notes.append("✗ Deterministic Judge từ chối: Nội dung có dấu hiệu không bám sát nguồn (Groundedness failed).")
+            else:
+                review_notes.append("! CẢNH BÁO: LLM Judge không khả dụng. Chất lượng ngữ nghĩa chưa được xác minh (UNVERIFIED).")
 
         passed = passed and crit_complete_sentence and llm_passed
 
@@ -716,7 +718,10 @@ class AutonomousChecklistAgent:
         if "final_article" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
-                return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator.", AgentStatus.COMPLETED
+                if "UNVERIFIED" in "".join(eval_res.get("review_notes", [])):
+                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (UNVERIFIED by LLM).", AgentStatus.COMPLETED
+                else:
+                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator.", AgentStatus.COMPLETED
 
         # 4. Khi đạt giới hạn số bước (current_step_index >= total_steps)
         if current_step_index >= total_steps:
