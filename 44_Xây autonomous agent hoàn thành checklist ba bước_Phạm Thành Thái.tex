@@ -623,7 +623,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \renewcommand{\arraystretch}{0.80}
 \begin{longtable}{|p{0.05\textwidth}|p{0.36\textwidth}|p{0.22\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 17 kịch bản (13 Offline Unit Tests đạt \& 4 Integration Tests)} \label{tab:test-cases} \\
+\caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Integration Tests)} \label{tab:test-cases} \\
 \hline
 \rowcolor{primary!15}
 \textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái / Kết quả kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
@@ -650,7 +650,8 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 14 & Sai sự thật nhưng đúng format (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Correctness) \\ \hline
 15 & Thiếu nội dung bắt buộc (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Completeness) \\ \hline
 16 & Nội dung bịa đặt, không bám sát (Judge Plumbing) & \texttt{BUDGET\_EXHAUSTED} & \texttt{LLM Judge từ chối} (Bắt lỗi Groundedness) \\ \hline
-17 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
+17 & Tích hợp: Adversarial (Real LLM) & \texttt{FAIL / SKIPPED} & \texttt{LLM Judge từ chối} (Nội dung sai, chung chung) \\ \hline
+18 & Thay đổi action\_queue khi REPLAN & \texttt{PASS (Replan)} & \texttt{Thay đổi kế hoạch} (Observe \& Replan) \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}

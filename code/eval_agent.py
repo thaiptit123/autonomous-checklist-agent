@@ -258,8 +258,18 @@ class TestIntegrationLLM(unittest.TestCase):
         self.assertTrue(report.quality_metrics["passed"])
         self.assertGreater(report.total_duration_sec, 0.5)
 
+    def test_adversarial_integration_correctness_generic(self):
+        print("\n[Integration Test] 2b. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Mô tả chung chung, sai bản chất)")
+        agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
+        adversarial_content = "RAG là một khuôn khổ để chuẩn hóa và giải quyết tính tương thích trong hệ thống phần mềm, giúp tối ưu vận hành."
+        res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG", "full_article", agent.llm)
+        self.assertFalse(res["passed"], "Nội dung chung chung sai bản chất nhưng lại được pass.")
+        self.assertIsNotNone(res.get("judge_verdict"), "Không nhận được judge_verdict.")
+        self.assertNotIn("error", res["judge_verdict"], f"LLM Judge gặp lỗi: {res['judge_verdict']}")
+        self.assertEqual(res["judge_verdict"].get("correctness"), 0, "Judge không phát hiện lỗi correctness đối với mô tả chung chung.")
+
     def test_adversarial_integration_correctness(self):
-        print("\n[Integration Test] 2. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Sai bản chất)")
+        print("\n[Integration Test] 2a. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Sai hoàn toàn)")
         agent = AutonomousChecklistAgent(max_steps=1, use_llm=True)
         adversarial_content = "RAG là một công cụ để nén ảnh JPEG và tăng tốc độ wifi. RAG không liên quan gì đến trí tuệ nhân tạo."
         res = agent.evaluator.evaluate(adversarial_content, "Viết bài chia sẻ ngắn giải thích RAG", "full_article", agent.llm)

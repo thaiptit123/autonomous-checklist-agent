@@ -261,7 +261,9 @@ class QualityEvaluator:
                 llm_passed = False
                 review_notes.append("✗ Deterministic Judge từ chối: Nội dung có dấu hiệu không bám sát nguồn (Groundedness failed).")
             else:
-                review_notes.append("! CẢNH BÁO: LLM Judge không khả dụng. Chất lượng ngữ nghĩa chưa được xác minh (UNVERIFIED).")
+                llm_passed = False
+                judge_verdict = {"error": "Offline Fallback", "reason": "Chưa có LLM Judge xác nhận ngữ nghĩa"}
+                review_notes.append("✗ LLM Judge không khả dụng: Yêu cầu bắt buộc xác minh ngữ nghĩa (Fail-closed).")
 
         passed = passed and crit_complete_sentence and llm_passed
 
