@@ -1,7 +1,7 @@
 import sys
 import unittest
 import os
-from checklist_agent import AutonomousChecklistAgent, AgentStatus, OllamaClient
+from checklist_agent import AutonomousChecklistAgent, AgentStatus, OllamaClient, ToolRegistry
 
 def assert_status_stop_reason_consistent(report):
     """Kiểm tra tính nhất quán hệ thống giữa AgentStatus và nội dung stop_reason."""
@@ -60,6 +60,7 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.steps_executed, 2)
         self.assertIn("MCP", report.final_output)
         self.assertTrue(report.quality_metrics["passed"])
+        self.assertIn("tool_data", agent.context_memory, "Dữ liệu từ ToolRegistry.read_document chưa được nạp vào context_memory")
 
     def test_budget_exhausted_unmet_goal(self):
         print("\n[Unit Test] 3. Hết ngân sách bước nhưng CHƯA đạt mục tiêu (Budget Exhausted)")
@@ -138,9 +139,19 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.steps_executed, 3)
 
     def test_bounded_loop_validation(self):
-        print("\n[Unit Test] 8. Kiểm định rào chắn Bounded Loop (max_steps <= 3)")
+        print("\n[Unit Test] 8. Kiểm định rào chắn Bounded Loop & An toàn ToolRegistry (max_steps <= 3, AST calculate)")
         with self.assertRaises(ValueError):
             AutonomousChecklistAgent(max_steps=5)
+
+        # 1. Kiểm định AST safe calculator (không dùng eval)
+        self.assertEqual(ToolRegistry.calculate("10 + 5 * 2"), "[Mock Tool: calc] Kết quả: 20")
+        self.assertEqual(ToolRegistry.calculate("(100 - 20) / 4"), "[Mock Tool: calc] Kết quả: 20.0")
+        # 2. Kiểm định rào chắn ngăn ngừa DoS số mũ và code injection
+        self.assertIn("Lỗi", ToolRegistry.calculate("2 ** 1000"))
+        self.assertIn("Lỗi", ToolRegistry.calculate("__import__('os').system('ls')"))
+        # 3. Kiểm định Mock tools
+        self.assertIn("Kafka", ToolRegistry.search_knowledge("Kafka"))
+        self.assertIn("input_doc", ToolRegistry.read_document("input_doc"))
 
     def test_summarize_without_document_fails(self):
         print("\n[Unit Test] 9. Từ chối tóm tắt khi thiếu tài liệu nguồn (Missing Source Doc -> FAILED)")

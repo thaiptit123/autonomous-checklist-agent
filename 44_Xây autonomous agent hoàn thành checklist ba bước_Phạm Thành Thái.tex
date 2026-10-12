@@ -622,8 +622,8 @@ Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt v�
 \endhead
 Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
 Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
-Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 2.125 ký tự (447 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
-\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.44 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
+Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 1.872 ký tự (391 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
+\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.43 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề và LLM Judge xác nhận.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -650,29 +650,29 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 5 & Mục tiêu ngoài chủ đề mẫu (Apache Kafka) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
 6 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
 7 & Sự cố thực thi và phát hiện kẹt & \texttt{PASS (FAILED)} & \texttt{Execution failed} (Retry \& dừng an toàn) \\ \hline
-8 & Rào chắn an toàn Bounded Loop (\texttt{max\_steps=5}) & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}) \\ \hline
+8 & Rào chắn Bounded Loop \& AST calculate an toàn & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}, Pow limit) \\ \hline
 9 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{PASS (FAILED)} & \texttt{Execution failed} (Chặn nội dung giả) \\ \hline
-10 & Sai sự thật nhưng đúng format (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{LLM Judge từ chối} (Mock correctness=0) \\ \hline
-11 & Thiếu nội dung bắt buộc (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{LLM Judge từ chối} (Mock completeness=0) \\ \hline
-12 & Bịa đặt nguồn, không bám sát (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{LLM Judge từ chối} (Mock groundedness=0) \\ \hline
+10 & Sai sự thật nhưng đúng format (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock correctness=0) \\ \hline
+11 & Thiếu nội dung bắt buộc (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock completeness=0) \\ \hline
+12 & Bịa đặt nguồn, không bám sát (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock groundedness=0) \\ \hline
 13 & Thay đổi \texttt{action\_queue} khi REPLAN & \texttt{PASS (Replan)} & Kế hoạch mới được thực thi và lưu log \\ \hline
-\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 2: Real LLM Integration Tests (5 kịch bản -- Chạy với Ollama thật)}} \\ \hline
-14 & Viết bài RAG hoàn chỉnh với LLM thật & \texttt{PASS / SKIPPED} & Hoàn thành 3 bước, Judge nghiệm thu \\ \hline
-15 & Adversarial (Real LLM): Lỗi Correctness (chung chung) & \texttt{PASS / SKIPPED} & Judge phát hiện lỗi correctness=0 \\ \hline
-16 & Adversarial (Real LLM): Lỗi Correctness (sai hoàn toàn) & \texttt{PASS / SKIPPED} & Judge phát hiện lỗi correctness=0 \\ \hline
-17 & Adversarial (Real LLM): Lỗi Completeness (thiếu ý) & \texttt{PASS / SKIPPED} & Judge phát hiện lỗi completeness=0 \\ \hline
-18 & Adversarial (Real LLM): Lỗi Groundedness (bịa đặt) & \texttt{PASS / SKIPPED} & Judge phát hiện lỗi groundedness=0 \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 2: Real LLM Integration Tests (5 kịch bản -- Chạy với Ollama thật: 5/5 PASS)}} \\ \hline
+14 & Viết bài RAG hoàn chỉnh với LLM thật & \texttt{PASS (Ollama)} & Hoàn thành 3 bước, Judge nghiệm thu \\ \hline
+15 & Adversarial (Real LLM): Lỗi Correctness (chung chung) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
+16 & Adversarial (Real LLM): Lỗi Correctness (sai hoàn toàn) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
+17 & Adversarial (Real LLM): Lỗi Completeness (thiếu ý) & \texttt{PASS (Ollama)} & LLM Judge từ chối: completeness=0 \\ \hline
+18 & Adversarial (Real LLM): Lỗi Groundedness (bịa đặt) & \texttt{PASS (Ollama)} & LLM Judge từ chối: groundedness=0 \\ \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Kết quả thực thi thực tế bộ kiểm thử (Console Execution Log):}
-\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{22.230}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (}\DecValTok{13}\NormalTok{ Unit Tests: }\VariableTok{PASS}\NormalTok{; }\DecValTok{5}\NormalTok{ LLM Tests: }\VariableTok{PASS}\NormalTok{/}\VariableTok{SKIP}\NormalTok{)}
+\CommentTok{# Kết quả thực thi thực tế bộ kiểm thử (Console Execution Log khi có Ollama):}
+\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{29.257}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (}\DecValTok{18}\NormalTok{/}\DecValTok{18}\NormalTok{ PASS: }\DecValTok{13}\NormalTok{ Unit Tests: }\VariableTok{PASS}\NormalTok{, }\DecValTok{5}\NormalTok{ Real LLM Tests: }\VariableTok{PASS}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
-\textit{*(Trong môi trường offline không có Ollama, 5 Integration Tests tự động kích hoạt cờ \texttt{SKIPPED (5 tests)}, bảo đảm 13 Unit Tests luôn pass độc lập mà không báo cáo sai lệch kết quả).* }
+\textit{*(Trong môi trường offline không có Ollama, 5 Integration Tests tự động kích hoạt cờ \texttt{SKIPPED (skipped=5)} qua điều kiện \texttt{@unittest.skipUnless}, bảo đảm 13 Unit Tests luôn PASS độc lập trong $\sim$0.045s mà không báo cáo sai lệch kết quả).* }
 
 \section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
 
@@ -698,21 +698,24 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
 \NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu..."}\NormalTok{\}}
 \NormalTok{  ],}
-\NormalTok{  }\DataTypeTok{"quality_metrics"}\NormalTok{: \{}
+\NormalTok{  }\DataTypeTok{"quality\_metrics"}\NormalTok{: \{}
 \NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"quality_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"semantic_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"char_count"}\NormalTok{: }\DecValTok{2125}\NormalTok{, }\DataTypeTok{"word_count"}\NormalTok{: }\DecValTok{447}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.443}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"matched_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
-\NormalTok{    }\DataTypeTok{"judge_verdict"}\NormalTok{: \{}
+\NormalTok{    }\DataTypeTok{"quality\_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"semantic\_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"char\_count"}\NormalTok{: }\DecValTok{1872}\NormalTok{, }\DataTypeTok{"word\_count"}\NormalTok{: }\DecValTok{391}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.427}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"matched\_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
+\NormalTok{    }\DataTypeTok{"judge\_verdict"}\NormalTok{: \{}
 \NormalTok{      }\DataTypeTok{"correctness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"groundedness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"completeness"}\NormalTok{: }\DecValTok{1}\NormalTok{,}
-\NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Văn bản chính xác thể hiện nguyên lý hoạt động của RAG, bám sát nguồn tài liệu và đầy đủ các phần."}
+\NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Văn bản mô tả chính xác RAG kết hợp truy xuất và sinh nội dung, đúng bản chất."}\NormalTok{,}
+\NormalTok{      }\DataTypeTok{"judge\_model"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
+\NormalTok{      }\DataTypeTok{"groundedness\_source"}\NormalTok{: }\StringTok{"none\_open\_domain"}\NormalTok{,}
+\NormalTok{      }\DataTypeTok{"judge\_status"}\NormalTok{: }\StringTok{"VERIFIED\_SUCCESS"}
 \NormalTok{    \}}
 \NormalTok{  \},}
-\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{21.5}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.8}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}
-\NormalTok{    }\DataTypeTok{"model_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"git_commit"}\NormalTok{: }\StringTok{"9c9e933"}
+\NormalTok{    }\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"bf5585d"}
 \NormalTok{  \}}
 \NormalTok{\}}
 \end{Highlighting}
