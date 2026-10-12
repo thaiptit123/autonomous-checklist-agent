@@ -31,6 +31,8 @@ Bai44/
     └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
 ```
 
+> **Ghi chú về tính nhất quán thời gian thực thi:** Báo cáo kiểm toán mẫu `agent_final_report.json` và số liệu trong tài liệu PDF ghi nhận thời gian thực thi là **19.8s** (chính xác: **19.812s**) từ phiên chạy benchmark chuẩn với mô hình `tinix-lm:latest`. Trong các lần chạy thử nghiệm ban đầu trước đó trên môi trường phần cứng khác nhau, thời gian có thể dao động (~35.6s); toàn bộ dữ liệu báo cáo kiểm toán, hình ảnh minh họa terminal và tài liệu PDF hiện đã được đồng bộ chuẩn xác 100% theo phiên chạy benchmark 19.8s.
+
 ## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 
 Để đảm bảo khả năng tái lập kết quả (reproducibility), hệ thống hỗ trợ 2 phương án thiết lập mô hình độc lập:

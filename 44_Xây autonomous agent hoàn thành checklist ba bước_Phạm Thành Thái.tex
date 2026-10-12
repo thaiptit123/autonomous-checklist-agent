@@ -295,14 +295,14 @@ Một hệ thống tác nhân tự hành hoàn chỉnh được cấu thành t�
 \subsection{1. Kịch bản thực tế: Bài viết chia sẻ về RAG cho người mới bắt đầu}
 Để chứng minh năng lực tự hành một cách thuyết phục nhất, chúng ta chọn một tác vụ cụ thể, có ranh giới rõ ràng nhưng đòi hỏi chất lượng logic cao: \textbf{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. 
 
-Với kịch bản này, bộ lập kế hoạch tự động phân tích mục tiêu và sản sinh checklist 3 bước linh hoạt (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}):
+Hệ thống thiết kế hai phương án phân rã checklist 3 bước tương ứng: (1) \textbf{Kịch bản dự phòng cấu trúc xác định (Deterministic Fallback Plan)} khi LLM ngoại tuyến (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}); và (2) \textbf{Kịch bản lập kế hoạch động qua LLM (Dynamic Planning)} trong phiên chạy thực tế (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}, phân tích chi tiết tại Mục \ref{thuc-nghiem}). Dưới đây là phân rã của kịch bản fallback cấu trúc:
 \begin{itemize}
-    \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{outline}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG (Retrieval-Augmented Generation), vì sao LLM cần RAG (tránh ảo giác, cập nhật dữ liệu riêng tư), và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
-    \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{generate}).} Kế thừa các luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần mạch lạc: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
-    \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa trọn vẹn dàn ý và luận điểm từ Bước 1 và 2, tiến hành chấp bút bài viết hoàn chỉnh, lồng ghép ví dụ trực quan dễ hiểu (học sinh thi "mở sách" vs "đóng sách"), rà soát ngữ phong và kiểm định định lượng chất lượng qua \texttt{QualityEvaluator}.
+    \item \textbf{Bước 1: Xác định nội dung cơ bản của RAG (Action: \texttt{outline}).} Thu thập và làm rõ các luận điểm cốt lõi: khái niệm RAG, vì sao cần RAG và cơ chế 3 chặng (Indexing $\rightarrow$ Retrieval $\rightarrow$ Generation).
+    \item \textbf{Bước 2: Xây dựng dàn ý bài chia sẻ ngắn (Action: \texttt{generate}).} Kế thừa luận điểm từ Bước 1 để cấu trúc hóa dàn bài 4 phần: Mở đầu, Bản chất kỹ thuật, Ví dụ minh họa và Lời kết thực hành.
+    \item \textbf{Bước 3: Viết và chỉnh sửa hoàn thiện bài chia sẻ (Action: \texttt{review\_polish}).} Kế thừa dàn ý từ Bước 2, chấp bút hoàn chỉnh bài viết, lồng ghép ví dụ trực quan (thi "mở sách" vs "đóng sách") và kiểm định qua \texttt{QualityEvaluator}.
 \end{itemize}
 
-\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, bộ lập kế hoạch sinh checklist động từ mục tiêu; bộ thực thi sử dụng action và gọi LLM để sinh kết quả cho từng bước; cơ chế dự phòng tổng hợp cấu trúc xác định từ bộ nhớ ngữ cảnh chỉ đóng vai trò chốt chặn an toàn khi LLM không khả dụng hoặc ngoại tuyến.
+\textit{Khác biệt cốt lõi so với workflow cố định:} Ở chế độ LLM, Planner phân rã động từ mục tiêu (LLM tự chủ chọn \texttt{generate} làm bước hoàn thiện); cơ chế fallback định sẵn chỉ đóng vai trò chốt chặn an toàn khi LLM ngoại tuyến. Cả hai đều hội tụ về việc nghiệm thu sản phẩm qua \texttt{QualityEvaluator}.
 
 \begin{figure}[H]
     \centering
@@ -448,7 +448,7 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \end{Highlighting}
 \end{Shaded}
 
-\textit{*Nguyên tắc phân định và Fail-Closed: Hệ thống tách bạch rõ ràng giữa hai chỉ số: \texttt{quality\_passed} (kiểm định định lượng về độ dài, cấu trúc, TTR) và \texttt{semantic\_verified} (xác thực ngữ nghĩa bởi LLM Judge). Khi yêu cầu thẩm định bằng LLM (\texttt{use\_llm=True}) mà LLM ngoại tuyến hoặc lỗi, cơ chế Fail-Closed kích hoạt: \texttt{semantic\_verified=False} và từ chối nghiệm thu (\texttt{passed=False}). Khi chạy offline (\texttt{use\_llm=False}), hệ thống chỉ cấp chứng nhận định lượng (\texttt{quality\_passed=True}) và lưu ý rõ \texttt{semantic\_verified=False}, tuyệt đối không ngộ nhận đó là bằng chứng ngữ nghĩa đầy đủ (triển khai trên GitHub kết xuất trọn vẹn cả 9 trường vào \texttt{EvaluationResult}).*}
+\textit{*Nguyên tắc phân định và Fail-Closed: Hệ thống tách bạch rõ ràng giữa hai chỉ số: \texttt{quality\_passed} (kiểm định định lượng về độ dài, cấu trúc, TTR) và \texttt{semantic\_verified} (xác thực ngữ nghĩa bởi LLM Judge). Khi \texttt{use\_llm=True} mà LLM ngoại tuyến hoặc lỗi, cơ chế Fail-Closed kích hoạt: \texttt{semantic\_verified=False} và từ chối nghiệm thu (\texttt{passed=False}). Với tác vụ tri thức mở (\texttt{input\_document=None}), tiêu chí Groundedness được LLM Judge thẩm định theo tri thức nội tại (\texttt{none\_open\_domain}), tuyệt đối không ngộ nhận là đã đối chiếu tài liệu nguồn ngoài hệ thống (triển khai trên GitHub kết xuất trọn vẹn 9 trường của \texttt{EvaluationResult}).*}
 
 \subsection{3. Thiết kế khung ToolRegistry (Mock) làm điểm mở rộng}
 \texttt{ToolRegistry} được thiết kế như khung ranh giới kiến trúc phục vụ thử nghiệm và mở rộng kết nối công cụ. Hiện tại, các công cụ tìm kiếm và đọc tài liệu hoạt động dưới dạng mô phỏng (mock), chưa phải tích hợp thực tế. Công cụ \texttt{calculate} sử dụng bộ phân tích cú pháp \texttt{ast} an toàn thay cho \texttt{eval()}, đảm bảo không thể thực thi mã độc:
@@ -595,20 +595,20 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \enlargethispage{3\baselineskip}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
-Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
+Trong kịch bản này, người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), lần lượt thực thi và thích ứng như thể hiện ở đồ họa minh họa Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.41\textwidth]{images/terminal_execution.png}
-    \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
+    \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện trực quan nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
 \end{figure}
 
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
-    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với kịch bản fallback định sẵn, LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết (cả \texttt{generate} và \texttt{review\_polish} đều định tuyến vào \texttt{final\_article} trước khi nghiệm thu dừng).
+    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với kịch bản fallback định sẵn (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish} ở Mục \ref{thiet-ke-checklist}), LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết (cả hai action đều định tuyến vào \texttt{final\_article} trước khi nghiệm thu dừng).
     \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}). Nếu kết quả quan sát cho thấy kế hoạch không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
-    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian phiên chạy 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved} (trong phạm vi kiểm định thử nghiệm).
+    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian phiên benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved} (trong phạm vi kiểm định thử nghiệm).
 \end{enumerate}
 
 \enlargethispage{3\baselineskip}
@@ -731,14 +731,14 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{      }\DataTypeTok{"judge\_model"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"groundedness\_source"}\NormalTok{: }\StringTok{"none\_open\_domain"}\NormalTok{, }\DataTypeTok{"judge\_status"}\NormalTok{: }\StringTok{"VERIFIED\_SUCCESS"}
 \NormalTok{    \}}
 \NormalTok{  \},}
-\NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.8}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.812}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"bf5585d"}\NormalTok{, }\DataTypeTok{"temperature"}\NormalTok{: }\FloatTok{0.25}\NormalTok{, }\DataTypeTok{"seed"}\NormalTok{: }\KeywordTok{null}\NormalTok{, }\DataTypeTok{"python\_version"}\NormalTok{: }\StringTok{"3.8.10"}\NormalTok{, }\DataTypeTok{"prompt\_template\_summary"}\NormalTok{: }\StringTok{"Lập checklist..."}\NormalTok{\}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
 \end{footnotesize}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài (\texttt{input\_document = None}); tiêu chí Groundedness của LLM Judge kiểm tra việc không bịa đặt thuật ngữ sai lệch so với tri thức chuẩn, tuyệt đối không ngộ nhận đã đối chiếu tài liệu nguồn độc lập. Ngược lại, với tác vụ tóm tắt (\texttt{intent == "summarize"}), Agent bắt buộc nhận tài liệu ngoài qua tham số \texttt{input\_document} (\texttt{groundedness\_source: "external\_document"}), và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian thực thi (19.812s, làm tròn 19.8s), khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài (\texttt{input\_document = None}); tiêu chí Groundedness do LLM Judge thẩm định dựa trên tri thức nội tại của mô hình để kiểm tra việc không bịa đặt thuật ngữ sai lệch, tuyệt đối không ngộ nhận đã đối chiếu tài liệu độc lập ngoài hệ thống. Ngược lại, với tác vụ tóm tắt (\texttt{intent == "summarize"}), Agent bắt buộc nhận tài liệu ngoài qua tham số \texttt{input\_document} (\texttt{groundedness\_source: "external\_document"}), và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
 
 \newpage
 \enlargethispage{6\baselineskip}

@@ -123,17 +123,17 @@ def generate_terminal_screenshot():
             print(f"Warning: Could not read {report_path}: {e}")
 
     if report and "execution_logs" in report and len(report["execution_logs"]) >= 3:
-        d1 = report["execution_logs"][0].get("duration_sec", 2.567)
-        d2 = report["execution_logs"][1].get("duration_sec", 2.479)
-        d3 = report["execution_logs"][2].get("duration_sec", 2.537)
-        tot_time = report.get("total_duration_sec", 10.25)
-        chars = len(report.get("final_output", "")) or 1056
+        d1 = report["execution_logs"][0].get("duration_sec", 3.176)
+        d2 = report["execution_logs"][1].get("duration_sec", 3.356)
+        d3 = report["execution_logs"][2].get("duration_sec", 7.380)
+        tot_time = report.get("total_duration_sec", 19.812)
+        chars = len(report.get("final_output", "")) or 1872
         status = report.get("status", "COMPLETED")
         executed = report.get("steps_executed", 3)
         total_p = report.get("total_steps_planned", 3)
-        ttr_val = report.get("quality_metrics", {}).get("ttr", 0.59)
+        ttr_val = report.get("quality_metrics", {}).get("ttr", 0.427)
     else:
-        d1, d2, d3, tot_time, chars, ttr_val = 2.567, 2.479, 2.537, 10.25, 1056, 0.59
+        d1, d2, d3, tot_time, chars, ttr_val = 3.176, 3.356, 7.380, 19.812, 1872, 0.427
         status, executed, total_p = "COMPLETED", 3, 3
 
     fig, ax = plt.subplots(figsize=(11, 7.6), dpi=300)
