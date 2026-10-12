@@ -3,109 +3,110 @@
   "total_steps_planned": 3,
   "steps_executed": 3,
   "status": "COMPLETED",
-  "stop_reason": "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator.",
+  "stop_reason": "Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau 3 bước.",
   "plan": [
     {
       "step_id": 1,
-      "title": "Xác định các ý chính và cấu trúc dàn ý",
-      "description": "Tạo dàn ý giải thích RAG",
-      "action_type": "outline",
+      "title": "Xác định nội dung cơ bản của RAG",
+      "description": "Tìm hiểu định nghĩa, nguyên lý hoạt động và lợi ích chính của RAG (Retrieval-Augmented Generation) để đảm bảo thông tin chính xác và dễ hiểu.",
+      "action_type": "research_points",
       "status": "COMPLETED",
-      "result": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?\n\nTrong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.\n\n## 1. Bản chất của RAG\nRAG là một khuôn khổ kết hợp giữa hai quá trình:\n- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.\n- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.\nĐiều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.\n\n## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)\nHệ thống RAG hoạt động theo 3 bước chuẩn:\n1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.\n2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.\n3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.\n\n## 3. Ví dụ thực tế trực quan\nHãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!\n\nRAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ."
+      "result": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\n**RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữa việc **truy xuất thông tin từ nguồn dữ liệu bên ngoài** và **tạo nội dung bằng mô hình ngôn ngữ**.  \n\nNguyên lý hoạt động của RAG gồm hai bước:  \n1. **Truy xuất** – Mô hình tìm kiếm thông tin liên quan từ một cơ sở dữ liệu (như văn bản, tài liệu, cơ sở tri thức) dựa trên câu hỏi hoặc yêu cầu đầu vào.  \n2. **Tạo nội dung** – Dữ liệu được truy xuất này được kết hợp với mô hình ngôn ngữ để sinh ra câu trả lời hoặc nội dung mới, chính xác và có nguồn gốc rõ ràng hơn.  \n\nLợi ích chính của RAG là giúp **tăng độ chính xác**, **giảm nguy cơ sai lệch** và **cung cấp thông tin thực tế** từ các nguồn hiện có, thay vì chỉ dựa vào kiến thức nội bộ của mô hình.  \n\nRAG không chỉ là công cụ hỗ trợ sinh lời, mà còn là nền tảng để xây dựng các hệ thống AI có khả năng học hỏi và phản hồi dựa trên dữ liệu thực tế – một bước tiến quan trọng trong việc làm cho AI trở nên đáng tin cậy và hữu ích hơn."
     },
     {
       "step_id": 2,
-      "title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh",
-      "description": "Viết bài chi tiết dựa trên dàn ý [Chỉ dẫn thích ứng: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.  ## 1. Bản chất của RAG RAG là một khuôn khổ kết hợp giữa hai quá trình: - **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài. - **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời. Điều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.  ## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation) Hệ thống RAG hoạt động theo 3 bước chuẩn: 1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database. 2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database. 3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.  ## 3. Ví dụ thực tế trực quan Hãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!  RAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ.]",
-      "action_type": "generate",
+      "title": "Dàn ý bài chia sẻ ngắn",
+      "description": "Lập dàn ý gồm phần mở đầu, giải thích đơn giản, ví dụ minh họa và kết luận, đảm bảo phù hợp với người mới bắt đầu. [Chỉ dẫn thích ứng: Nêu ví dụ đơn giản để minh họa cách RAG hoạt động trong đời sống hàng ngày.]",
+      "action_type": "outline",
       "status": "COMPLETED",
-      "result": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?\n\nTrong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.\n\n## 1. Bản chất của RAG\nRAG là một khuôn khổ kết hợp giữa hai quá trình:\n- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.\n- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.\nĐiều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.\n\n## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)\nHệ thống RAG hoạt động theo 3 bước chuẩn:\n1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.\n2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.\n3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.\n\n## 3. Ví dụ thực tế trực quan\nHãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!\n\nRAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ."
+      "result": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)\n\n**Mở đầu:**  \nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự, nhưng được ứng dụng trong trí tuệ nhân tạo.\n\n**Giải thích đơn giản:**  \nRAG là kỹ thuật kết hợp giữa việc *truy xuất* thông tin từ các nguồn dữ liệu bên ngoài (như sách, trang web) và *tạo nội dung* bằng mô hình ngôn ngữ (như một trợ lý ảo). Thay vì chỉ \"đoán\" câu trả lời, nó tìm kiếm thông tin thực tế trước rồi dùng để tạo câu trả lời chính xác hơn.\n\n**Ví dụ minh họa:**  \nGiả sử bạn hỏi: *\"Tại sao nước sôi ở 100 độ C?\"* – RAG sẽ tự động tìm kiếm thông tin khoa học từ các nguồn đáng tin cậy, rồi tổng hợp lại để trả lời một cách chính xác, dựa trên dữ liệu thực tế.\n\n**Kết luận:**  \nRAG giúp AI không chỉ \"nói suy nghĩ\" mà còn \"tìm kiếm và dùng thông tin thật\" – giống như cách con người học hỏi từ thế giới xung quanh."
     },
     {
       "step_id": 3,
-      "title": "Rà soát, kiểm định chất lượng",
-      "description": "Kiểm tra ngữ nghĩa [Chỉ dẫn thích ứng: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.  ## 1. Bản chất của RAG RAG là một khuôn khổ kết hợp giữa hai quá trình: - **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài. - **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời. Điều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.  ## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation) Hệ thống RAG hoạt động theo 3 bước chuẩn: 1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database. 2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database. 3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.  ## 3. Ví dụ thực tế trực quan Hãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!  RAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ.]",
-      "action_type": "review_polish",
+      "title": "Viết bài chia sẻ hoàn chỉnh",
+      "description": "Viết bài chia sẻ ngắn dựa trên dàn ý, sử dụng ngôn ngữ đơn giản, rõ ràng và dễ hiểu cho người mới bắt đầu. [Chỉ dẫn thích ứng: Nêu rõ RAG là gì bằng ngôn ngữ đơn giản, gần gũi, dễ hiểu.]",
+      "action_type": "generate",
       "status": "COMPLETED",
-      "result": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?\n\nTrong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.\n\n## 1. Bản chất của RAG\nRAG là một khuôn khổ kết hợp giữa hai quá trình:\n- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.\n- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.\nĐiều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.\n\n## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)\nHệ thống RAG hoạt động theo 3 bước chuẩn:\n1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.\n2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.\n3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.\n\n## 3. Ví dụ thực tế trực quan\nHãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!\n\nRAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ."
+      "result": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự – nhưng được ứng dụng trong trí tuệ nhân tạo.\n\nRAG là sự kết hợp giữa hai bước:  \nTrước tiên, hệ thống **truy xuất** thông tin từ các nguồn dữ liệu bên ngoài (như sách, báo, trang web) để tìm câu trả lời phù hợp.  \nSau đó, nó **tạo ra** câu trả lời tự nhiên bằng cách sử dụng một mô hình ngôn ngữ, giống như cách bạn viết lời nói.\n\nĐiều đặc biệt là, thay vì chỉ dựa vào kiến thức \"trong đầu\" của máy, RAG cho phép máy học hỏi từ thực tế – giúp câu trả lời chính xác và cập nhật hơn.\n\nVì vậy, RAG không chỉ là công nghệ \"tự tạo nội dung\", mà còn là công cụ giúp máy hiểu và trả lời câu hỏi một cách thông minh, dựa trên thông tin thực tế.  \n\n👉 RAG là cách mà AI \"tìm kiếm\" rồi \"trả lời\" – như một người bạn thông minh, luôn kiểm tra thông tin trước khi nói."
     }
   ],
   "execution_logs": [
     {
       "step_id": 1,
-      "step_title": "Xác định các ý chính và cấu trúc dàn ý",
-      "timestamp": "2026-10-09 11:15:46",
-      "duration_sec": 0.0,
+      "step_title": "Xác định nội dung cơ bản của RAG",
+      "timestamp": "2026-10-12 11:47:15",
+      "duration_sec": 3.641,
       "input_context_keys": [],
-      "output_summary": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...",
+      "output_summary": "# RAG là gì? – Giải thích cho người mới bắt đầu  **RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữ...",
       "status": "COMPLETED",
       "details": {
-        "action_type": "outline",
-        "output_length_chars": 1639
+        "action_type": "research_points",
+        "output_length_chars": 1012
       }
     },
     {
       "step_id": 2,
-      "step_title": "Soạn thảo nội dung bài chia sẻ hoàn chỉnh",
-      "timestamp": "2026-10-09 11:15:46",
-      "duration_sec": 0.0,
+      "step_title": "Dàn ý bài chia sẻ ngắn",
+      "timestamp": "2026-10-12 11:47:19",
+      "duration_sec": 3.919,
       "input_context_keys": [
-        "outline"
+        "research_points"
       ],
-      "output_summary": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...",
+      "output_summary": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)  **Mở đầu:**   Bạn có bao giờ dùng Google tìm ki...",
       "status": "COMPLETED",
       "details": {
-        "action_type": "generate",
-        "output_length_chars": 1639
+        "action_type": "outline",
+        "output_length_chars": 965
       }
     },
     {
       "step_id": 3,
-      "step_title": "Rà soát, kiểm định chất lượng",
-      "timestamp": "2026-10-09 11:15:46",
-      "duration_sec": 0.003,
+      "step_title": "Viết bài chia sẻ hoàn chỉnh",
+      "timestamp": "2026-10-12 11:47:24",
+      "duration_sec": 4.043,
       "input_context_keys": [
-        "outline",
-        "draft_article"
+        "research_points",
+        "outline"
       ],
-      "output_summary": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...",
+      "output_summary": "# RAG là gì? – Giải thích cho người mới bắt đầu  Bạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để t...",
       "status": "COMPLETED",
       "details": {
-        "action_type": "review_polish",
-        "output_length_chars": 1639
+        "action_type": "generate",
+        "output_length_chars": 958
       }
     }
   ],
-  "final_output": "# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?\n\nTrong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề \"ảo giác\" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.\n\n## 1. Bản chất của RAG\nRAG là một khuôn khổ kết hợp giữa hai quá trình:\n- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.\n- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.\nĐiều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.\n\n## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)\nHệ thống RAG hoạt động theo 3 bước chuẩn:\n1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.\n2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.\n3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.\n\n## 3. Ví dụ thực tế trực quan\nHãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!\n\nRAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ.",
+  "final_output": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự – nhưng được ứng dụng trong trí tuệ nhân tạo.\n\nRAG là sự kết hợp giữa hai bước:  \nTrước tiên, hệ thống **truy xuất** thông tin từ các nguồn dữ liệu bên ngoài (như sách, báo, trang web) để tìm câu trả lời phù hợp.  \nSau đó, nó **tạo ra** câu trả lời tự nhiên bằng cách sử dụng một mô hình ngôn ngữ, giống như cách bạn viết lời nói.\n\nĐiều đặc biệt là, thay vì chỉ dựa vào kiến thức \"trong đầu\" của máy, RAG cho phép máy học hỏi từ thực tế – giúp câu trả lời chính xác và cập nhật hơn.\n\nVì vậy, RAG không chỉ là công nghệ \"tự tạo nội dung\", mà còn là công cụ giúp máy hiểu và trả lời câu hỏi một cách thông minh, dựa trên thông tin thực tế.  \n\n👉 RAG là cách mà AI \"tìm kiếm\" rồi \"trả lời\" – như một người bạn thông minh, luôn kiểm tra thông tin trước khi nói.",
   "quality_metrics": {
     "passed": true,
-    "char_count": 1639,
-    "word_count": 311,
-    "ttr": 0.605,
+    "char_count": 958,
+    "word_count": 203,
+    "ttr": 0.601,
     "matched_keywords": [
       "giải",
+      "thích",
       "rag"
     ],
     "judge_verdict": {
       "correctness": 1,
       "groundedness": 1,
       "completeness": 1,
-      "reason": "Bài viết giải thích rõ ràng khái niệm RAG, quy trình Indexing - Retrieval - Generation và có ví dụ minh họa dễ hiểu."
+      "reason": "Văn bản chính xác mô tả RAG như một phương pháp kết hợp truy xuất thông tin từ nguồn bên ngoài và tạo nội dung bằng mô hình ngôn ngữ. Nội dung bám sát tài liệu nguồn về nguyên lý hoạt động, lợi ích và ý nghĩa của RAG. Tất cả các yếu tố yêu cầu đều được bao quát đầy đủ và được trình bày rõ ràng cho người mới bắt đầu."
     },
     "review_notes": [
-      "✓ Tiêu chuẩn độ dài: Đạt 1639 ký tự (311 từ, ngưỡng tối thiểu 250 ký tự)",
+      "✓ Tiêu chuẩn độ dài: Đạt 958 ký tự (203 từ, ngưỡng tối thiểu 250 ký tự)",
       "✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown",
       "✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.60 (ngưỡng yêu cầu >= 0.35)",
-      "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, rag)",
-      "✓ LLM Judge xác nhận: Bài viết giải thích rõ ràng khái niệm RAG, quy trình Indexing - Retrieval - Generation và có ví dụ minh họa dễ hiểu."
+      "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, thích, rag)",
+      "✓ LLM Judge xác nhận: Văn bản chính xác mô tả RAG như một phương pháp kết hợp truy xuất thông tin từ nguồn bên ngoài và tạo nội dung bằng mô hình ngôn ngữ. Nội dung bám sát tài liệu nguồn về nguyên lý hoạt động, lợi ích và ý nghĩa của RAG. Tất cả các yếu tố yêu cầu đều được bao quát đầy đủ và được trình bày rõ ràng cho người mới bắt đầu."
     ]
   },
-  "total_duration_sec": 35.6,
+  "total_duration_sec": 17.169,
   "reproducibility": {
     "model_version": "tinix-lm:latest",
     "temperature": 0.25,
     "seed": null,
-    "git_commit": "8b0c761",
+    "git_commit": "82ebcd3",
     "planner_prompt_template_summary": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
     "executor_prompt_template_summary": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
     "judge_prompt_template_summary": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",

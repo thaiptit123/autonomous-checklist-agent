@@ -31,33 +31,49 @@ Bai44/
     └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
 ```
 
-## 3. Hướng dẫn tái tạo môi trường (Reproduction Steps)
-Để đảm bảo khả năng tái tạo kết quả (reproducibility) với Integration Tests, vui lòng thiết lập môi trường Ollama cục bộ:
+## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 
-1. **Cài đặt Ollama**: Tải và cài đặt tại [ollama.com](https://ollama.com). Đảm bảo service chạy ở port mặc định `11434` hoặc `11436` (GPU).
-2. **Kéo mô hình dự phòng (Mặc định)**:
-   Mô hình `tinix-lm:latest` là mô hình nội bộ độc quyền không được publish public (vui lòng liên hệ tác giả qua email admin@tinix.io để xin quyền truy cập Modelfile). 
-   Nếu bạn đã có `Modelfile` và trọng số model nội bộ, hãy tạo model bằng lệnh:
-   ```bash
-   ollama create tinix-lm:latest -f Modelfile
-   ```
-   Nếu không có quyền truy cập, bạn có thể chạy Agent bằng mô hình thay thế mặc định:
-   ```bash
-   ollama pull qwen2.5:3b
-   ```
-3. **Cài đặt thư viện Python**: (Không yêu cầu thư viện ngoài, chỉ dùng chuẩn của Python 3.8+).
+Để đảm bảo khả năng tái lập kết quả (reproducibility), hệ thống hỗ trợ 2 phương án thiết lập mô hình độc lập:
 
-Chạy tác nhân tự hành:
+### Trường hợp 1: Sử dụng mô hình nội bộ `tinix-lm:latest` (Dành cho thành viên nội bộ / tác giả)
+- `tinix-lm:latest` là mô hình tinh chỉnh nội bộ chuyên biệt, **không phát hành công khai** trên Ollama Library (vì vậy **không thể tải bằng lệnh `ollama pull`**).
+- Để sử dụng mô hình này, người dùng cần có quyền truy cập tệp `Modelfile` và checkpoint trọng số (liên hệ trực tiếp qua email: `admin@tinix.io` hoặc `thaiptit123@gmail.com` để nhận quyền).
+- Sau khi có `Modelfile`, khởi tạo mô hình vào Ollama bằng lệnh:
+  ```bash
+  ollama create tinix-lm:latest -f Modelfile
+  ```
+
+### Trường hợp 2: Sử dụng mô hình nguồn mở thay thế (Dành cho người thẩm định / cộng đồng kiểm thử)
+- Người thẩm định hoặc người dùng thông thường không có `Modelfile` nội bộ có thể chạy và tái lập toàn bộ quy trình của Agent bằng mô hình nguồn mở tiêu chuẩn:
+  ```bash
+  ollama pull qwen2.5:3b
+  ```
+- Hệ thống tác nhân tự động nhận diện và tương thích hoàn toàn với `qwen2.5:3b` (cũng như bất kỳ mô hình nào có sẵn trong Ollama qua cơ chế tự động khám phá mô hình tại cổng `11436` / `11434`).
+- Nếu môi trường không khởi chạy Ollama, hệ thống tự động kích hoạt chế độ **Deterministic Fallback** để kiểm thử logic cục bộ mà không gặp sự cố gián đoạn.
+
+## 4. Chạy tác nhân và bộ kiểm thử (Execution & Evaluation)
+
+### Chạy tác nhân tự hành:
 ```bash
 python3 code/checklist_agent.py
 ```
 
-Chạy bộ 18 kịch bản kiểm thử toàn diện (Adversarial Tests):
+### Chạy bộ 18 kịch bản kiểm thử toàn diện:
+Bộ kiểm thử `code/eval_agent.py` bao gồm tổng cộng **18 kịch bản kiểm thử**, được phân định minh bạch thành 2 nhóm độc lập:
+1. **13 Offline Unit Tests (Plumbing & Core Logic)**:
+   - Kiểm thử toàn diện cơ chế điều phối tuần tự, rào chắn Bounded Loop, khả năng tự phục hồi (Retry/Replan), và các bài test đường ống kiểm duyệt (Judge Plumbing Tests).
+   - Chạy hoàn toàn offline trong môi trường Deterministic Fallback, **kết quả luôn đạt 13/13 PASS** mà không phụ thuộc vào Ollama hay mạng ngoài.
+2. **5 Real LLM Integration Tests (Adversarial Semantic Evaluation)**:
+   - Kiểm thử tương tác ngữ nghĩa thực tế với LLM Judge cục bộ để thẩm định năng lực phát hiện nội dung sai sự thật, thiếu yêu cầu, hoặc bịa đặt (hallucination).
+   - Được gắn cờ an toàn `@unittest.skipUnless(is_ollama_available(), ...)`:
+     - Khi có Ollama chạy cục bộ: Thực thi đầy đủ và **đạt 5/5 PASS**.
+     - Khi không có Ollama: Tự động **SKIPPED (5 tests)** một cách minh bạch, hoàn toàn không suy diễn hoặc báo cáo sai lệch kết quả.
+
 ```bash
 python3 code/eval_agent.py
 ```
 
-Tạo lại hình ảnh sơ đồ:
+### Tạo lại hình ảnh sơ đồ kiến trúc:
 ```bash
 python3 code/generate_assets.py
 ```
