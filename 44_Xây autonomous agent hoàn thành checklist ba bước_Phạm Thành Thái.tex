@@ -378,6 +378,7 @@ Chúng ta sử dụng \texttt{dataclass} và \texttt{Enum} để định nghĩa 
 
 \subsection{2. Bộ kiểm định chất lượng đa tầng và kết nối mô hình ngôn ngữ lớn}
 Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{QualityEvaluator} tính toán trực tiếp các chỉ số kỹ thuật và kết nối mô hình ngôn ngữ lớn qua \texttt{OllamaClient}. \textit{*(Các đoạn mã dưới đây phản ánh trung thực cấu trúc cài đặt trong tệp \texttt{checklist\_agent.py} trên repository)*}:
+\enlargethispage{3\baselineskip}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -390,7 +391,7 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
         \ControlFlowTok{return} \BuiltInTok{round}\NormalTok{(}\BuiltInTok{len}\NormalTok{(}\BuiltInTok{set}\NormalTok{(words)) }\OperatorTok{/} \BuiltInTok{len}\NormalTok{(words), }\DecValTok{3}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ words }\ControlFlowTok{else} \FloatTok{0.0}
 
     \AttributeTok{@classmethod}
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{evaluate}\NormalTok{(}\VariableTok{cls}\NormalTok{, content: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, llm_client=}\VariableTok{None}\NormalTok{, source_doc: }\DataTypeTok{str}\NormalTok{=}\StringTok{""}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{]:}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{evaluate}\NormalTok{(}\VariableTok{cls}\NormalTok{, content: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, llm_client=}\VariableTok{None}\NormalTok{, source_doc: }\DataTypeTok{Optional}\NormalTok{[}\DataTypeTok{str}\NormalTok{]}\OperatorTok{=}\VariableTok{None}\NormalTok{, require_llm_judge: }\DataTypeTok{bool}\NormalTok{=}\ConstantTok{False}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{]:}
         \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ content: }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: }\ConstantTok{False}\NormalTok{, }\StringTok{"ttr"}\NormalTok{: }\FloatTok{0.0}\NormalTok{, }\StringTok{"char_count"}\NormalTok{: }\DecValTok{0}\NormalTok{\}}
 \NormalTok{        words }\OperatorTok{=}\NormalTok{ [re.sub(}\StringTok{r"^[^\textbackslash{}w]+|[^\textbackslash{}w]+$"}\NormalTok{, }\StringTok{""}\NormalTok{, w) }\ControlFlowTok{for}\NormalTok{ w }\KeywordTok{in}\NormalTok{ content.lower().split() }\ControlFlowTok{if}\NormalTok{ w]}
 \NormalTok{        ttr }\OperatorTok{=} \VariableTok{cls}\NormalTok{.calculate_ttr(content)}
@@ -407,25 +408,41 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ (content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{)) }\KeywordTok{or} \StringTok{"..."} \KeywordTok{in}\NormalTok{ content.strip()[}\OperatorTok{-}\DecValTok{5}\NormalTok{:])}
 \NormalTok{        quality_passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete}
 \NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Cơ chế fail-closed \& tách bạch cờ)}
-\NormalTok{        semantic_verified }\OperatorTok{=} \ConstantTok{False}
-\NormalTok{        judge_verdict }\OperatorTok{=} \VariableTok{None}
-\NormalTok{        }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{is not}\NormalTok{ }\VariableTok{None}\NormalTok{:}
-\NormalTok{            }\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ llm_client.is_available():}
-\NormalTok{                judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"LLM_UNAVAILABLE"}\NormalTok{, }\StringTok{"reason"}\NormalTok{: }\StringTok{"Dịch vụ LLM không khả dụng"}\NormalTok{\}}
-\NormalTok{                passed }\OperatorTok{=} \ConstantTok{False} \CommentTok{# Fail-closed: thiếu Judge khi yêu cầu xác minh -> trượt}
-\NormalTok{            }\ControlFlowTok{else}\NormalTok{:}
-\NormalTok{                llm_eval }\OperatorTok{=}\NormalTok{ llm_client.generate(prompt)}
-\NormalTok{                }\ControlFlowTok{if}\NormalTok{ llm_eval }\KeywordTok{and}\NormalTok{ re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL):}
+\NormalTok{        semantic_verified }\OperatorTok{=} \ConstantTok{False}\NormalTok{; judge_verdict }\OperatorTok{=} \VariableTok{None}
+\NormalTok{        has_source }\OperatorTok{=} \BuiltInTok{bool}\NormalTok{(source_doc }\KeywordTok{and}\NormalTok{ source_doc.strip())}
+\NormalTok{        judge_needed }\OperatorTok{=}\NormalTok{ require_llm_judge }\KeywordTok{or}\NormalTok{ (llm_client }\KeywordTok{is not}\NormalTok{ }\VariableTok{None}\NormalTok{)}
+\NormalTok{        }\ControlFlowTok{if}\NormalTok{ judge_needed:}
+\NormalTok{            }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{is}\NormalTok{ }\VariableTok{None} \KeywordTok{or} \KeywordTok{not}\NormalTok{ llm_client.is_available():}
+\NormalTok{                judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"judge_status"}\NormalTok{: }\StringTok{"LLM_UNAVAILABLE"}\NormalTok{, }\StringTok{"correctness"}\NormalTok{: }\DecValTok{0}\NormalTok{, }\StringTok{"groundedness"}\NormalTok{: }\DecValTok{0}\NormalTok{, }\StringTok{"completeness"}\NormalTok{: }\DecValTok{0}\NormalTok{,}
+\NormalTok{                                 }\StringTok{"judge_model"}\NormalTok{: }\BuiltInTok{getattr}\NormalTok{(llm_client, }\StringTok{"model"}\NormalTok{, }\StringTok{"none"}\NormalTok{) }\ControlFlowTok{if}\NormalTok{ llm_client }\ControlFlowTok{else} \StringTok{"none"}\NormalTok{,}
+\NormalTok{                                 }\StringTok{"groundedness_source"}\NormalTok{: }\StringTok{"external_document"}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ has_source }\ControlFlowTok{else} \StringTok{"none_open_domain"}\NormalTok{,}
+\NormalTok{                                 }\StringTok{"reason"}\NormalTok{: }\StringTok{"Dịch vụ LLM không khả dụng (Fail-closed: từ chối nghiệm thu khi thiếu Judge)"}\NormalTok{\}}
+\NormalTok{                }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: }\ConstantTok{False}\NormalTok{, }\StringTok{"quality_passed"}\NormalTok{: quality_passed, }\StringTok{"semantic_verified"}\NormalTok{: }\ConstantTok{False}\NormalTok{, }\StringTok{"judge_verdict"}\NormalTok{: judge_verdict\}}
+\NormalTok{            llm_eval }\OperatorTok{=}\NormalTok{ llm_client.generate(prompt)}
+\NormalTok{            }\ControlFlowTok{if}\NormalTok{ llm_eval }\KeywordTok{and}\NormalTok{ re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL):}
+\NormalTok{                }\ControlFlowTok{try}\NormalTok{:}
 \NormalTok{                    judge_res }\OperatorTok{=}\NormalTok{ json.loads(re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL).group(}\DecValTok{0}\NormalTok{))}
 \NormalTok{                    req_keys }\OperatorTok{=}\NormalTok{ (}\StringTok{"correctness"}\NormalTok{, }\StringTok{"groundedness"}\NormalTok{, }\StringTok{"completeness"}\NormalTok{)}
-\NormalTok{                    has_keys }\OperatorTok{=} \BuiltInTok{all}\NormalTok{(k }\KeywordTok{in}\NormalTok{ judge_res }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
-\NormalTok{                    types_ok }\OperatorTok{=}\NormalTok{ has_keys }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(}\BuiltInTok{type}\NormalTok{(judge_res[k]) }\KeywordTok{is} \DataTypeTok{int} \KeywordTok{and}\NormalTok{ judge_res[k] }\KeywordTok{in}\NormalTok{ (}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
-\NormalTok{                    semantic_verified }\OperatorTok{=}\NormalTok{ types_ok }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(judge_res[k] }\OperatorTok{==} \DecValTok{1} \ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
+\NormalTok{                    types_ok }\OperatorTok{=} \BuiltInTok{all}\NormalTok{(k }\KeywordTok{in}\NormalTok{ judge_res }\KeywordTok{and} \BuiltInTok{type}\NormalTok{(judge_res[k]) }\KeywordTok{is} \DataTypeTok{int} \KeywordTok{and}\NormalTok{ judge_res[k] }\KeywordTok{in}\NormalTok{ (}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
+\NormalTok{                    all_ones }\OperatorTok{=}\NormalTok{ types_ok }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(judge_res[k] }\OperatorTok{==} \DecValTok{1} \ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
 \NormalTok{                    judge_verdict }\OperatorTok{=}\NormalTok{ judge_res}
-\NormalTok{                }\ControlFlowTok{else}\NormalTok{:}
-\NormalTok{                    judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Parse fail"}\NormalTok{\}}
-\NormalTok{                passed }\OperatorTok{=}\NormalTok{ quality_passed }\KeywordTok{and}\NormalTok{ semantic_verified}
+\NormalTok{                    judge_verdict[}\StringTok{"judge_model"}\NormalTok{] }\OperatorTok{=} \BuiltInTok{getattr}\NormalTok{(llm_client, }\StringTok{"model"}\NormalTok{, }\StringTok{"tinix-lm:latest"}\NormalTok{)}
+\NormalTok{                    judge_verdict[}\StringTok{"groundedness_source"}\NormalTok{] }\OperatorTok{=} \StringTok{"external_document"}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ has_source }\ControlFlowTok{else} \StringTok{"none_open_domain"}
+\NormalTok{                    }\ControlFlowTok{if}\NormalTok{ all_ones:}
+\NormalTok{                        semantic_verified }\OperatorTok{=} \ConstantTok{True}\NormalTok{; judge_verdict[}\StringTok{"judge_status"}\NormalTok{] }\OperatorTok{=} \StringTok{"VERIFIED_SUCCESS"}
+\NormalTok{                    }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{                        semantic_verified }\OperatorTok{=} \ConstantTok{False}\NormalTok{; judge_verdict[}\StringTok{"judge_status"}\NormalTok{] }\OperatorTok{=} \StringTok{"REJECTED"}
+\NormalTok{                }\ControlFlowTok{except} \DataTypeTok{Exception} \KeywordTok{as}\NormalTok{ e:}
+\NormalTok{                    semantic_verified }\OperatorTok{=} \ConstantTok{False}\NormalTok{; judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"judge_status"}\NormalTok{: }\StringTok{"PARSE_EXCEPTION"}\NormalTok{, }\StringTok{"error"}\NormalTok{: }\BuiltInTok{str}\NormalTok{(e)\}}
+\NormalTok{            }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{                semantic_verified }\OperatorTok{=} \ConstantTok{False}\NormalTok{; judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"judge_status"}\NormalTok{: }\StringTok{"PARSE_ERROR"}\NormalTok{, }\StringTok{"error"}\NormalTok{: }\StringTok{"Parse fail"}\NormalTok{\}}
+\NormalTok{            passed }\OperatorTok{=}\NormalTok{ quality_passed }\KeywordTok{and}\NormalTok{ semantic_verified}
 \NormalTok{        }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            heuristic_passed }\OperatorTok{=} \KeywordTok{not} \BuiltInTok{any}\NormalTok{(k }\KeywordTok{in}\NormalTok{ content.lower() }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ [}\StringTok{"chính xác 100%"}\NormalTok{, }\StringTok{"tuyệt đối"}\NormalTok{])}
+\NormalTok{            judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"judge_status"}\NormalTok{: }\StringTok{"OFFLINE_HEURISTIC_PASS"}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ heuristic_passed }\ControlFlowTok{else} \StringTok{"REJECTED_OFFLINE"}\NormalTok{,}
+\NormalTok{                             }\StringTok{"correctness"}\NormalTok{: }\DecValTok{1}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ heuristic_passed }\ControlFlowTok{else} \DecValTok{0}\NormalTok{, }\StringTok{"groundedness"}\NormalTok{: }\DecValTok{1}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ has_source }\ControlFlowTok{else} \VariableTok{None}\NormalTok{,}
+\NormalTok{                             }\StringTok{"completeness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\StringTok{"judge_model"}\NormalTok{: }\StringTok{"none (offline_heuristic)"}\NormalTok{,}
+\NormalTok{                             }\StringTok{"groundedness_source"}\NormalTok{: }\StringTok{"external_document"}\NormalTok{ }\ControlFlowTok{if}\NormalTok{ has_source }\ControlFlowTok{else} \StringTok{"none_open_domain"}\NormalTok{\}}
 \NormalTok{            passed }\OperatorTok{=}\NormalTok{ quality_passed }\KeywordTok{and}\NormalTok{ heuristic_passed}
 \NormalTok{        }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"quality_passed"}\NormalTok{: quality_passed, }\StringTok{"semantic_verified"}\NormalTok{: semantic_verified, }\StringTok{"judge_verdict"}\NormalTok{: judge_verdict\}}
 \end{Highlighting}
@@ -477,7 +494,7 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
         \VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
         \VariableTok{self}\NormalTok{.context_memory: }\DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
 
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{plan_steps}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{List}\NormalTok{[Step]:}
+    \KeywordTok{def}\NormalTok{ }\FunctionTok{plan_steps}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, max_steps: }\DataTypeTok{int}\NormalTok{ }\OperatorTok{=}\NormalTok{ }\VariableTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{List}\NormalTok{[Step]:}
         \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.PLANNING}
 \NormalTok{        topic, intent }\OperatorTok{=} \VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
 \NormalTok{        steps: }\DataTypeTok{List}\NormalTok{[Step] }\OperatorTok{=}\NormalTok{ []}
@@ -490,7 +507,7 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
                     \NormalTok{match }\OperatorTok{=}\NormalTok{ re.search(}\StringTok{r"\textbackslash{}[\textbackslash{}s*\{.*\}\textbackslash{}s*\textbackslash{}]"}\NormalTok{, resp, re.DOTALL)}
                     \ControlFlowTok{if}\NormalTok{ match:}
 \NormalTok{                        raw }\OperatorTok{=}\NormalTok{ json.loads(match.group(}\DecValTok{0}\NormalTok{))}
-                        \ControlFlowTok{for}\NormalTok{ idx, s }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(raw[:}\VariableTok{self}\NormalTok{.max_steps], }\DecValTok{1}\NormalTok{):}
+                        \ControlFlowTok{for}\NormalTok{ idx, s }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(raw[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)], }\DecValTok{1}\NormalTok{):}
 \NormalTok{                            steps.append(Step(idx, s.get(}\StringTok{"title"}\NormalTok{, }\StringTok{f"Bước \{idx\}"}\NormalTok{),}
 \NormalTok{                                              s.get(}\StringTok{"description"}\NormalTok{, }\StringTok{""}\NormalTok{), s.get(}\StringTok{"action_type"}\NormalTok{, }\StringTok{"generate"}\NormalTok{)))}
                 \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
@@ -507,22 +524,22 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 \NormalTok{                steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Xác định dàn ý về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{),}
 \NormalTok{                         Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Soạn bài viết về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"generate"}\NormalTok{),}
 \NormalTok{                         Step(}\DecValTok{3}\NormalTok{, }\StringTok{f"Rà soát chất lượng về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"review_polish"}\NormalTok{)]}
-        \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:}\VariableTok{self}\NormalTok{.max_steps]}
+        \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)]}
         \ControlFlowTok{return} \VariableTok{self}\NormalTok{.plan}
 
     \KeywordTok{def}\NormalTok{ }\FunctionTok{_evaluate_stop_condition}\NormalTok{(}\VariableTok{self}\NormalTok{, current_step_index: }\DataTypeTok{int}\NormalTok{, total_steps: }\DataTypeTok{int}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Tuple}\NormalTok{[}\DataTypeTok{bool}\NormalTok{, }\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Optional}\NormalTok{[AgentStatus]]:}
-\NormalTok{        src }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"input_document"}\NormalTok{, }\VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"research_points"}\NormalTok{, }\StringTok{""}\NormalTok{))}
-        \CommentTok{# 1. Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True}
+\NormalTok{        src }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"input_document"}\NormalTok{)}
+        \CommentTok{# 1. Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True (kèm require_llm_judge=self.use_llm)}
         \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"} \KeywordTok{and} \StringTok{"outline"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
-            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"outline"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src)[}\StringTok{"passed"}\NormalTok{]:}
+            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"outline"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Dàn ý đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
         \ControlFlowTok{if} \StringTok{"final_article"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
-            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"final_article"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src)[}\StringTok{"passed"}\NormalTok{]:}
+            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"final_article"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
         \CommentTok{# 2. Hết ngân sách bước thực thi: Bắt buộc thẩm định lại chất lượng}
         \ControlFlowTok{if}\NormalTok{ current_step_index }\OperatorTok{>=}\NormalTok{ total_steps:}
 \NormalTok{            target }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"final_article"}\NormalTok{) }\KeywordTok{or} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"outline"}\NormalTok{)}
-            \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src)[}\StringTok{"passed"}\NormalTok{]:}
+            \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
                 \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Sản phẩm đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.COMPLETED}
             \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
         \ControlFlowTok{return} \ConstantTok{False}\NormalTok{, }\StringTok{"Continue"}\NormalTok{, }\ConstantTok{None}
@@ -530,6 +547,7 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 \end{Shaded}
 
 \subsection{5. Vòng lặp thực thi tự hành}
+\enlargethispage{2\baselineskip}
 Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc tự động khép kín kèm cơ chế bắt lỗi an toàn:
 
 \begin{Shaded}
@@ -565,23 +583,23 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
                 \ControlFlowTok{if}\NormalTok{ final_status: }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status}
                 \ControlFlowTok{break}
 
-        \ControlFlowTok{return}\NormalTok{ FinalReport(}
-\NormalTok{            goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx,}
+        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx,}
 \NormalTok{            status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan],}
 \NormalTok{            execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output,}
-\NormalTok{            quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter() }\OperatorTok{-}\NormalTok{ start_time, }\DecValTok{3}\NormalTok{)}
-\NormalTok{        )}
+\NormalTok{            quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter() }\OperatorTok{-}\NormalTok{ start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
+\newpage
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
+\enlargethispage{2\baselineskip}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
 Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.52\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.45\textwidth]{images/terminal_execution.png}
     \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
     \label{fig:terminal}
 \end{figure}
@@ -593,11 +611,14 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (tổng thời gian 35.6s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.56 (ngưỡng $\ge 0.35$), độ dài 2515 ký tự (482 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
+\enlargethispage{3\baselineskip}
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
+    \tightlist
     \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Kịch bản này cố ý chạy ở chế độ dự phòng (\texttt{use\_llm=False}) nhằm kiểm chứng độc lập khả năng nhận diện ý định và dừng sớm an toàn khi LLM ngoại tuyến (năng lực lập kế hoạch động qua LLM đã được kiểm chứng riêng ở Kịch bản 1). Agent sử dụng luật nhận diện ý định (Intent) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}:
     \begin{enumerate}
+        \tightlist
         \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
         \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
     \end{enumerate}
@@ -609,7 +630,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\renewcommand{\arraystretch}{1.02}
+\renewcommand{\arraystretch}{0.88}
 \begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
 \caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái} \label{tab:so-sanh-chat-luong} \\
 \hline
@@ -631,7 +652,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.70}
+\renewcommand{\arraystretch}{0.62}
 \begin{longtable}{|p{0.05\textwidth}|p{0.38\textwidth}|p{0.20\textwidth}|p{0.25\textwidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)} \label{tab:test-cases} \\
 \hline
@@ -668,17 +689,20 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\CommentTok{# Kết quả thực thi thực tế bộ kiểm thử (Console Execution Log khi có Ollama):}
-\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{29.257}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (}\DecValTok{18}\NormalTok{/}\DecValTok{18}\NormalTok{ PASS: }\DecValTok{13}\NormalTok{ Unit Tests: }\VariableTok{PASS}\NormalTok{, }\DecValTok{5}\NormalTok{ Real LLM Tests: }\VariableTok{PASS}\NormalTok{)}
+\CommentTok{# [Lần chạy 1 - Có kết nối Ollama thực tế (tinix-lm:latest)]:}
+\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{29.811}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (}\DecValTok{18}\NormalTok{/}\DecValTok{18}\NormalTok{ PASS: }\DecValTok{13}\NormalTok{ Unit Tests PASS, }\DecValTok{5}\NormalTok{ Real LLM Tests PASS)}
+\CommentTok{# [Lần chạy 2 - Môi trường Offline độc lập (không có dịch vụ Ollama)]:}
+\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{0.045}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (skipped=}\DecValTok{5}\NormalTok{, }\DecValTok{13}\NormalTok{ Unit Tests PASS)}
 \end{Highlighting}
 \end{Shaded}
-\textit{*(Trong môi trường offline không có Ollama, 5 Integration Tests tự động kích hoạt cờ \texttt{SKIPPED (skipped=5)} qua điều kiện \texttt{@unittest.skipUnless}, bảo đảm 13 Unit Tests luôn PASS độc lập trong $\sim$0.045s mà không báo cáo sai lệch kết quả).* }
+\textit{*(Chú thích phân định môi trường: Hai kết quả log trên phản ánh trung thực hai điều kiện kiểm thử: Khi có dịch vụ Ollama hoạt động, cả 18 kịch bản (gồm 5 Integration Tests gửi prompt thật đến LLM Judge để kiểm thử đối kháng) chạy hoàn tất trong 29.811s; khi không có Ollama, 5 Integration Tests tự động được bỏ qua qua cờ \texttt{SKIPPED (skipped=5)}, giúp 13 Unit Tests kiểm chứng độc lập hoàn tất trong 0.045s).* }
 
 \section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
+\enlargethispage{3\baselineskip}
 
 Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp tin \texttt{agent\_final\_report.json}. Dưới đây là cấu trúc tệp tin kiểm toán thực tế được sinh ra:
 
-\begin{small}
+\begin{footnotesize}
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{\{}
@@ -691,68 +715,52 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? – Giải thích cho người mới bắt đầu..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý bài chia sẻ ngắn: RAG là gì?..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu..."}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì?..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Bài viết..."}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"quality\_metrics"}\NormalTok{: \{}
-\NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"quality\_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"semantic\_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"char\_count"}\NormalTok{: }\DecValTok{1872}\NormalTok{, }\DataTypeTok{"word\_count"}\NormalTok{: }\DecValTok{391}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.427}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"matched\_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
+\NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"quality\_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"semantic\_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"char\_count"}\NormalTok{: }\DecValTok{1872}\NormalTok{, }\DataTypeTok{"word\_count"}\NormalTok{: }\DecValTok{391}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.427}\NormalTok{, }\DataTypeTok{"matched\_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
 \NormalTok{    }\DataTypeTok{"judge\_verdict"}\NormalTok{: \{}
 \NormalTok{      }\DataTypeTok{"correctness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"groundedness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"completeness"}\NormalTok{: }\DecValTok{1}\NormalTok{,}
 \NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Văn bản mô tả chính xác RAG kết hợp truy xuất và sinh nội dung, đúng bản chất."}\NormalTok{,}
-\NormalTok{      }\DataTypeTok{"judge\_model"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
-\NormalTok{      }\DataTypeTok{"groundedness\_source"}\NormalTok{: }\StringTok{"none\_open\_domain"}\NormalTok{,}
-\NormalTok{      }\DataTypeTok{"judge\_status"}\NormalTok{: }\StringTok{"VERIFIED\_SUCCESS"}
+\NormalTok{      }\DataTypeTok{"judge\_model"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"groundedness\_source"}\NormalTok{: }\StringTok{"none\_open\_domain"}\NormalTok{, }\DataTypeTok{"judge\_status"}\NormalTok{: }\StringTok{"VERIFIED\_SUCCESS"}
 \NormalTok{    \}}
 \NormalTok{  \},}
 \NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.8}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}
-\NormalTok{    }\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"bf5585d"}
-\NormalTok{  \}}
+\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"bf5585d"}\NormalTok{\}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
-\end{small}
+\end{footnotesize}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống tự động lưu vết các siêu dữ liệu (metadata) bao gồm: \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, trạng thái \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết và đối chiếu thông tin (các tham số này được lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực rằng đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài độc lập (\texttt{input\_document = None}); tiêu chí Groundedness của LLM Judge ở đây kiểm tra việc không bịa đặt thuật ngữ/khái niệm sai lệch so với tri thức chuẩn, tuyệt đối không diễn đạt như thể đã đối chiếu tài liệu nguồn độc lập. Ngược lại, với tác vụ tóm tắt (\texttt{intent == "summarize"}), Agent bắt buộc nhận tài liệu ngoài qua tham số \texttt{input\_document} (\texttt{groundedness\_source: "external\_document"}), và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
 
-\enlargethispage{2\baselineskip}
-
+\newpage
+\enlargethispage{6\baselineskip}
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
 Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
 
-\textbf{1. Trợ lý tự động viết tài liệu API (technical documentation agent):}\\
-Khi kỹ sư hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách tham số và error codes) $\rightarrow$ Bước 2 (Sinh tài liệu chi tiết kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI Spec $\rightarrow$ Lưu file).
+\begin{enumerate}
+    \tightlist
+    \item \textbf{Trợ lý tự động viết tài liệu API (technical documentation agent):} Khi kỹ sư hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách tham số và error codes) $\rightarrow$ Bước 2 (Sinh tài liệu chi tiết kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI Spec $\rightarrow$ Lưu file).
+    \item \textbf{Trợ lý rà soát pull request (code review agent):} Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}: Bước 1 (Trích xuất git diff những file thay đổi) $\rightarrow$ Bước 2 (Đối chiếu bộ quy tắc an ninh: secret, SQL injection, null check) $\rightarrow$ Bước 3 (Tổng hợp comment góp ý và thông báo lên GitHub/GitLab).
+    \item \textbf{Trợ lý tự động hóa chăm sóc khách hàng:} Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
+\end{enumerate}
 
-\textbf{2. Trợ lý rà soát pull request (code review agent):}\\
-Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}: Bước 1 (Trích xuất git diff những file thay đổi) $\rightarrow$ Bước 2 (Đối chiếu bộ quy tắc an ninh: secret, SQL injection, null check) $\rightarrow$ Bước 3 (Tổng hợp comment góp ý và thông báo lên GitHub/GitLab).
-
-\textbf{3. Trợ lý tự động hóa chăm sóc khách hàng:}\\
-Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
-
-\enlargethispage{4\baselineskip}
 \section{Kết luận}\label{ket-luan}
 
 Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát và Đánh giá (Observe \& Evaluate) $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
 
 Thông qua bài học này, bạn đã thiết kế và vận hành thành công hệ thống Bounded Checklist Agent có cơ chế xử lý lỗi và retry trong phạm vi giới hạn để giải quyết bài toán viết bài chia sẻ RAG cho người mới bắt đầu. Mô hình khép kín này là nền tảng tối quan trọng giúp bạn tự tin bước vào những bài toán phức tạp hơn như Multi-Agent Systems, Hierarchical Planning và Graph-based Autonomous Workflows trong tương lai.
 
-\textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):}\\
-Toàn bộ mã nguồn \texttt{checklist\_agent.py}, bộ kiểm thử \texttt{eval\_agent.py}, script sinh ảnh \texttt{generate\_assets.py} cùng báo cáo \texttt{agent\_final\_report.json} được lưu trữ công khai tại GitHub: \\
-\url{https://github.com/thaiptit123/autonomous-checklist-agent}
+\textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):} Toàn bộ mã nguồn và báo cáo thực nghiệm được lưu trữ công khai tại GitHub: \url{https://github.com/thaiptit123/autonomous-checklist-agent}.
 
 \section{Tài liệu tham khảo}\label{tai-lieu-tham-khao}
 
-\begin{small}
+\begin{footnotesize}
 \begin{enumerate}
     \tightlist
     \def\labelenumi{[\arabic{enumi}]}
@@ -762,6 +770,6 @@ Toàn bộ mã nguồn \texttt{checklist\_agent.py}, bộ kiểm thử \texttt{e
     \item \textbf{ReAct Framework}: \textit{Synergizing Reasoning and Acting in Language Models} (ICLR 2023). \url{https://arxiv.org/abs/2210.03629}
     \item \textbf{AI Guru x TiniX Tutorial Series}: Chuỗi tài liệu chuẩn cho kỹ sư AI.
 \end{enumerate}
-\end{small}
+\end{footnotesize}
 
 \end{document}

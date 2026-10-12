@@ -160,33 +160,30 @@ def generate_terminal_screenshot():
         ("[PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC BẰNG LLM:", "#A7F3D0"),
         ("   [1] (research_points) Xác định nội dung cơ bản của RAG", "#F1F5F9"),
         ("   [2] (outline) Dàn ý bài chia sẻ ngắn", "#F1F5F9"),
-        ("   [3] (review_polish) Viết và chỉnh sửa bài chia sẻ", "#F1F5F9"),
+        ("   [3] (generate) Viết và hoàn thiện bài chia sẻ", "#F1F5F9"),
         ("--------------------------------------------------------------------------", "#475569"),
         ("[BƯỚC 1] Đang thực hiện: Xác định nội dung cơ bản của RAG...", "#E2E8F0"),
-        (f"   [OBSERVE] Quan sát: Đã hoàn thành 1,037 ký tự | [OK] COMPLETED ({d1:.3f}s)", "#34D399"),
-        ("   🔄 [ADAPT] Thích ứng Bước 2: Bổ sung ví dụ đời sống gần gũi cho người mới.", "#FCD34D"),
+        (f"   [OBSERVE] Quan sát: Đã hoàn thành 1,078 ký tự | [OK] COMPLETED ({d1:.3f}s)", "#34D399"),
+        ("   -> [ADAPT] Thích ứng Bước 2: Nêu rõ vai trò của từng thành phần trong RAG để dễ hiểu.", "#FCD34D"),
         ("[BƯỚC 2] Đang thực hiện: Dàn ý bài chia sẻ ngắn...", "#E2E8F0"),
-        ("   ✗ Trạng thái: FAILED (5.012s) - Mất kết nối máy chủ LLM (Timeout)", "#EF4444"),
-        ("   🔄 [RETRY] Tự động thử lại hành động do lỗi.", "#F59E0B"),
-        ("[BƯỚC 3] Đang thực hiện: [RETRY] Dàn ý bài chia sẻ ngắn...", "#E2E8F0"),
         (f"   [OBSERVE] Quan sát: Dàn ý logic 4 phần | [OK] COMPLETED ({d2:.3f}s)", "#34D399"),
-        ("   🔄 [ADAPT] Thích ứng Bước 4: Tập trung ngôn ngữ trực quan, không dùng biệt ngữ.", "#FCD34D"),
-        ("[BƯỚC 4] Đang thực hiện: Viết và chỉnh sửa bài chia sẻ...", "#E2E8F0"),
-        (f"   ✓ LLM Judge xác nhận: Đạt chuẩn semantic (Tính chính xác và toàn vẹn cao)", "#34D399"),
+        ("   -> [ADAPT] Thích ứng Bước 3: Tập trung giải thích đơn giản bằng ví dụ đời sống.", "#FCD34D"),
+        ("[BƯỚC 3] Đang thực hiện: Viết và hoàn thiện bài chia sẻ...", "#E2E8F0"),
+        (f"   [JUDGE] LLM Judge xác nhận: Đạt chuẩn semantic (Tính chính xác và toàn vẹn cao)", "#34D399"),
         (f"   [OBSERVE] Quan sát: Đạt chuẩn định lượng | [OK] COMPLETED ({d3:.3f}s)", "#34D399"),
-        ("🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved (QualityEvaluator Passed)", "#F87171"),
+        ("!! [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved (LLM Judge Verified)", "#F87171"),
         ("==========================================================================", "#38BDF8"),
         ("BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)", "#38BDF8"),
-        (f"   - Trạng thái: {status} | Số bước: 4/{total_p} | Tổng thời gian LLM: {tot_time:.3f}s", "#F8FAFC"),
+        (f"   - Trạng thái: {status} | Số bước: 3/3 | Tổng thời gian LLM: {tot_time:.3f}s", "#F8FAFC"),
         (f"   - Kiểm duyệt định lượng: TTR={ttr_val:.2f} | Đạt {chars:,} ký tự | Cấu trúc Markdown chuẩn", "#A7F3D0"),
-        ("   - Sản phẩm: Bài viết 'RAG là gì? Giải thích cho người mới' (Nghiệm thu đạt chuẩn)", "#FCD34D"),
+        ("   - Sản phẩm: Bài viết 'RAG là gì? Giải thích đơn giản cho người mới bắt đầu'", "#FCD34D"),
         ("Đã lưu báo cáo chi tiết vào: agent_final_report.json", "#38BDF8"),
     ]
 
     y_pos = 6.6
     for line, color in terminal_text:
         ax.text(0.3, y_pos, line, fontsize=8.5, color=color, family="monospace", va="center")
-        y_pos -= 0.26
+        y_pos -= 0.25
 
     ax.set_xlim(0, 12)
     ax.set_ylim(0, 7.6)
