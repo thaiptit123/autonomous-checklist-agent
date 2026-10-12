@@ -1096,6 +1096,9 @@ class AutonomousChecklistAgent:
     def run(self, goal: str, input_document: Optional[str] = None) -> FinalReport:
         """
         Vòng lặp Autonomous Agent: Lập plan động -> Lặp thực thi -> Quan sát & Thích ứng -> Lưu log -> Kiểm tra dừng -> Báo cáo cuối
+        Ghi chú: Tham số input_document là Optional ở chữ ký tổng quát, nhưng đối với tác vụ tóm tắt
+        (intent == 'summarize'), rào chắn an toàn trong _execute_step_action yêu cầu bắt buộc phải có tài liệu nguồn
+        (nếu thiếu input_document, tiến trình dừng với trạng thái FAILED an toàn qua Test 9).
         """
         start_time = time.perf_counter()
         self.logs.clear()

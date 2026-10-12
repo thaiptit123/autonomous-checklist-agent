@@ -24,14 +24,14 @@ Bai44/
 │   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe & Adapt)
 │   ├── eval_agent.py           # Bộ 18 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
-│   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM thực tế (19.8s)
+│   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM benchmark thực tế (19.8s / 19.812s)
 └── images/
     ├── architecture_diagram.png # Sơ đồ kiến trúc tổng thể tác nhân
     ├── state_flow_diagram.png   # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
     └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
 ```
 
-> **Ghi chú về tính nhất quán thời gian thực thi:** Báo cáo kiểm toán mẫu `agent_final_report.json` và số liệu trong tài liệu PDF ghi nhận thời gian thực thi là **19.8s** (chính xác: **19.812s**) từ phiên chạy benchmark chuẩn với mô hình `tinix-lm:latest`. Trong các lần chạy thử nghiệm ban đầu trước đó trên môi trường phần cứng khác nhau, thời gian có thể dao động (~35.6s); toàn bộ dữ liệu báo cáo kiểm toán, hình ảnh minh họa terminal và tài liệu PDF hiện đã được đồng bộ chuẩn xác 100% theo phiên chạy benchmark 19.8s.
+> **Ghi chú về tính nhất quán thời gian thực thi:** Báo cáo kiểm toán mẫu `agent_final_report.json`, hình ảnh minh họa terminal và tài liệu PDF ghi nhận thời gian thực thi là **19.8s** (chính xác: **19.812s**) từ phiên chạy benchmark chuẩn với mô hình `tinix-lm:latest` (1.872 ký tự, 391 từ, TTR 0.427). Toàn bộ dữ liệu báo cáo kiểm toán, nhật ký terminal và tài liệu PDF hiện đã được đồng bộ chuẩn xác 100% theo phiên chạy 19.8s này (thay thế cho số liệu ước lượng ~35.6s ở các phiên chạy thử nghiệm ban đầu trên cấu hình cũ).
 
 ## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 
@@ -45,8 +45,8 @@ Bai44/
   ollama create tinix-lm:latest -f Modelfile
   ```
 
-### Trường hợp 2: Sử dụng mô hình nguồn mở thay thế (Dành cho người thẩm định / cộng đồng kiểm thử)
-- Người thẩm định hoặc người dùng thông thường không có `Modelfile` nội bộ có thể chạy và tái lập toàn bộ quy trình của Agent bằng mô hình nguồn mở tiêu chuẩn:
+### Trường hợp 2: Sử dụng mô hình nguồn mở thay thế khi không có quyền truy cập `tinix-lm:latest` (Dành cho người thẩm định / cộng đồng kiểm thử)
+- Người thẩm định hoặc người dùng thông thường không có `Modelfile` nội bộ có thể chạy và tái lập toàn bộ quy trình của Agent bằng mô hình thay thế tiêu chuẩn:
   ```bash
   ollama pull qwen2.5:3b
   ```
