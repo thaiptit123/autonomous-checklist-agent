@@ -101,7 +101,10 @@ class ToolRegistry:
                     elif isinstance(node.op, ast.Sub): return left - right
                     elif isinstance(node.op, ast.Mult): return left * right
                     elif isinstance(node.op, ast.Div): return left / right
-                    elif isinstance(node.op, ast.Pow): return left ** right
+                    elif isinstance(node.op, ast.Pow):
+                        if right > 100 or abs(left) > 1000000:
+                            raise ValueError("Số mũ quá lớn vượt ngưỡng an toàn")
+                        return left ** right
                 elif isinstance(node, ast.UnaryOp):
                     operand = _safe_eval(node.operand)
                     if isinstance(node.op, ast.UAdd): return +operand
@@ -205,74 +208,91 @@ class QualityEvaluator:
         )
         if not crit_complete_sentence:
             review_notes.append("✗ Lỗi ngữ nghĩa: Phát hiện câu bị cắt xén (cut-off sentence) ở cuối văn bản.")
-            passed = False
-            
-        # 6. Mở rộng đánh giá bằng LLM-as-a-judge (Nếu môi trường hỗ trợ)
-        llm_passed = True
-        judge_verdict = None
-        
-        if llm_client and llm_client.is_available():
-            judge_prompt = (
-                f"Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness), "
-                f"Tính bám sát nguồn (Groundedness) và Tính toàn vẹn yêu cầu (Completeness).\n\n"
-                f"Mục tiêu: {goal}\n"
-                f"Tài liệu nguồn để đối chiếu Groundedness: {source_doc if source_doc else 'Không có'}\n"
-                f"Văn bản cần đánh giá:\n{content}\n\n"
-                f"Trả về DUY NHẤT một chuỗi JSON (không markdown) với cấu trúc sau:\n"
-                f"{{\"correctness\": 1/0, \"groundedness\": 1/0, \"completeness\": 1/0, \"reason\": \"Giải thích ngắn\"}}"
-            )
-            llm_eval = llm_client.generate(judge_prompt, max_tokens=150)
-            if llm_eval:
-                try:
-                    match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
-                    if match:
-                        judge_res = json.loads(match.group(0))
-                        judge_verdict = judge_res
-                        required_keys = ("correctness", "groundedness", "completeness")
-                        keys_present = all(k in judge_res for k in required_keys)
-                        types_valid = keys_present and all(
-                            type(judge_res[k]) is int and judge_res[k] in (0, 1)
-                            for k in required_keys
-                        )
-                        all_scores_one = types_valid and all(judge_res[k] == 1 for k in required_keys)
 
-                        if not all_scores_one:
-                            llm_passed = False
-                            if not keys_present:
-                                err_msg = "Thiếu trường bắt buộc trong phán quyết của LLM Judge (cần có correctness, groundedness, completeness)"
-                            elif not types_valid:
-                                err_msg = "Sai kiểu dữ liệu hoặc giá trị không thuộc {0, 1} (chỉ chấp nhận số nguyên 0 hoặc 1, không nhận boolean/string)"
-                            else:
-                                err_msg = judge_res.get("reason", "Một trong các tiêu chí Correctness, Groundedness, Completeness không đạt (bằng 0)")
-                            review_notes.append(f"✗ LLM Judge từ chối: {err_msg}")
-                        else:
-                            llm_passed = True
-                            review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
-                    else:
-                        llm_passed = False
-                        judge_verdict = {"error": "Parse fail fallback", "reason": "Không trả về định dạng JSON hợp lệ"}
-                        review_notes.append("✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).")
-                except Exception as e:
-                    llm_passed = False
-                    judge_verdict = {"error": "Parse exception", "reason": str(e)}
-                    review_notes.append(f"✗ LLM Judge từ chối: Lỗi ngoại lệ khi parse JSON ({str(e)}).")
+        quality_passed = passed and crit_complete_sentence
+
+        # 6. Mở rộng đánh giá bằng LLM-as-a-judge (Tách bạch rõ quality_passed và semantic_verified)
+        semantic_verified = False
+        judge_verdict = None
+
+        if llm_client is not None:
+            # Luồng thẩm định yêu cầu LLM Judge thực tế
+            if not llm_client.is_available():
+                # FAIL-CLOSED: Khi yêu cầu thẩm định bằng LLM nhưng dịch vụ LLM không khả dụng
+                semantic_verified = False
+                judge_verdict = {
+                    "error": "LLM_UNAVAILABLE",
+                    "reason": "Dịch vụ LLM Judge không khả dụng hoặc mất kết nối (Fail-closed: Không thể nghiệm thu ngữ nghĩa khi thiếu Judge)."
+                }
+                review_notes.append("✗ LLM Judge từ chối: Mô hình LLM không khả dụng (Fail-closed: Không thể nghiệm thu ngữ nghĩa khi thiếu Judge).")
+                final_passed = False
             else:
-                llm_passed = False
-                judge_verdict = {"error": "No response", "reason": "Model không trả về kết quả đánh giá"}
-                review_notes.append("✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.")
+                judge_prompt = (
+                    f"Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness), "
+                    f"Tính bám sát nguồn (Groundedness) và Tính toàn vẹn yêu cầu (Completeness).\n\n"
+                    f"Mục tiêu: {goal}\n"
+                    f"Tài liệu nguồn để đối chiếu Groundedness: {source_doc if source_doc else 'Không có'}\n"
+                    f"Văn bản cần đánh giá:\n{content}\n\n"
+                    f"Trả về DUY NHẤT một chuỗi JSON (không markdown) với cấu trúc sau:\n"
+                    f"{{\"correctness\": 1/0, \"groundedness\": 1/0, \"completeness\": 1/0, \"reason\": \"Giải thích ngắn\"}}"
+                )
+                llm_eval = llm_client.generate(judge_prompt, max_tokens=150)
+                if llm_eval:
+                    try:
+                        match = re.search(r'\{.*\}', llm_eval, re.DOTALL)
+                        if match:
+                            judge_res = json.loads(match.group(0))
+                            judge_verdict = judge_res
+                            required_keys = ("correctness", "groundedness", "completeness")
+                            keys_present = all(k in judge_res for k in required_keys)
+                            types_valid = keys_present and all(
+                                type(judge_res[k]) is int and judge_res[k] in (0, 1)
+                                for k in required_keys
+                            )
+                            all_scores_one = types_valid and all(judge_res[k] == 1 for k in required_keys)
+
+                            if not all_scores_one:
+                                semantic_verified = False
+                                if not keys_present:
+                                    err_msg = "Thiếu trường bắt buộc trong phán quyết của LLM Judge (cần có correctness, groundedness, completeness)"
+                                elif not types_valid:
+                                    err_msg = "Sai kiểu dữ liệu hoặc giá trị không thuộc {0, 1} (chỉ chấp nhận số nguyên 0 hoặc 1, không nhận boolean/string)"
+                                else:
+                                    err_msg = judge_res.get("reason", "Một trong các tiêu chí Correctness, Groundedness, Completeness không đạt (bằng 0)")
+                                review_notes.append(f"✗ LLM Judge từ chối: {err_msg}")
+                            else:
+                                semantic_verified = True
+                                review_notes.append(f"✓ LLM Judge xác nhận: {judge_res.get('reason', 'Đạt chuẩn semantic')}")
+                        else:
+                            semantic_verified = False
+                            judge_verdict = {"error": "Parse fail fallback", "reason": "Không trả về định dạng JSON hợp lệ"}
+                            review_notes.append("✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).")
+                    except Exception as e:
+                        semantic_verified = False
+                        judge_verdict = {"error": "Parse exception", "reason": str(e)}
+                        review_notes.append(f"✗ LLM Judge từ chối: Lỗi ngoại lệ khi parse JSON ({str(e)}).")
+                else:
+                    semantic_verified = False
+                    judge_verdict = {"error": "No response", "reason": "Model không trả về kết quả đánh giá"}
+                    review_notes.append("✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.")
+
+                final_passed = quality_passed and semantic_verified
         else:
-            # Chế độ Deterministic Fallback Judge (khi LLM offline / use_llm=False)
-            # 1. Correctness: Chặn các khẳng định tuyệt đối sai sự thật
+            # Chế độ Offline Unit Tests / Deterministic Heuristic Fallback (use_llm=False)
+            semantic_verified = False
+            heuristic_passed = True
+
+            # 1. Correctness heuristic: Chặn các khẳng định tuyệt đối sai sự thật
             if any(k in content.lower() for k in ["chính xác 100%", "tuyệt đối", "luôn luôn"]):
-                llm_passed = False
+                heuristic_passed = False
                 judge_verdict = {"correctness": 0, "groundedness": 1, "completeness": 1, "reason": "Chứa khẳng định tuyệt đối đáng ngờ"}
                 review_notes.append("✗ Deterministic Judge từ chối: Nội dung chứa khẳng định tuyệt đối đáng ngờ (Correctness failed).")
-            # 2. Completeness: Đảm bảo có định nghĩa cơ bản
+            # 2. Completeness heuristic: Đảm bảo có định nghĩa cơ bản
             elif intent == "full_article" and len(content.split()) < 150:
-                llm_passed = False
+                heuristic_passed = False
                 judge_verdict = {"correctness": 1, "groundedness": 1, "completeness": 0, "reason": "Nội dung quá ngắn, thiếu thông tin cốt lõi"}
                 review_notes.append("✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).")
-            # 3. Groundedness: Đảm bảo bám sát nguồn nếu có
+            # 3. Groundedness heuristic: Đảm bảo bám sát nguồn nếu có
             elif source_doc:
                 doc_words = [
                     re.sub(r"^[^\w]+|[^\w]+$", "", w).lower()
@@ -281,22 +301,24 @@ class QualityEvaluator:
                     and re.sub(r"^[^\w]+|[^\w]+$", "", w).lower() not in {"mock", "tool", "search", "read_document", "thấy", "được", "trích", "xuất", "tài", "liệu"}
                 ]
                 if doc_words and not any(w in content.lower() for w in doc_words[:10]):
-                    llm_passed = False
+                    heuristic_passed = False
                     judge_verdict = {"correctness": 1, "groundedness": 0, "completeness": 1, "reason": "Nội dung không bám sát tài liệu nguồn"}
                     review_notes.append("✗ Deterministic Judge từ chối: Nội dung có dấu hiệu không bám sát nguồn (Groundedness failed).")
                 else:
-                    llm_passed = True
-                    judge_verdict = {"mode": "deterministic_fallback", "correctness": 1, "groundedness": 1, "completeness": 1, "reason": "Thỏa mãn kiểm định định lượng và heuristic"}
-                    review_notes.append("✓ Deterministic Judge xác nhận: Thỏa mãn bộ lọc định lượng và heuristic.")
+                    heuristic_passed = True
+                    judge_verdict = {"mode": "deterministic_fallback", "correctness": 1, "groundedness": 1, "completeness": 1, "semantic_verified": False, "reason": "Thỏa mãn kiểm định định lượng và heuristic offline"}
+                    review_notes.append("ℹ Deterministic Fallback: Thỏa mãn bộ lọc định lượng và heuristic offline (semantic_verified=False).")
             else:
-                llm_passed = True
-                judge_verdict = {"mode": "deterministic_fallback", "correctness": 1, "groundedness": 1, "completeness": 1, "reason": "Thỏa mãn kiểm định định lượng và heuristic"}
-                review_notes.append("✓ Deterministic Judge xác nhận: Thỏa mãn bộ lọc định lượng và heuristic.")
+                heuristic_passed = True
+                judge_verdict = {"mode": "deterministic_fallback", "correctness": 1, "groundedness": 1, "completeness": 1, "semantic_verified": False, "reason": "Thỏa mãn kiểm định định lượng và heuristic offline"}
+                review_notes.append("ℹ Deterministic Fallback: Thỏa mãn bộ lọc định lượng và heuristic offline (semantic_verified=False).")
 
-        passed = passed and crit_complete_sentence and llm_passed
+            final_passed = quality_passed and heuristic_passed
 
         return {
-            "passed": passed,
+            "passed": final_passed,
+            "quality_passed": quality_passed,
+            "semantic_verified": semantic_verified,
             "char_count": char_count,
             "word_count": word_count,
             "ttr": ttr,
@@ -581,16 +603,31 @@ class AutonomousChecklistAgent:
 
         # 1. Thử gọi LLM sinh nội dung nếu có sẵn
         if self.use_llm and self.llm and self.llm.is_available():
-            context_summary = "\n".join([f"- {k}: {str(v)[:220]}..." for k, v in self.context_memory.items()])
-            llm_prompt = (
-                f"Bạn là Autonomous Content Agent đang thực thi nhiệm vụ.\n"
-                f"Mục tiêu tổng thể: {goal}\n"
-                f"Nhiệm vụ bước hiện tại [{step.step_id}]: {step.title}\n"
-                f"Mô tả và chỉ dẫn: {step.description}\n"
-                f"Dữ liệu ngữ cảnh tích lũy từ các bước trước:\n{context_summary if context_summary else '(Chưa có ngữ cảnh trước)'}\n\n"
-                f"Hãy tạo nội dung kết quả cho bước này một cách rõ ràng, logic, có phân đoạn Markdown (khoảng 150-200 từ), kết thúc trọn vẹn và hoàn chỉnh câu cuối cùng."
-            )
-            llm_res = self.llm.generate(llm_prompt, max_tokens=600)
+            context_summary = "\n\n".join([f"### {k}:\n{str(v)}" for k, v in self.context_memory.items() if k not in ("review_notes",)])
+            if step.action_type in ("generate", "review_polish"):
+                llm_prompt = (
+                    f"Bạn là Autonomous Content Agent đang thực thi nhiệm vụ soạn thảo bài viết.\n"
+                    f"Mục tiêu tổng thể: {goal}\n"
+                    f"Nhiệm vụ bước hiện tại [{step.step_id}]: {step.title}\n"
+                    f"Mô tả và chỉ dẫn: {step.description}\n"
+                    f"Ngữ cảnh chi tiết từ các bước trước:\n{context_summary}\n\n"
+                    f"Hãy soạn thảo bài viết hoàn chỉnh bằng Markdown (khoảng 300-400 từ), bao gồm đầy đủ:\n"
+                    f"1. Định nghĩa và giải thích bản chất dễ hiểu cho người mới.\n"
+                    f"2. Cơ chế hoạt động 2-3 giai đoạn (Truy xuất / Retrieval và Sinh nội dung / Generation).\n"
+                    f"3. Lợi ích cốt lõi: tăng độ chính xác, có cơ sở dữ liệu thực tế, giảm hallucination.\n"
+                    f"4. Ví dụ minh họa đời thường gần gũi và kết luận rõ ràng.\n"
+                    f"Đảm bảo câu văn mạch lạc, phân cấp tiêu đề Markdown rõ ràng và kết thúc trọn vẹn câu cuối."
+                )
+            else:
+                llm_prompt = (
+                    f"Bạn là Autonomous Content Agent đang thực thi nhiệm vụ.\n"
+                    f"Mục tiêu tổng thể: {goal}\n"
+                    f"Nhiệm vụ bước hiện tại [{step.step_id}]: {step.title}\n"
+                    f"Mô tả và chỉ dẫn: {step.description}\n"
+                    f"Dữ liệu ngữ cảnh tích lũy từ các bước trước:\n{context_summary if context_summary else '(Chưa có ngữ cảnh trước)'}\n\n"
+                    f"Hãy tạo nội dung kết quả cho bước này một cách rõ ràng, logic, có phân đoạn Markdown (khoảng 150-200 từ), kết thúc trọn vẹn và hoàn chỉnh câu cuối cùng."
+                )
+            llm_res = self.llm.generate(llm_prompt, max_tokens=650)
             if llm_res and len(llm_res.strip()) > 50:
                 result = llm_res.strip()
                 if step.action_type == "research_points":
@@ -601,6 +638,7 @@ class AutonomousChecklistAgent:
                     self.context_memory["summary"] = result
                 elif step.action_type == "generate":
                     self.context_memory["draft_article"] = result
+                    self.context_memory["final_article"] = result
                 elif step.action_type == "review_polish":
                     eval_res = self.evaluator.evaluate(result, goal, "full_article", self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
                     self.context_memory["review_notes"] = eval_res["review_notes"]
@@ -761,19 +799,24 @@ class AutonomousChecklistAgent:
         if intent == "outline_only" and "outline" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["outline"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
-                return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng theo đúng mục tiêu.", AgentStatus.COMPLETED
+                verified_tag = " (LLM Judge Verified)" if eval_res.get("semantic_verified", False) else " (Chưa xác minh ngữ nghĩa bởi LLM Judge)"
+                return True, f"Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng{verified_tag} theo đúng mục tiêu.", AgentStatus.COMPLETED
 
         # 2. Trường hợp mục tiêu tóm tắt tài liệu (summarize)
         if intent == "summarize" and "summary" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["summary"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
-                return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng.", AgentStatus.COMPLETED
+                verified_tag = " (LLM Judge Verified)" if eval_res.get("semantic_verified", False) else " (Chưa xác minh ngữ nghĩa bởi LLM Judge)"
+                return True, f"Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng{verified_tag}.", AgentStatus.COMPLETED
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
             eval_res = self.evaluator.evaluate(self.context_memory["final_article"], goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
             if eval_res["passed"]:
-                return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator.", AgentStatus.COMPLETED
+                if eval_res.get("semantic_verified", False):
+                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).", AgentStatus.COMPLETED
+                else:
+                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge).", AgentStatus.COMPLETED
 
         # 4. Khi đạt giới hạn số bước (current_step_index >= total_steps)
         if current_step_index >= total_steps:
@@ -789,7 +832,10 @@ class AutonomousChecklistAgent:
             if target_content:
                 eval_res = self.evaluator.evaluate(target_content, goal, intent, self.llm, source_doc=self.context_memory.get("input_document", self.context_memory.get("research_points", "")))
                 if eval_res["passed"]:
-                    return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau {current_step_index} bước.", AgentStatus.COMPLETED
+                    if eval_res.get("semantic_verified", False):
+                        return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng (LLM Judge Verified) sau {current_step_index} bước.", AgentStatus.COMPLETED
+                    else:
+                        return True, f"Goal achieved: Đã hoàn thành mục tiêu theo chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {current_step_index} bước.", AgentStatus.COMPLETED
                 else:
                     failed_notes = [n for n in eval_res["review_notes"] if n.startswith("✗")]
                     reason_detail = "; ".join(failed_notes) if failed_notes else "Chưa thỏa mãn tiêu chí chất lượng"
@@ -967,7 +1013,10 @@ class AutonomousChecklistAgent:
             if self.quality_metrics.get("passed", False):
                 self.status = AgentStatus.COMPLETED
                 if not stop_reason:
-                    stop_reason = f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau {steps_executed} bước."
+                    if self.quality_metrics.get("semantic_verified", False):
+                        stop_reason = f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng (LLM Judge Verified) sau {steps_executed} bước."
+                    else:
+                        stop_reason = f"Goal achieved: Đã hoàn thành theo chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {steps_executed} bước."
             else:
                 self.status = AgentStatus.BUDGET_EXHAUSTED
                 if not stop_reason:
@@ -976,7 +1025,10 @@ class AutonomousChecklistAgent:
                     stop_reason = f"Budget exhausted: Đã thực hiện tối đa {steps_executed}/{self.max_steps} bước nhưng chưa đạt chuẩn nghiệm thu ({reason_detail})."
 
         if self.status == AgentStatus.COMPLETED and not stop_reason:
-            stop_reason = "Goal achieved: Sản phẩm đạt chuẩn nghiệm thu chất lượng."
+            if self.quality_metrics.get("semantic_verified", False):
+                stop_reason = "Goal achieved: Sản phẩm đạt chuẩn nghiệm thu chất lượng (LLM Judge Verified)."
+            else:
+                stop_reason = "Goal achieved: Sản phẩm đạt chuẩn nghiệm thu định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge)."
         elif self.status == AgentStatus.BUDGET_EXHAUSTED and not stop_reason:
             stop_reason = f"Budget exhausted: Đã thực hiện tối đa {steps_executed}/{self.max_steps} bước nhưng chưa đạt chuẩn nghiệm thu."
 

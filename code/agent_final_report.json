@@ -3,85 +3,87 @@
   "total_steps_planned": 3,
   "steps_executed": 3,
   "status": "COMPLETED",
-  "stop_reason": "Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng sau 3 bước.",
+  "stop_reason": "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).",
   "plan": [
     {
       "step_id": 1,
       "title": "Xác định nội dung cơ bản của RAG",
-      "description": "Tìm hiểu định nghĩa, nguyên lý hoạt động và lợi ích chính của RAG (Retrieval-Augmented Generation) để đảm bảo thông tin chính xác và dễ hiểu.",
+      "description": "Tìm hiểu định nghĩa, nguyên lý hoạt động và lợi ích của RAG (Retrieval-Augmented Generation) để đảm bảo thông tin chính xác và dễ hiểu.",
       "action_type": "research_points",
       "status": "COMPLETED",
-      "result": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\n**RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữa việc **truy xuất thông tin từ nguồn dữ liệu bên ngoài** và **tạo nội dung bằng mô hình ngôn ngữ**.  \n\nNguyên lý hoạt động của RAG gồm hai bước:  \n1. **Truy xuất** – Mô hình tìm kiếm thông tin liên quan từ một cơ sở dữ liệu (như văn bản, tài liệu, cơ sở tri thức) dựa trên câu hỏi hoặc yêu cầu đầu vào.  \n2. **Tạo nội dung** – Dữ liệu được truy xuất này được kết hợp với mô hình ngôn ngữ để sinh ra câu trả lời hoặc nội dung mới, chính xác và có nguồn gốc rõ ràng hơn.  \n\nLợi ích chính của RAG là giúp **tăng độ chính xác**, **giảm nguy cơ sai lệch** và **cung cấp thông tin thực tế** từ các nguồn hiện có, thay vì chỉ dựa vào kiến thức nội bộ của mô hình.  \n\nRAG không chỉ là công cụ hỗ trợ sinh lời, mà còn là nền tảng để xây dựng các hệ thống AI có khả năng học hỏi và phản hồi dựa trên dữ liệu thực tế – một bước tiến quan trọng trong việc làm cho AI trở nên đáng tin cậy và hữu ích hơn."
+      "result": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\n**RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữa việc *truy xuất thông tin* từ một cơ sở dữ liệu lớn và việc *tạo nội dung* bằng mô hình ngôn ngữ.  \n\nNguyên lý hoạt động của RAG bao gồm hai bước chính:  \n1. **Truy xuất** (Retrieval): Khi một câu hỏi được đưa ra, hệ thống sẽ tìm kiếm các đoạn văn hoặc thông tin liên quan từ một kho dữ liệu (như tài liệu, sách, bài báo).  \n2. **Tạo nội dung** (Generation): Sau khi thu thập thông tin, mô hình ngôn ngữ sẽ sử dụng dữ liệu đó để tạo ra câu trả lời tự nhiên, chính xác và có nguồn gốc.  \n\nLợi ích của RAG là rất lớn: nó giúp giảm nguy cơ \"giả mạo\" thông tin (hallucination), vì câu trả lời được xây dựng dựa trên dữ liệu thực tế. Ngoài ra, RAG cho phép hệ thống học hỏi từ nhiều nguồn khác nhau, làm cho câu trả lời trở nên phong phú và đáng tin cậy hơn.  \n\nTóm lại, RAG là một cách tiếp cận thông minh để kết nối dữ liệu thực tế với khả năng tạo nội dung, giúp tạo ra những câu trả lời chính xác và có căn cứ."
     },
     {
       "step_id": 2,
       "title": "Dàn ý bài chia sẻ ngắn",
-      "description": "Lập dàn ý gồm phần mở đầu, giải thích đơn giản, ví dụ minh họa và kết luận, đảm bảo phù hợp với người mới bắt đầu. [Chỉ dẫn thích ứng: Nêu ví dụ đơn giản để minh họa cách RAG hoạt động trong đời sống hàng ngày.]",
+      "description": "Lập dàn ý gồm phần mở đầu, giải thích đơn giản, ví dụ minh họa và kết luận để người mới bắt đầu dễ tiếp thu. [Chỉ dẫn thích ứng: Tập trung vào việc giải thích RAG bằng ví dụ đời sống đơn giản, dễ hiểu.]",
       "action_type": "outline",
       "status": "COMPLETED",
-      "result": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)\n\n**Mở đầu:**  \nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự, nhưng được ứng dụng trong trí tuệ nhân tạo.\n\n**Giải thích đơn giản:**  \nRAG là kỹ thuật kết hợp giữa việc *truy xuất* thông tin từ các nguồn dữ liệu bên ngoài (như sách, trang web) và *tạo nội dung* bằng mô hình ngôn ngữ (như một trợ lý ảo). Thay vì chỉ \"đoán\" câu trả lời, nó tìm kiếm thông tin thực tế trước rồi dùng để tạo câu trả lời chính xác hơn.\n\n**Ví dụ minh họa:**  \nGiả sử bạn hỏi: *\"Tại sao nước sôi ở 100 độ C?\"* – RAG sẽ tự động tìm kiếm thông tin khoa học từ các nguồn đáng tin cậy, rồi tổng hợp lại để trả lời một cách chính xác, dựa trên dữ liệu thực tế.\n\n**Kết luận:**  \nRAG giúp AI không chỉ \"nói suy nghĩ\" mà còn \"tìm kiếm và dùng thông tin thật\" – giống như cách con người học hỏi từ thế giới xung quanh."
+      "result": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)\n\n**Mở đầu:**  \nBạn có bao giờ tự hỏi: \"Tại sao AI lại trả lời câu hỏi mà mình không biết?\" – Đó là vì AI đôi khi \"invent\" thông tin không có thật.\n\n**Giải thích đơn giản:**  \nRAG (Retrieval-Augmented Generation) là cách AI \"tra cứu\" thông tin thực tế trước khi trả lời, thay vì chỉ đoán suy nghĩ. Nó như một người bạn thông minh: khi bạn hỏi, nó sẽ tìm kiếm thông tin từ sách, báo, hoặc tài liệu rồi mới đưa ra câu trả lời.\n\n**Ví dụ đời sống:**  \nGiả sử bạn hỏi: \"Tại sao nước sôi ở 100 độ C?\" – RAG sẽ tự động tìm kiếm trong cơ sở dữ liệu (như sách vật lý) để kiểm tra thông tin, rồi trả lời dựa trên dữ liệu đó, không tự sáng tạo.\n\n**Kết luận:**  \nRAG giúp AI trả lời chính xác hơn, có nguồn gốc và đáng tin cậy – giống như một người bạn luôn tra cứu sách trước khi nói điều gì. Vì vậy, RAG là bước tiến quan trọng để AI không chỉ \"nói\" mà còn \"biết\"."
     },
     {
       "step_id": 3,
-      "title": "Viết bài chia sẻ hoàn chỉnh",
-      "description": "Viết bài chia sẻ ngắn dựa trên dàn ý, sử dụng ngôn ngữ đơn giản, rõ ràng và dễ hiểu cho người mới bắt đầu. [Chỉ dẫn thích ứng: Nêu rõ RAG là gì bằng ngôn ngữ đơn giản, gần gũi, dễ hiểu.]",
+      "title": "Viết bài chia sẻ ngắn",
+      "description": "Viết bài giải thích RAG theo dàn ý đã lập, sử dụng ngôn ngữ đơn giản, rõ ràng và phù hợp với người mới bắt đầu. [Chỉ dẫn thích ứng: Giới thiệu RAG một cách đơn giản, dễ hiểu, gần gũi với người mới bắt đầu.]",
       "action_type": "generate",
       "status": "COMPLETED",
-      "result": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự – nhưng được ứng dụng trong trí tuệ nhân tạo.\n\nRAG là sự kết hợp giữa hai bước:  \nTrước tiên, hệ thống **truy xuất** thông tin từ các nguồn dữ liệu bên ngoài (như sách, báo, trang web) để tìm câu trả lời phù hợp.  \nSau đó, nó **tạo ra** câu trả lời tự nhiên bằng cách sử dụng một mô hình ngôn ngữ, giống như cách bạn viết lời nói.\n\nĐiều đặc biệt là, thay vì chỉ dựa vào kiến thức \"trong đầu\" của máy, RAG cho phép máy học hỏi từ thực tế – giúp câu trả lời chính xác và cập nhật hơn.\n\nVì vậy, RAG không chỉ là công nghệ \"tự tạo nội dung\", mà còn là công cụ giúp máy hiểu và trả lời câu hỏi một cách thông minh, dựa trên thông tin thực tế.  \n\n👉 RAG là cách mà AI \"tìm kiếm\" rồi \"trả lời\" – như một người bạn thông minh, luôn kiểm tra thông tin trước khi nói."
+      "result": "# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu\n\nBạn có bao giờ tự hỏi: *\"Tại sao AI lại trả lời câu hỏi mà mình không biết?\"* – Đó là vì AI đôi khi \"invent\" thông tin không có thật.  \n\n**RAG (Retrieval-Augmented Generation)** là một cách AI trả lời câu hỏi *không phải đoán mò*, mà thay vào đó, nó sẽ **tra cứu thông tin thực tế** trước khi đưa ra câu trả lời.  \n\nNó giống như một người bạn thông minh: khi bạn hỏi một câu, nó sẽ tìm kiếm trong kho sách, báo, tài liệu rồi mới đưa ra câu trả lời – chứ không tự nghĩ ra điều gì đó không đúng.  \n\n### Làm thế nào RAG hoạt động?\n\nRAG hoạt động qua **hai bước chính**:\n\n1. **Truy xuất (Retrieval)**: Khi bạn hỏi một câu, hệ thống sẽ tìm kiếm các đoạn thông tin liên quan trong một cơ sở dữ liệu lớn – như sách giáo khoa, bài báo khoa học, hoặc tài liệu trực tuyến.  \n2. **Tạo nội dung (Generation)**: Sau khi tìm thấy thông tin, mô hình AI sẽ sử dụng dữ liệu đó để tạo ra một câu trả lời tự nhiên, chính xác và có nguồn gốc.  \n\n### Vì sao RAG lại quan trọng?\n\n- **Giảm \"giả mạo thông tin\" (hallucination)**: AI không còn tự sáng tạo thông tin không có thật – mà luôn dựa trên dữ liệu thực tế.  \n- **Độ chính xác cao hơn**: Câu trả lời được xây dựng từ nguồn tin đáng tin cậy, giúp người dùng tin tưởng hơn.  \n- **Dễ mở rộng**: RAG có thể học từ nhiều nguồn khác nhau – từ sách đến báo, từ khoa học đến đời sống – làm cho câu trả lời phong phú và đa dạng hơn.  \n\n### Ví dụ đời thường\n\nGiả sử bạn hỏi: *\"Tại sao nước sôi ở 100 độ C?\"*  \n→ RAG sẽ tự động tìm kiếm trong cơ sở dữ liệu (ví dụ: sách vật lý, trang web khoa học) để kiểm tra thông tin.  \n→ Sau đó, nó sẽ trả lời dựa trên dữ liệu đó, chẳng hạn: *\"Ở áp suất khí quyển chuẩn, nước sôi ở 100 độ C vì nhiệt độ này đủ để làm nước chuyển từ trạng thái lỏng sang khí.\"*  \n\n### Kết luận\n\nRAG giúp AI không chỉ \"nói\" mà còn \"biết\" – bằng cách tra cứu thông tin thực tế trước khi trả lời. Vì vậy, RAG là bước tiến quan trọng để AI trở nên chính xác, có căn cứ và đáng tin cậy – giống như một người bạn luôn tra cứu sách trước khi nói điều gì.  \n\nHãy cùng chờ đợi những AI thông minh hơn, có căn cứ và luôn trung thực hơn!"
     }
   ],
   "execution_logs": [
     {
       "step_id": 1,
       "step_title": "Xác định nội dung cơ bản của RAG",
-      "timestamp": "2026-10-12 11:47:15",
-      "duration_sec": 3.641,
+      "timestamp": "2026-10-12 12:22:54",
+      "duration_sec": 3.211,
       "input_context_keys": [],
       "output_summary": "# RAG là gì? – Giải thích cho người mới bắt đầu  **RAG** (Retrieval-Augmented Generation) là một phương pháp kết hợp giữ...",
       "status": "COMPLETED",
       "details": {
         "action_type": "research_points",
-        "output_length_chars": 1012
+        "output_length_chars": 1031
       }
     },
     {
       "step_id": 2,
       "step_title": "Dàn ý bài chia sẻ ngắn",
-      "timestamp": "2026-10-12 11:47:19",
-      "duration_sec": 3.919,
+      "timestamp": "2026-10-12 12:22:59",
+      "duration_sec": 3.516,
       "input_context_keys": [
         "research_points"
       ],
-      "output_summary": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)  **Mở đầu:**   Bạn có bao giờ dùng Google tìm ki...",
+      "output_summary": "# Dàn ý bài chia sẻ ngắn: RAG là gì? (giải thích cho người mới bắt đầu)  **Mở đầu:**   Bạn có bao giờ tự hỏi: \"Tại sao A...",
       "status": "COMPLETED",
       "details": {
         "action_type": "outline",
-        "output_length_chars": 965
+        "output_length_chars": 925
       }
     },
     {
       "step_id": 3,
-      "step_title": "Viết bài chia sẻ hoàn chỉnh",
-      "timestamp": "2026-10-12 11:47:24",
-      "duration_sec": 4.043,
+      "step_title": "Viết bài chia sẻ ngắn",
+      "timestamp": "2026-10-12 12:23:08",
+      "duration_sec": 8.5,
       "input_context_keys": [
         "research_points",
         "outline"
       ],
-      "output_summary": "# RAG là gì? – Giải thích cho người mới bắt đầu  Bạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để t...",
+      "output_summary": "# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu  Bạn có bao giờ tự hỏi: *\"Tại sao AI lại trả lời câu hỏi mà mìn...",
       "status": "COMPLETED",
       "details": {
         "action_type": "generate",
-        "output_length_chars": 958
+        "output_length_chars": 2125
       }
     }
   ],
-  "final_output": "# RAG là gì? – Giải thích cho người mới bắt đầu\n\nBạn có bao giờ dùng Google tìm kiếm thông tin, rồi dùng kết quả đó để trả lời một câu hỏi? RAG (Retrieval-Augmented Generation) là một cách làm tương tự – nhưng được ứng dụng trong trí tuệ nhân tạo.\n\nRAG là sự kết hợp giữa hai bước:  \nTrước tiên, hệ thống **truy xuất** thông tin từ các nguồn dữ liệu bên ngoài (như sách, báo, trang web) để tìm câu trả lời phù hợp.  \nSau đó, nó **tạo ra** câu trả lời tự nhiên bằng cách sử dụng một mô hình ngôn ngữ, giống như cách bạn viết lời nói.\n\nĐiều đặc biệt là, thay vì chỉ dựa vào kiến thức \"trong đầu\" của máy, RAG cho phép máy học hỏi từ thực tế – giúp câu trả lời chính xác và cập nhật hơn.\n\nVì vậy, RAG không chỉ là công nghệ \"tự tạo nội dung\", mà còn là công cụ giúp máy hiểu và trả lời câu hỏi một cách thông minh, dựa trên thông tin thực tế.  \n\n👉 RAG là cách mà AI \"tìm kiếm\" rồi \"trả lời\" – như một người bạn thông minh, luôn kiểm tra thông tin trước khi nói.",
+  "final_output": "# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu\n\nBạn có bao giờ tự hỏi: *\"Tại sao AI lại trả lời câu hỏi mà mình không biết?\"* – Đó là vì AI đôi khi \"invent\" thông tin không có thật.  \n\n**RAG (Retrieval-Augmented Generation)** là một cách AI trả lời câu hỏi *không phải đoán mò*, mà thay vào đó, nó sẽ **tra cứu thông tin thực tế** trước khi đưa ra câu trả lời.  \n\nNó giống như một người bạn thông minh: khi bạn hỏi một câu, nó sẽ tìm kiếm trong kho sách, báo, tài liệu rồi mới đưa ra câu trả lời – chứ không tự nghĩ ra điều gì đó không đúng.  \n\n### Làm thế nào RAG hoạt động?\n\nRAG hoạt động qua **hai bước chính**:\n\n1. **Truy xuất (Retrieval)**: Khi bạn hỏi một câu, hệ thống sẽ tìm kiếm các đoạn thông tin liên quan trong một cơ sở dữ liệu lớn – như sách giáo khoa, bài báo khoa học, hoặc tài liệu trực tuyến.  \n2. **Tạo nội dung (Generation)**: Sau khi tìm thấy thông tin, mô hình AI sẽ sử dụng dữ liệu đó để tạo ra một câu trả lời tự nhiên, chính xác và có nguồn gốc.  \n\n### Vì sao RAG lại quan trọng?\n\n- **Giảm \"giả mạo thông tin\" (hallucination)**: AI không còn tự sáng tạo thông tin không có thật – mà luôn dựa trên dữ liệu thực tế.  \n- **Độ chính xác cao hơn**: Câu trả lời được xây dựng từ nguồn tin đáng tin cậy, giúp người dùng tin tưởng hơn.  \n- **Dễ mở rộng**: RAG có thể học từ nhiều nguồn khác nhau – từ sách đến báo, từ khoa học đến đời sống – làm cho câu trả lời phong phú và đa dạng hơn.  \n\n### Ví dụ đời thường\n\nGiả sử bạn hỏi: *\"Tại sao nước sôi ở 100 độ C?\"*  \n→ RAG sẽ tự động tìm kiếm trong cơ sở dữ liệu (ví dụ: sách vật lý, trang web khoa học) để kiểm tra thông tin.  \n→ Sau đó, nó sẽ trả lời dựa trên dữ liệu đó, chẳng hạn: *\"Ở áp suất khí quyển chuẩn, nước sôi ở 100 độ C vì nhiệt độ này đủ để làm nước chuyển từ trạng thái lỏng sang khí.\"*  \n\n### Kết luận\n\nRAG giúp AI không chỉ \"nói\" mà còn \"biết\" – bằng cách tra cứu thông tin thực tế trước khi trả lời. Vì vậy, RAG là bước tiến quan trọng để AI trở nên chính xác, có căn cứ và đáng tin cậy – giống như một người bạn luôn tra cứu sách trước khi nói điều gì.  \n\nHãy cùng chờ đợi những AI thông minh hơn, có căn cứ và luôn trung thực hơn!",
   "quality_metrics": {
     "passed": true,
-    "char_count": 958,
-    "word_count": 203,
-    "ttr": 0.601,
+    "quality_passed": true,
+    "semantic_verified": true,
+    "char_count": 2125,
+    "word_count": 447,
+    "ttr": 0.443,
     "matched_keywords": [
       "giải",
       "thích",
@@ -91,22 +93,22 @@
       "correctness": 1,
       "groundedness": 1,
       "completeness": 1,
-      "reason": "Văn bản chính xác mô tả RAG như một phương pháp kết hợp truy xuất thông tin từ nguồn bên ngoài và tạo nội dung bằng mô hình ngôn ngữ. Nội dung bám sát tài liệu nguồn về nguyên lý hoạt động, lợi ích và ý nghĩa của RAG. Tất cả các yếu tố yêu cầu đều được bao quát đầy đủ và được trình bày rõ ràng cho người mới bắt đầu."
+      "reason": "Văn bản chính xác thể hiện nguyên lý hoạt động của RAG, bám sát nguồn tài liệu với các bước truy xuất và tạo nội dung, và đầy đủ các yếu tố như định nghĩa, lợi ích, ví dụ và kết luận."
     },
     "review_notes": [
-      "✓ Tiêu chuẩn độ dài: Đạt 958 ký tự (203 từ, ngưỡng tối thiểu 250 ký tự)",
+      "✓ Tiêu chuẩn độ dài: Đạt 2125 ký tự (447 từ, ngưỡng tối thiểu 250 ký tự)",
       "✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown",
-      "✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.60 (ngưỡng yêu cầu >= 0.35)",
+      "✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.44 (ngưỡng yêu cầu >= 0.35)",
       "✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, thích, rag)",
-      "✓ LLM Judge xác nhận: Văn bản chính xác mô tả RAG như một phương pháp kết hợp truy xuất thông tin từ nguồn bên ngoài và tạo nội dung bằng mô hình ngôn ngữ. Nội dung bám sát tài liệu nguồn về nguyên lý hoạt động, lợi ích và ý nghĩa của RAG. Tất cả các yếu tố yêu cầu đều được bao quát đầy đủ và được trình bày rõ ràng cho người mới bắt đầu."
+      "✓ LLM Judge xác nhận: Văn bản chính xác thể hiện nguyên lý hoạt động của RAG, bám sát nguồn tài liệu với các bước truy xuất và tạo nội dung, và đầy đủ các yếu tố như định nghĩa, lợi ích, ví dụ và kết luận."
     ]
   },
-  "total_duration_sec": 17.169,
+  "total_duration_sec": 21.512,
   "reproducibility": {
     "model_version": "tinix-lm:latest",
     "temperature": 0.25,
     "seed": null,
-    "git_commit": "82ebcd3",
+    "git_commit": "9c9e933",
     "planner_prompt_template_summary": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
     "executor_prompt_template_summary": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
     "judge_prompt_template_summary": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",

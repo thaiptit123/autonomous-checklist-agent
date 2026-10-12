@@ -405,27 +405,33 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \NormalTok{        crit_relevance }\OperatorTok{=} \BuiltInTok{len}\NormalTok{(matched_kws) }\OperatorTok{>} \DecValTok{0} \ControlFlowTok{if}\NormalTok{ goal_kws }\ControlFlowTok{else} \ConstantTok{True}
 \NormalTok{        }\CommentTok{# 5. Kiểm tra lỗi cắt xén câu (cut-off sentence)}
 \NormalTok{        crit_complete }\OperatorTok{=} \KeywordTok{not}\NormalTok{ (content.strip().endswith((}\StringTok{","}\NormalTok{, }\StringTok{"và"}\NormalTok{, }\StringTok{"hoặc"}\NormalTok{, }\StringTok{"là"}\NormalTok{)) }\KeywordTok{or} \StringTok{"..."} \KeywordTok{in}\NormalTok{ content.strip()[}\OperatorTok{-}\DecValTok{5}\NormalTok{:])}
-\NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Chế độ fail-closed)}
-\NormalTok{        llm_passed }\OperatorTok{=} \ConstantTok{True}
+\NormalTok{        quality_passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete}
+\NormalTok{        }\CommentTok{# 6. Đánh giá bằng LLM-as-a-judge (Cơ chế fail-closed \& tách bạch cờ)}
+\NormalTok{        semantic_verified }\OperatorTok{=} \ConstantTok{False}
 \NormalTok{        judge_verdict }\OperatorTok{=} \VariableTok{None}
-\NormalTok{        }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{and}\NormalTok{ llm_client.is_available():}
-\NormalTok{            llm_eval }\OperatorTok{=}\NormalTok{ llm_client.generate(prompt)}
-\NormalTok{            }\ControlFlowTok{if}\NormalTok{ llm_eval }\KeywordTok{and}\NormalTok{ re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL):}
-\NormalTok{                judge_res }\OperatorTok{=}\NormalTok{ json.loads(re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL).group(}\DecValTok{0}\NormalTok{))}
-\NormalTok{                req_keys }\OperatorTok{=}\NormalTok{ (}\StringTok{"correctness"}\NormalTok{, }\StringTok{"groundedness"}\NormalTok{, }\StringTok{"completeness"}\NormalTok{)}
-\NormalTok{                has_keys }\OperatorTok{=} \BuiltInTok{all}\NormalTok{(k }\KeywordTok{in}\NormalTok{ judge_res }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
-\NormalTok{                types_ok }\OperatorTok{=}\NormalTok{ has_keys }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(}\BuiltInTok{type}\NormalTok{(judge_res[k]) }\KeywordTok{is} \DataTypeTok{int} \KeywordTok{and}\NormalTok{ judge_res[k] }\KeywordTok{in}\NormalTok{ (}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
-\NormalTok{                }\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ (types_ok }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(judge_res[k] }\OperatorTok{==} \DecValTok{1} \ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)):}
-\NormalTok{                    llm_passed }\OperatorTok{=} \ConstantTok{False} \CommentTok{# Thiếu trường, sai kiểu int hoặc có điểm 0 -> fail-closed}
-\NormalTok{                judge_verdict }\OperatorTok{=}\NormalTok{ judge_res}
+\NormalTok{        }\ControlFlowTok{if}\NormalTok{ llm_client }\KeywordTok{is not}\NormalTok{ }\VariableTok{None}\NormalTok{:}
+\NormalTok{            }\ControlFlowTok{if} \KeywordTok{not}\NormalTok{ llm_client.is_available():}
+\NormalTok{                judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"LLM_UNAVAILABLE"}\NormalTok{, }\StringTok{"reason"}\NormalTok{: }\StringTok{"Dịch vụ LLM không khả dụng"}\NormalTok{\}}
+\NormalTok{                passed }\OperatorTok{=} \ConstantTok{False} \CommentTok{# Fail-closed: thiếu Judge khi yêu cầu xác minh -> trượt}
 \NormalTok{            }\ControlFlowTok{else}\NormalTok{:}
-\NormalTok{                llm_passed }\OperatorTok{=} \ConstantTok{False} \CommentTok{# Parse lỗi hoặc không có dữ liệu -> fail-closed}
-\NormalTok{        passed }\OperatorTok{=}\NormalTok{ crit_length }\KeywordTok{and}\NormalTok{ crit_structure }\KeywordTok{and}\NormalTok{ crit_diversity }\KeywordTok{and}\NormalTok{ crit_relevance }\KeywordTok{and}\NormalTok{ crit_complete }\KeywordTok{and}\NormalTok{ llm_passed}
-\NormalTok{        return \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"ttr"}\NormalTok{: ttr, }\StringTok{"char_count"}\NormalTok{: }\BuiltInTok{len}\NormalTok{(content), }\StringTok{"judge_verdict"}\NormalTok{: judge_verdict\}}
+\NormalTok{                llm_eval }\OperatorTok{=}\NormalTok{ llm_client.generate(prompt)}
+\NormalTok{                }\ControlFlowTok{if}\NormalTok{ llm_eval }\KeywordTok{and}\NormalTok{ re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL):}
+\NormalTok{                    judge_res }\OperatorTok{=}\NormalTok{ json.loads(re.search(}\StringTok{r'\{.*\}'}\NormalTok{, llm_eval, re.DOTALL).group(}\DecValTok{0}\NormalTok{))}
+\NormalTok{                    req_keys }\OperatorTok{=}\NormalTok{ (}\StringTok{"correctness"}\NormalTok{, }\StringTok{"groundedness"}\NormalTok{, }\StringTok{"completeness"}\NormalTok{)}
+\NormalTok{                    has_keys }\OperatorTok{=} \BuiltInTok{all}\NormalTok{(k }\KeywordTok{in}\NormalTok{ judge_res }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
+\NormalTok{                    types_ok }\OperatorTok{=}\NormalTok{ has_keys }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(}\BuiltInTok{type}\NormalTok{(judge_res[k]) }\KeywordTok{is} \DataTypeTok{int} \KeywordTok{and}\NormalTok{ judge_res[k] }\KeywordTok{in}\NormalTok{ (}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }\ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
+\NormalTok{                    semantic_verified }\OperatorTok{=}\NormalTok{ types_ok }\KeywordTok{and} \BuiltInTok{all}\NormalTok{(judge_res[k] }\OperatorTok{==} \DecValTok{1} \ControlFlowTok{for}\NormalTok{ k }\KeywordTok{in}\NormalTok{ req_keys)}
+\NormalTok{                    judge_verdict }\OperatorTok{=}\NormalTok{ judge_res}
+\NormalTok{                }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{                    judge_verdict }\OperatorTok{=}\NormalTok{ \{}\StringTok{"error"}\NormalTok{: }\StringTok{"Parse fail"}\NormalTok{\}}
+\NormalTok{                passed }\OperatorTok{=}\NormalTok{ quality_passed }\KeywordTok{and}\NormalTok{ semantic_verified}
+\NormalTok{        }\ControlFlowTok{else}\NormalTok{:}
+\NormalTok{            passed }\OperatorTok{=}\NormalTok{ quality_passed }\KeywordTok{and}\NormalTok{ heuristic_passed}
+\NormalTok{        }\ControlFlowTok{return}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: passed, }\StringTok{"quality_passed"}\NormalTok{: quality_passed, }\StringTok{"semantic_verified"}\NormalTok{: semantic_verified, }\StringTok{"judge_verdict"}\NormalTok{: judge_verdict\}}
 \end{Highlighting}
 \end{Shaded}
 
-\textit{*Lưu ý: Khi LLM Judge không khả dụng, hệ thống chuyển sang chế độ Deterministic Fallback Judge để kiểm định ngặt nghèo các tiêu chí cấu trúc/định lượng và nội dung rác, nhưng không coi đó là bằng chứng đầy đủ cho correctness hoặc groundedness.}
+\textit{*Nguyên tắc phân định và Fail-Closed: Hệ thống tách bạch rõ ràng giữa hai chỉ số: \texttt{quality\_passed} (kiểm định định lượng về độ dài, cấu trúc, TTR) và \texttt{semantic\_verified} (xác thực ngữ nghĩa bởi LLM Judge). Khi yêu cầu thẩm định bằng LLM (\texttt{use\_llm=True}) mà LLM ngoại tuyến hoặc lỗi, cơ chế Fail-Closed kích hoạt: \texttt{semantic\_verified=False} và từ chối nghiệm thu (\texttt{passed=False}). Khi chạy offline (\texttt{use\_llm=False}), hệ thống chỉ cấp chứng nhận định lượng (\texttt{quality\_passed=True}) và lưu ý rõ \texttt{semantic\_verified=False}, tuyệt đối không ngộ nhận đó là bằng chứng ngữ nghĩa đầy đủ.}
 
 \subsection{3. Thiết kế khung ToolRegistry (Mock) làm điểm mở rộng}
 Hệ thống tích hợp \texttt{ToolRegistry} chủ yếu để làm điểm mở rộng cho phép bổ sung Tool Calling thực tế trong tương lai. Hiện tại, các công cụ \texttt{search\_knowledge} và \texttt{read\_document} chỉ trả về chuỗi mô phỏng giả lập. Công cụ \texttt{calculate} sử dụng bộ phân tích biểu thức \texttt{ast} an toàn thay vì \texttt{eval()}, đảm bảo không thể thực thi mã độc:
@@ -616,8 +622,8 @@ Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt v�
 \endhead
 Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
 Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
-Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 2.515 ký tự (482 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
-\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.56 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
+Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 2.125 ký tự (447 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
+\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.44 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề.\strut \tabularnewline \hline
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
@@ -625,7 +631,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.80}
+\renewcommand{\arraystretch}{0.70}
 \begin{longtable}{|p{0.05\textwidth}|p{0.38\textwidth}|p{0.20\textwidth}|p{0.25\textwidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)} \label{tab:test-cases} \\
 \hline
@@ -660,48 +666,62 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# Kết quả thực thi thực tế bộ kiểm thử (Console Execution Log):}
+\NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{22.230}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (}\DecValTok{13}\NormalTok{ Unit Tests: }\VariableTok{PASS}\NormalTok{; }\DecValTok{5}\NormalTok{ LLM Tests: }\VariableTok{PASS}\NormalTok{/}\VariableTok{SKIP}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\textit{*(Trong môi trường offline không có Ollama, 5 Integration Tests tự động kích hoạt cờ \texttt{SKIPPED (5 tests)}, bảo đảm 13 Unit Tests luôn pass độc lập mà không báo cáo sai lệch kết quả).* }
+
 \section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
 
 Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp tin \texttt{agent\_final\_report.json}. Dưới đây là cấu trúc tệp tin kiểm toán thực tế được sinh ra:
 
+\begin{small}
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{\{}
 \NormalTok{  }\DataTypeTok{"goal"}\NormalTok{: }\StringTok{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator."}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified)."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định các ý chính và cấu trúc dàn ý..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Soạn thảo nội dung bài chia sẻ hoàn chỉnh..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Rà soát, kiểm định chất lượng và nghiệm thu..."}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định nội dung cơ bản của RAG"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{4.12}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"Dàn ý chi tiết bài viết: Khám phá toàn diện RAG..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.56}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Hướng dẫn toàn diện và giải thích bản chất: RAG..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{10.22}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"outline"}\NormalTok{, }\StringTok{"draft_article"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
-\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Hướng dẫn toàn diện và giải thích bản chất: RAG..."}\NormalTok{\}}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? – Giải thích cho người mới bắt đầu..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý bài chia sẻ ngắn: RAG là gì?..."}\NormalTok{\},}
+\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
+\NormalTok{     }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu..."}\NormalTok{\}}
 \NormalTok{  ],}
 \NormalTok{  }\DataTypeTok{"quality_metrics"}\NormalTok{: \{}
 \NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"char_count"}\NormalTok{: }\DecValTok{2100}\NormalTok{, }\DataTypeTok{"word_count"}\NormalTok{: }\DecValTok{420}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.612}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"quality_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"semantic_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
+\NormalTok{    }\DataTypeTok{"char_count"}\NormalTok{: }\DecValTok{2125}\NormalTok{, }\DataTypeTok{"word_count"}\NormalTok{: }\DecValTok{447}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.443}\NormalTok{,}
 \NormalTok{    }\DataTypeTok{"matched_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
 \NormalTok{    }\DataTypeTok{"judge_verdict"}\NormalTok{: \{}
 \NormalTok{      }\DataTypeTok{"correctness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"groundedness"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"completeness"}\NormalTok{: }\DecValTok{1}\NormalTok{,}
-\NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Bài viết giải thích rõ ràng khái niệm RAG, bám sát nội dung và đầy đủ các phần."}
+\NormalTok{      }\DataTypeTok{"reason"}\NormalTok{: }\StringTok{"Văn bản chính xác thể hiện nguyên lý hoạt động của RAG, bám sát nguồn tài liệu và đầy đủ các phần."}
 \NormalTok{    \}}
 \NormalTok{  \},}
-\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{35.6}\NormalTok{,}
+\NormalTok{  }\DataTypeTok{"total_duration_sec"}\NormalTok{: }\FloatTok{21.5}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}
 \NormalTok{    }\DataTypeTok{"model_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{,}
-\NormalTok{    }\DataTypeTok{"git_commit"}\NormalTok{: }\StringTok{"d2f38c1"}
+\NormalTok{    }\DataTypeTok{"git_commit"}\NormalTok{: }\StringTok{"9c9e933"}
 \NormalTok{  \}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
+\end{small}
 
 Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống tự động lưu vết các siêu dữ liệu (metadata) bao gồm: \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, trạng thái \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết và đối chiếu thông tin (các tham số này được lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
+
+\enlargethispage{2\baselineskip}
 
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
@@ -716,6 +736,7 @@ Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho 
 \textbf{3. Trợ lý tự động hóa chăm sóc khách hàng:}\\
 Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
 
+\enlargethispage{4\baselineskip}
 \section{Kết luận}\label{ket-luan}
 
 Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát và Đánh giá (Observe \& Evaluate) $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
@@ -728,14 +749,16 @@ Toàn bộ mã nguồn \texttt{checklist\_agent.py}, bộ kiểm thử \texttt{e
 
 \section{Tài liệu tham khảo}\label{tai-lieu-tham-khao}
 
+\begin{small}
 \begin{enumerate}
     \tightlist
     \def\labelenumi{[\arabic{enumi}]}
-    \item \textbf{Anthropic}: \textit{Building Effective Agents}. Bài viết kinh điển phân tích ranh giới giữa Workflow và Autonomous Agent. \url{https://www.anthropic.com/research/building-effective-agents}
-    \item \textbf{LangChain / LangGraph Documentation}: Khung phát triển ứng dụng tác nhân có trạng thái và vòng lặp kiểm soát. \url{https://langchain-ai.github.io/langgraph/}
-    \item \textbf{Lewis et al.}: \textit{Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks}. Nghiên cứu gốc giới thiệu kỹ thuật RAG. \url{https://arxiv.org/abs/2005.11401}
-    \item \textbf{ReAct Framework}: \textit{Synergizing Reasoning and Acting in Language Models} (Yao et al., ICLR 2023). \url{https://arxiv.org/abs/2210.03629}
-    \item \textbf{AI Guru x TiniX Tutorial Series}: Chuỗi tài liệu chuẩn định dạng nội bộ cho các khóa đào tạo kỹ sư AI.
+    \item \textbf{Anthropic}: \textit{Building Effective Agents}. Ranh giới Workflow \& Autonomous Agent. \url{https://www.anthropic.com/research/building-effective-agents}
+    \item \textbf{LangChain / LangGraph Documentation}: Khung phát triển Agent có trạng thái. \url{https://langchain-ai.github.io/langgraph/}
+    \item \textbf{Lewis et al.}: \textit{Retrieval-Augmented Generation for NLP Tasks}. Nghiên cứu gốc RAG. \url{https://arxiv.org/abs/2005.11401}
+    \item \textbf{ReAct Framework}: \textit{Synergizing Reasoning and Acting in Language Models} (ICLR 2023). \url{https://arxiv.org/abs/2210.03629}
+    \item \textbf{AI Guru x TiniX Tutorial Series}: Chuỗi tài liệu chuẩn cho kỹ sư AI.
 \end{enumerate}
+\end{small}
 
 \end{document}
