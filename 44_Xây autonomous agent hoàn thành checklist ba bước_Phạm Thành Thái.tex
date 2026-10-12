@@ -451,7 +451,7 @@ Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{Quali
 \textit{*Nguyên tắc phân định và Fail-Closed: Hệ thống tách bạch rõ ràng giữa hai chỉ số: \texttt{quality\_passed} (kiểm định định lượng về độ dài, cấu trúc, TTR) và \texttt{semantic\_verified} (xác thực ngữ nghĩa bởi LLM Judge). Khi yêu cầu thẩm định bằng LLM (\texttt{use\_llm=True}) mà LLM ngoại tuyến hoặc lỗi, cơ chế Fail-Closed kích hoạt: \texttt{semantic\_verified=False} và từ chối nghiệm thu (\texttt{passed=False}). Khi chạy offline (\texttt{use\_llm=False}), hệ thống chỉ cấp chứng nhận định lượng (\texttt{quality\_passed=True}) và lưu ý rõ \texttt{semantic\_verified=False}, tuyệt đối không ngộ nhận đó là bằng chứng ngữ nghĩa đầy đủ (triển khai trên GitHub kết xuất trọn vẹn cả 9 trường vào \texttt{EvaluationResult}).*}
 
 \subsection{3. Thiết kế khung ToolRegistry (Mock) làm điểm mở rộng}
-Hệ thống tích hợp \texttt{ToolRegistry} chủ yếu để làm điểm mở rộng cho phép bổ sung Tool Calling thực tế trong tương lai. Hiện tại, các công cụ \texttt{search\_knowledge} và \texttt{read\_document} chỉ trả về chuỗi mô phỏng giả lập. Công cụ \texttt{calculate} sử dụng bộ phân tích biểu thức \texttt{ast} an toàn thay vì \texttt{eval()}, đảm bảo không thể thực thi mã độc:
+\texttt{ToolRegistry} được thiết kế như khung ranh giới kiến trúc phục vụ thử nghiệm và mở rộng kết nối công cụ. Hiện tại, các công cụ tìm kiếm và đọc tài liệu hoạt động dưới dạng mô phỏng (mock), chưa phải tích hợp thực tế. Công cụ \texttt{calculate} sử dụng bộ phân tích cú pháp \texttt{ast} an toàn thay cho \texttt{eval()}, đảm bảo không thể thực thi mã độc:
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -592,23 +592,23 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 
 \newpage
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
-\enlargethispage{2\baselineskip}
+\enlargethispage{3\baselineskip}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
 Trong kịch bản này, người dùng nhập câu lệnh mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), lần lượt thực thi và thích ứng như thể hiện ở Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.45\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.41\textwidth]{images/terminal_execution.png}
     \caption{Minh họa nhật ký thực thi của Agent trên Terminal ghi nhận quá trình hoàn thành 3 bước và kích hoạt Stop Condition}
     \label{fig:terminal}
 \end{figure}
 
 Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
-    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}).
-    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và lập tức kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}), cho thấy hệ thống có khả năng thích ứng với kết quả trung gian thay vì chỉ thực thi một chuỗi bước cố định. Đặc biệt, nếu kết quả quan sát cho thấy kế hoạch hiện tại không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
-    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (tổng thời gian phiên chạy 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), cấu trúc Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
+    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với kịch bản fallback định sẵn, LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết (cả \texttt{generate} và \texttt{review\_polish} đều định tuyến vào \texttt{final\_article} trước khi nghiệm thu dừng).
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}). Nếu kết quả quan sát cho thấy kế hoạch không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
+    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian phiên chạy 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved} (trong phạm vi kiểm định thử nghiệm).
 \end{enumerate}
 
 \enlargethispage{3\baselineskip}
@@ -652,7 +652,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.62}
+\renewcommand{\arraystretch}{0.58}
 \begin{longtable}{|p{0.05\textwidth}|p{0.38\textwidth}|p{0.20\textwidth}|p{0.25\textwidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)} \label{tab:test-cases} \\
 \hline
@@ -686,6 +686,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
+\vspace{-2mm}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -695,10 +696,12 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \NormalTok{Ran }\DecValTok{18}\NormalTok{ tests in }\FloatTok{0.045}\NormalTok{s }\OperatorTok{-} \VariableTok{OK}\NormalTok{ (skipped=}\DecValTok{5}\NormalTok{, }\DecValTok{13}\NormalTok{ Unit Tests PASS)}
 \end{Highlighting}
 \end{Shaded}
-\textit{*(Chú thích phân định môi trường: Hai kết quả log trên phản ánh trung thực hai điều kiện kiểm thử: Khi có dịch vụ Ollama hoạt động, cả 18 kịch bản (gồm 5 Integration Tests gửi prompt thật đến LLM Judge để kiểm thử đối kháng) chạy hoàn tất trong 29.811s; khi không có Ollama, 5 Integration Tests tự động được bỏ qua qua cờ \texttt{SKIPPED (skipped=5)}, giúp 13 Unit Tests kiểm chứng độc lập hoàn tất trong 0.045s).* }
+\vspace{-1mm}
+{\footnotesize \textit{*(Chú thích phân định: Khi có Ollama, 18 kịch bản (gồm 5 Integration Tests LLM Judge đối kháng) chạy hoàn tất trong 29.811s; khi không có Ollama, 5 tests tự động bỏ qua (\texttt{skipped=5}), 13 Unit Tests kiểm chứng hoàn tất trong 0.045s).* }}
 
+\newpage
 \section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
-\enlargethispage{5\baselineskip}
+\enlargethispage{6\baselineskip}
 
 Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp tin \texttt{agent\_final\_report.json}. Dưới đây là cấu trúc tệp tin kiểm toán thực tế được sinh ra (trích đoạn rút gọn minh họa các trường chính; xem tệp đầy đủ \texttt{agent\_final\_report.json} trên repository):
 
@@ -735,7 +738,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \end{Shaded}
 \end{footnotesize}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực rằng đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài độc lập (\texttt{input\_document = None}); tiêu chí Groundedness của LLM Judge ở đây kiểm tra việc không bịa đặt thuật ngữ/khái niệm sai lệch so với tri thức chuẩn, tuyệt đối không diễn đạt như thể đã đối chiếu tài liệu nguồn độc lập. Ngược lại, với tác vụ tóm tắt (\texttt{intent == "summarize"}), Agent bắt buộc nhận tài liệu ngoài qua tham số \texttt{input\_document} (\texttt{groundedness\_source: "external\_document"}), và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian, khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài (\texttt{input\_document = None}); tiêu chí Groundedness của LLM Judge kiểm tra việc không bịa đặt thuật ngữ sai lệch so với tri thức chuẩn, tuyệt đối không ngộ nhận đã đối chiếu tài liệu nguồn độc lập. Ngược lại, với tác vụ tóm tắt (\texttt{intent == "summarize"}), Agent bắt buộc nhận tài liệu ngoài qua tham số \texttt{input\_document} (\texttt{groundedness\_source: "external\_document"}), và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát. Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
 
 \newpage
 \enlargethispage{6\baselineskip}
@@ -754,7 +757,7 @@ Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở 
 
 Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát và Đánh giá (Observe \& Evaluate) $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
 
-Thông qua bài học này, bạn đã thiết kế và vận hành thành công hệ thống Bounded Checklist Agent có cơ chế xử lý lỗi và retry trong phạm vi giới hạn để giải quyết bài toán viết bài chia sẻ RAG cho người mới bắt đầu. Mô hình khép kín này là nền tảng tối quan trọng giúp bạn tự tin bước vào những bài toán phức tạp hơn như Multi-Agent Systems, Hierarchical Planning và Graph-based Autonomous Workflows trong tương lai.
+Thông qua bài học này, bạn đã thiết kế và vận hành thành công mô hình thử nghiệm Bounded Checklist Agent với các cơ chế lập kế hoạch động, quan sát thích ứng, retry/replan và kiểm định chất lượng đa tầng trong phạm vi kiểm soát an toàn ($\le 3$ bước). Đây là mô hình nền tảng trong môi trường đào tạo và nghiên cứu kỹ thuật tác nhân, đóng vai trò bước đệm quan trọng trước khi tích hợp công cụ thực tế và phát triển các hệ thống tác nhân đa tầng (Multi-Agent Systems) phức tạp hơn trong tương lai.
 
 \textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):} Toàn bộ mã nguồn và báo cáo thực nghiệm được lưu trữ công khai tại GitHub: \url{https://github.com/thaiptit123/autonomous-checklist-agent}.
 

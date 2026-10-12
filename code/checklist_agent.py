@@ -592,13 +592,13 @@ class AutonomousChecklistAgent:
                 f"Mục tiêu: \"{goal}\"\n\n"
                 f"Trả về DUY NHẤT một mảng JSON với tối đa 3 phần tử. Mỗi phần tử có cấu trúc:\n"
                 f"[\n"
-                f"  {{\"step_id\": 1, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"outline\"}},\n"
-                f"  {{\"step_id\": 2, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"generate\"}},\n"
-                f"  {{\"step_id\": 3, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"review_polish\"}}\n"
+                f"  {{\"step_id\": 1, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"research_points\"}},\n"
+                f"  {{\"step_id\": 2, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"outline\"}},\n"
+                f"  {{\"step_id\": 3, \"title\": \"...\", \"description\": \"...\", \"action_type\": \"generate\"}}\n"
                 f"]\n"
                 f"Lưu ý: action_type chọn một trong ('research_points', 'outline', 'generate', 'review_polish', 'summarize'). "
                 f"Nếu mục tiêu chỉ cần dàn ý (outline), chỉ sinh đúng 2 bước. "
-                f"Nếu mục tiêu là viết bài hoàn chỉnh, bước cuối cùng luôn là review_polish để rà soát chất lượng. "
+                f"Với mục tiêu viết bài hoàn chỉnh, bước cuối cùng là hoàn thiện nội dung (action_type là 'generate' hoặc 'review_polish'). "
                 f"Chỉ trả về JSON thuần, không kèm markdown hay giải thích."
             )
             response = self.llm.generate(prompt, max_tokens=320)
