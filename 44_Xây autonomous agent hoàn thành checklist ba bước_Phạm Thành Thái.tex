@@ -34,7 +34,7 @@
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
 \newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
-\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines=true,breakanywhere=true,fontsize=\footnotesize,frame=single,framesep=1.8mm,rulecolor=\color{gray}}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines=true,breakanywhere=true,fontsize=\footnotesize,frame=single,framesep=1.2mm,rulecolor=\color{gray}}
 % Add ',fontsize=\small' for more characters per line
 \newenvironment{Shaded}{}{}
 \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{#1}}}
@@ -159,9 +159,9 @@
 \titleformat{\subsection}{\color{primary}\fontsize{16}{19}\selectfont\bfseries}{\thesubsection}{0.4em}{}
 \titleformat{\subsubsection}{\color{primary}\fontsize{14}{17}\selectfont\bfseries}{\thesubsubsection}{0.4em}{}
 
-\titlespacing{\section}{0pt}{1.2em}{0.6em}
-\titlespacing{\subsection}{0pt}{1em}{0.5em}
-\titlespacing{\subsubsection}{0pt}{0.8em}{0.4em}
+\titlespacing{\section}{0pt}{0.75em}{0.35em}
+\titlespacing{\subsection}{0pt}{0.65em}{0.30em}
+\titlespacing{\subsubsection}{0pt}{0.55em}{0.25em}
 
 \AtBeginDocument{\fontsize{13}{15.6}\selectfont}
 \linespread{1.15}
@@ -176,7 +176,7 @@
 \newcommand{\thd}[1]{\cellcolor{primary}\textcolor{white}{\textbf{#1}}}
 
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.5em}
+\setlength{\parskip}{0.34em}
 \usepackage{fvextra}
 \usepackage{caption}
 \captionsetup{font=large}
@@ -306,7 +306,7 @@ Hệ thống thiết kế hai phương án phân rã checklist 3 bước tương
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.82\textwidth]{images/state_flow_diagram.png}
+    \includegraphics[width=0.70\textwidth]{images/state_flow_diagram.png}
     \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
@@ -320,7 +320,6 @@ Như minh họa ở Hình \ref{fig:state_flow}, tính liên tục của tác nh�
 \end{itemize}
 Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau sẽ hoạt động thiếu định hướng và tác nhân sẽ không thể đạt được mục tiêu chung.
 
-\enlargethispage{2\baselineskip}
 \section{Điều kiện dừng và giới hạn an toàn trong vòng lặp}\label{dieu-kien-dung}
 
 \subsection{1. Hiểm họa của vòng lặp vô hạn (infinite loop trap)}
@@ -379,7 +378,6 @@ Chúng ta sử dụng \texttt{dataclass} và \texttt{Enum} để định nghĩa 
 
 \subsection{2. Bộ kiểm định chất lượng đa tầng và kết nối mô hình ngôn ngữ lớn}
 Thay vì sử dụng các chuỗi hardcode, tác nhân tích hợp \texttt{QualityEvaluator} tính toán trực tiếp các chỉ số kỹ thuật và kết nối mô hình ngôn ngữ lớn qua \texttt{OllamaClient}. \textit{*(Đoạn mã rút gọn minh họa logic kiểm định cốt lõi; triển khai đầy đủ trên GitHub trả về cả 9 trường: passed, quality\_passed, semantic\_verified, char\_count, word\_count, ttr, matched\_keywords, judge\_verdict, review\_notes)*}:
-\enlargethispage{3\baselineskip}
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -548,7 +546,6 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 \end{Shaded}
 
 \subsection{5. Vòng lặp thực thi tự hành}
-\enlargethispage{2\baselineskip}
 Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc tự động khép kín kèm cơ chế bắt lỗi an toàn:
 
 \begin{Shaded}
@@ -591,16 +588,14 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \end{Highlighting}
 \end{Shaded}
 
-\newpage
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
-\enlargethispage{3\baselineskip}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
 Trong kịch bản này, người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), lần lượt thực thi và thích ứng như thể hiện ở đồ họa minh họa Hình \ref{fig:terminal}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.41\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.32\textwidth]{images/terminal_execution.png}
     \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện trực quan nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
 \end{figure}
@@ -612,7 +607,6 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian phiên benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved} (trong phạm vi kiểm định thử nghiệm).
 \end{enumerate}
 
-\enlargethispage{3\baselineskip}
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
 \begin{itemize}
@@ -631,7 +625,7 @@ Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng di
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\renewcommand{\arraystretch}{0.88}
+\renewcommand{\arraystretch}{0.72}
 \begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
 \caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái} \label{tab:so-sanh-chat-luong} \\
 \hline
@@ -653,7 +647,7 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.58}
+\renewcommand{\arraystretch}{0.48}
 \begin{longtable}{|p{0.05\textwidth}|p{0.38\textwidth}|p{0.20\textwidth}|p{0.25\textwidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)} \label{tab:test-cases} \\
 \hline
@@ -700,9 +694,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \vspace{-1mm}
 {\footnotesize \textit{*(Chú thích phân định: Khi có Ollama, 18 kịch bản (gồm 5 Integration Tests LLM Judge đối kháng) chạy hoàn tất trong 29.811s; khi không có Ollama, 5 tests tự động bỏ qua (\texttt{skipped=5}), 13 Unit Tests kiểm chứng hoàn tất trong 0.045s).* }}
 
-\newpage
 \section{Phân tích báo cáo tổng kết và nhật ký từng bước thực thi}\label{phan-tich-bao-cao}
-\enlargethispage{6\baselineskip}
 
 Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp tin \texttt{agent\_final\_report.json}. Dưới đây là cấu trúc tệp tin kiểm toán thực tế được sinh ra (trích đoạn rút gọn minh họa các trường chính; xem tệp đầy đủ \texttt{agent\_final\_report.json} trên repository):
 
@@ -741,8 +733,6 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 
 Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian thực thi (19.812s, làm tròn 19.8s), khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài (\texttt{input\_document = None}); tiêu chí Groundedness do LLM Judge thẩm định dựa trên tri thức nội tại của mô hình để kiểm tra việc không bịa đặt thuật ngữ sai lệch, tuyệt đối không ngộ nhận đã đối chiếu tài liệu độc lập ngoài hệ thống. Ngược lại, khi được cung cấp tài liệu nguồn (với tác vụ tóm tắt \texttt{intent == "summarize"} qua tham số \texttt{input\_document}), hệ thống lưu nhận \texttt{groundedness\_source: "external\_document"} và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát; nếu thiếu tài liệu nguồn cho tác vụ này, Agent từ chối thực thi và chuyển trạng thái \texttt{FAILED} an toàn (như kiểm chứng tại Test 9). Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
 
-\newpage
-\enlargethispage{6\baselineskip}
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
 Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
