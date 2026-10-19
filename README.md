@@ -11,7 +11,10 @@ Tài liệu hướng dẫn và mã nguồn thực hành thuộc series chuyên s
   - Thực thi tuần tự (Sequential Execution) và truyền trạng thái qua State Memory.
   - Kiểm soát giới hạn vòng lặp hữu hạn (Bounded Loop $\le$ 3 bước).
   - Đánh giá chất lượng bằng **LLM-as-a-judge** nghiêm ngặt với Rubric: Tính chính xác (Correctness), Tính bám sát (Groundedness), và Tính toàn vẹn (Completeness).
-  - Phân định rõ ràng 3 trạng thái dừng (**Stop Condition**): `COMPLETED` (chỉ khi `QualityEvaluator.passed == True`), `BUDGET_EXHAUSTED` (hết số bước cho phép mà chưa đạt chuẩn), và `FAILED` (bước thực thi gặp ngoại lệ).
+- Phân định rõ ràng các trạng thái dừng (**Stop Condition**):
+    - `COMPLETED`: Ở chế độ LLM (`use_llm=True`), chỉ được cấp khi đạt toàn bộ tiêu chí định lượng VÀ thẩm định ngữ nghĩa thành công (`semantic_verified=True` bởi LLM Judge); ở chế độ offline (`use_llm=False`), chỉ nghiệm thu ở mức logic cấu trúc kiểm thử và ghi rõ ràng chưa qua thẩm định ngữ nghĩa.
+    - `BUDGET_EXHAUSTED`: Hết số bước cho phép mà chưa đạt chuẩn nghiệm thu (hoặc thiếu xác minh ngữ nghĩa của LLM Judge).
+    - `FAILED`: Bước thực thi gặp ngoại lệ hoặc thiếu tài liệu nguồn bắt buộc đối với tác vụ tóm tắt (Test 9).
   - Xuất báo cáo kiểm toán đầy đủ: Ghi nhận metadata cần thiết (**model_version, git_commit, python_version, seed, temperature**) để truy vết và hỗ trợ tái lập thực nghiệm.
 
 ## 2. Cấu trúc thư mục
@@ -31,7 +34,14 @@ Bai44/
     └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
 ```
 
-> **Ghi chú về tính nhất quán thời gian thực thi:** Báo cáo kiểm toán mẫu `agent_final_report.json`, hình ảnh minh họa terminal và tài liệu PDF ghi nhận thời gian thực thi là **19.8s** (chính xác: **19.812s**) từ phiên chạy benchmark chuẩn với mô hình `tinix-lm:latest` (1.872 ký tự, 391 từ, TTR 0.427). Toàn bộ dữ liệu báo cáo kiểm toán, nhật ký terminal và tài liệu PDF hiện đã được đồng bộ chuẩn xác 100% theo phiên chạy 19.8s này (thay thế cho số liệu ước lượng ~35.6s ở các phiên chạy thử nghiệm ban đầu trên cấu hình cũ).
+### Bảng đối chiếu số liệu thời gian và kết quả thực nghiệm (Benchmark Summary)
+
+| Hạng mục thực nghiệm | Thời gian đo được | Mô hình & Môi trường | Ý nghĩa & Nguồn dữ liệu |
+|---|---|---|---|
+| **Phiên chạy Agent mẫu (RAG Article)** | **19.812s** (làm tròn **19.8s**) | `tinix-lm:latest` (Ollama GPU) | Bài viết RAG hoàn chỉnh (1.872 ký tự, 391 từ, TTR 0.427, 3/3 bước `COMPLETED`, LLM Judge Verified). Lưu tại `code/agent_final_report.json` và minh họa ở PDF Trang 14, 18. |
+| **Suite 18 Tests (Khi có Ollama)** | **29.811s** | `tinix-lm:latest` (Ollama GPU) | 13 Offline Unit Tests PASS + 5 Real LLM Integration Tests PASS (18/18 PASS, gồm 4 kịch bản kiểm thử đối kháng). Minh họa ở PDF Trang 17. |
+| **Suite 18 Tests (Chế độ Offline)** | **0.045s** | Deterministic Fallback (Không có Ollama) | 13 Offline Unit Tests PASS, 5 Integration Tests tự động bỏ qua (`skipped=5`). Minh họa ở PDF Trang 17. |
+| *Lưu ý về các lần đo cũ* | *~35.6s / 21.5s* | *Môi trường thử nghiệm ban đầu* | *Các con số ước lượng trên phần cứng cũ trong quá trình phát triển ban đầu đã được thay thế hoàn toàn bằng bộ số liệu benchmark chuẩn 19.812s.* |
 
 ## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 

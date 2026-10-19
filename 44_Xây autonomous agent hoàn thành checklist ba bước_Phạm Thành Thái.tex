@@ -320,6 +320,7 @@ Như minh họa ở Hình \ref{fig:state_flow}, tính liên tục của tác nh�
 \end{itemize}
 Nếu cơ chế truyền trạng thái này bị đứt gãy, các bước sau sẽ hoạt động thiếu định hướng và tác nhân sẽ không thể đạt được mục tiêu chung.
 
+\enlargethispage{2\baselineskip}
 \section{Điều kiện dừng và giới hạn an toàn trong vòng lặp}\label{dieu-kien-dung}
 
 \subsection{1. Hiểm họa của vòng lặp vô hạn (infinite loop trap)}
@@ -332,7 +333,7 @@ Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ng�
 \subsection{2. Thiết kế vòng lặp giới hạn và bộ đánh giá dừng đa trạng thái}
 Để giải quyết triệt để rủi ro trên, hệ thống của chúng ta thiết lập cơ chế kiểm soát kép phân định rõ ràng 3 trạng thái kết thúc:
 \begin{enumerate}
-    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không (ví dụ: mục tiêu viết bài đòi hỏi phải có \texttt{final\_article} và vượt qua kiểm định của \texttt{QualityEvaluator}). Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED} đại diện cho mục tiêu hoàn thành, tương đương \texttt{GOAL\_ACHIEVED}).
+    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không: ở chế độ LLM (\texttt{use\_llm=True}), hệ thống siết chặt điều kiện nghiệm thu bắt buộc phải đạt xác minh ngữ nghĩa (\texttt{semantic\_verified=True}); ở chế độ offline (\texttt{use\_llm=False}), hệ thống nghiệm thu theo chuẩn logic định lượng và ghi rõ chưa qua thẩm định ngữ nghĩa. Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED}).
     \item \textbf{Trạng thái hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}):} Khi số bước thực thi đạt ngưỡng cho phép (ví dụ \texttt{max\_steps = 1} với mục tiêu viết bài, hệ thống mới chỉ xong dàn ý), tác nhân ngắt vòng lặp an toàn và ghi nhận trạng thái \texttt{BUDGET\_EXHAUSTED} chứ không báo nhầm là \texttt{COMPLETED}.
     \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), Agent tự động thử lại một lần. Nếu lỗi liên tiếp vượt ngưỡng cho phép, hệ thống mới chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
 \end{enumerate}

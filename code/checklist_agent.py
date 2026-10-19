@@ -1026,8 +1026,11 @@ class AutonomousChecklistAgent:
                 require_llm_judge=self.use_llm
             )
             if eval_res["passed"]:
-                verified_tag = " (LLM Judge Verified)" if eval_res.get("semantic_verified", False) else " (Chưa xác minh ngữ nghĩa bởi LLM Judge)"
-                return True, f"Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng{verified_tag} theo đúng mục tiêu.", AgentStatus.COMPLETED
+                if self.use_llm:
+                    if eval_res.get("semantic_verified", False):
+                        return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng và ngữ nghĩa (LLM Judge Verified) theo đúng mục tiêu.", AgentStatus.COMPLETED
+                else:
+                    return True, "Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge) theo đúng mục tiêu.", AgentStatus.COMPLETED
 
         # 2. Trường hợp mục tiêu tóm tắt tài liệu (summarize)
         if intent == "summarize" and "summary" in self.context_memory:
@@ -1040,8 +1043,11 @@ class AutonomousChecklistAgent:
                 require_llm_judge=self.use_llm
             )
             if eval_res["passed"]:
-                verified_tag = " (LLM Judge Verified)" if eval_res.get("semantic_verified", False) else " (Chưa xác minh ngữ nghĩa bởi LLM Judge)"
-                return True, f"Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng{verified_tag}.", AgentStatus.COMPLETED
+                if self.use_llm:
+                    if eval_res.get("semantic_verified", False):
+                        return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng và ngữ nghĩa (LLM Judge Verified).", AgentStatus.COMPLETED
+                else:
+                    return True, "Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).", AgentStatus.COMPLETED
 
         # 3. Trường hợp mục tiêu là bài viết hoàn chỉnh (full_article)
         if "final_article" in self.context_memory:
@@ -1054,10 +1060,11 @@ class AutonomousChecklistAgent:
                 require_llm_judge=self.use_llm
             )
             if eval_res["passed"]:
-                if eval_res.get("semantic_verified", False):
-                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).", AgentStatus.COMPLETED
+                if self.use_llm:
+                    if eval_res.get("semantic_verified", False):
+                        return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).", AgentStatus.COMPLETED
                 else:
-                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge).", AgentStatus.COMPLETED
+                    return True, "Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).", AgentStatus.COMPLETED
 
         # 4. Khi đạt giới hạn số bước (current_step_index >= total_steps)
         if current_step_index >= total_steps:
@@ -1080,10 +1087,13 @@ class AutonomousChecklistAgent:
                     require_llm_judge=self.use_llm
                 )
                 if eval_res["passed"]:
-                    if eval_res.get("semantic_verified", False):
-                        return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng (LLM Judge Verified) sau {current_step_index} bước.", AgentStatus.COMPLETED
+                    if self.use_llm:
+                        if eval_res.get("semantic_verified", False):
+                            return True, f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng (LLM Judge Verified) sau {current_step_index} bước.", AgentStatus.COMPLETED
+                        else:
+                            return True, f"Budget exhausted: Đã thực hiện tối đa {current_step_index}/{self.max_steps} bước nhưng chưa đạt chuẩn nghiệm thu ngữ nghĩa của LLM Judge.", AgentStatus.BUDGET_EXHAUSTED
                     else:
-                        return True, f"Goal achieved: Đã hoàn thành mục tiêu theo chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {current_step_index} bước.", AgentStatus.COMPLETED
+                        return True, f"Goal achieved: Đã hoàn thành mục tiêu theo chuẩn định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {current_step_index} bước.", AgentStatus.COMPLETED
                 else:
                     failed_notes = [n for n in eval_res["review_notes"] if n.startswith("✗")]
                     reason_detail = "; ".join(failed_notes) if failed_notes else "Chưa thỏa mãn tiêu chí chất lượng"
