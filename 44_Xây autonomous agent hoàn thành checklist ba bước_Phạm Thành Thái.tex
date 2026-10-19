@@ -705,16 +705,8 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{  }\DataTypeTok{"goal"}\NormalTok{: }\StringTok{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified)."}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Xác định nội dung cơ bản của RAG"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài chia sẻ ngắn"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết và hoàn thiện bài chia sẻ"}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{\}}
-\NormalTok{  ],}
-\NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# RAG là gì?..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Dàn ý..."}\NormalTok{\},}
-\NormalTok{    \{}\DataTypeTok{"step_id"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{, }\DataTypeTok{"input_context_keys"}\NormalTok{: [}\StringTok{"research_points"}\NormalTok{, }\StringTok{"outline"}\NormalTok{], }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{, }\DataTypeTok{"output_summary"}\NormalTok{: }\StringTok{"# Bài viết..."}\NormalTok{\}}
-\NormalTok{  ],}
+\NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [\{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Nghiên cứu RAG"}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài viết"}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết bài chia sẻ"}\NormalTok{\}],}
+\NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [\{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{\}],}
 \NormalTok{  }\DataTypeTok{"quality\_metrics"}\NormalTok{: \{}
 \NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"quality\_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"semantic\_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
 \NormalTok{    }\DataTypeTok{"char\_count"}\NormalTok{: }\DecValTok{1872}\NormalTok{, }\DataTypeTok{"word\_count"}\NormalTok{: }\DecValTok{391}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.427}\NormalTok{, }\DataTypeTok{"matched\_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
@@ -754,7 +746,6 @@ Thông qua bài học này, bạn đã thiết kế và vận hành thành công
 
 \section{Tài liệu tham khảo}\label{tai-lieu-tham-khao}
 
-\begin{footnotesize}
 \begin{enumerate}
     \tightlist
     \def\labelenumi{[\arabic{enumi}]}
@@ -764,6 +755,5 @@ Thông qua bài học này, bạn đã thiết kế và vận hành thành công
     \item \textbf{ReAct Framework}: \textit{Synergizing Reasoning and Acting in Language Models} (ICLR 2023). \url{https://arxiv.org/abs/2210.03629}
     \item \textbf{AI Guru x TiniX Tutorial Series}: Chuỗi tài liệu chuẩn cho kỹ sư AI.
 \end{enumerate}
-\end{footnotesize}
 
 \end{document}
