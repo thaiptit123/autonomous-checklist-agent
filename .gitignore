@@ -5,3 +5,4 @@ __pycache__/
 *.log
 *.out
 *.toc
+!code/test_execution_ollama.log

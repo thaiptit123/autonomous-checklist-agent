@@ -27,7 +27,8 @@ Bai44/
 │   ├── checklist_agent.py      # Mã nguồn chính của tác nhân tự hành (LLM + Quality Evaluator + Observe & Adapt)
 │   ├── eval_agent.py           # Bộ 18 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
-│   └── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM benchmark thực tế (19.8s / 19.812s)
+│   ├── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM benchmark thực tế (19.8s / 19.812s)
+│   └── test_execution_ollama.log # Nhật ký chạy thực tế toàn bộ 18/18 tests với Ollama thật (30.352s)
 └── images/
     ├── architecture_diagram.png # Sơ đồ kiến trúc tổng thể tác nhân
     ├── state_flow_diagram.png   # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
@@ -39,9 +40,13 @@ Bai44/
 | Hạng mục thực nghiệm | Thời gian đo được | Mô hình & Môi trường | Ý nghĩa & Nguồn dữ liệu |
 |---|---|---|---|
 | **Phiên chạy Agent mẫu (RAG Article)** | **19.812s** (làm tròn **19.8s**) | `tinix-lm:latest` (Ollama GPU) | Bài viết RAG hoàn chỉnh (1.872 ký tự, 391 từ, TTR 0.427, 3/3 bước `COMPLETED`, LLM Judge Verified). Lưu tại `code/agent_final_report.json` và minh họa ở PDF Trang 14, 18. |
-| **Suite 18 Tests (Khi có Ollama)** | **29.811s** | `tinix-lm:latest` (Ollama GPU) | 13 Offline Unit Tests PASS + 5 Real LLM Integration Tests PASS (18/18 PASS, gồm 4 kịch bản kiểm thử đối kháng). Minh họa ở PDF Trang 17. |
+| **Suite 18 Tests (Khi có Ollama)** | **29.811s** (chạy thực tế: **30.352s**) | `tinix-lm:latest` (Ollama GPU) | 13 Offline Unit Tests PASS + 5 Real LLM Integration Tests PASS (18/18 PASS, gồm 4 kịch bản kiểm thử đối kháng). Nhật ký thực nghiệm lưu tại `code/test_execution_ollama.log` và minh họa ở PDF Trang 17. |
 | **Suite 18 Tests (Chế độ Offline)** | **0.045s** | Deterministic Fallback (Không có Ollama) | 13 Offline Unit Tests PASS, 5 Integration Tests tự động bỏ qua (`skipped=5`). Minh họa ở PDF Trang 17. |
 | *Lưu ý về các lần đo cũ* | *~35.6s / 21.5s* | *Môi trường thử nghiệm ban đầu* | *Các con số ước lượng trên phần cứng cũ trong quá trình phát triển ban đầu đã được thay thế hoàn toàn bằng bộ số liệu benchmark chuẩn 19.812s.* |
+
+> **Phân định ranh giới ý nghĩa của trạng thái `COMPLETED`:**
+> - **Trong chế độ LLM (`use_llm=True`):** `COMPLETED` là sự nghiệm thu chất lượng kép (**Dual-Gate Verified**): bắt buộc phải thỏa mãn cả tiêu chuẩn định lượng lẫn xác thực ngữ nghĩa thành công từ LLM Judge (`semantic_verified=True`, `judge_status="VERIFIED_SUCCESS"`). Nếu LLM Judge từ chối (correctness/groundedness/completeness = 0) hoặc gặp lỗi kết nối/JSON, hệ thống kích hoạt Fail-Closed: tuyệt đối không cho phép dừng ở `COMPLETED` mà chuyển sang `BUDGET_EXHAUSTED` khi hết bước.
+> - **Trong chế độ Offline Heuristic (`use_llm=False`):** `COMPLETED` chỉ đại diện cho việc thỏa mãn bộ lọc logic định lượng (độ dài, đề mục Markdown, đa dạng từ vựng TTR, từ khóa) phục vụ kiểm thử đơn vị độc lập (Unit Test) không phụ thuộc GPU/Ollama. Hệ thống ghi nhận tường minh trong `stop_reason` và nhật ký kiểm toán: `(Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge)` với `semantic_verified=False`. Trạng thái này không đồng nghĩa với việc nội dung đã được LLM thẩm định ngữ nghĩa.
 
 ## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 
@@ -84,6 +89,8 @@ Bộ kiểm thử `code/eval_agent.py` bao gồm tổng cộng **18 kịch bản
 ```bash
 python3 code/eval_agent.py
 ```
+
+> **Nhật ký chạy thực tế với LLM thật:** Toàn bộ kết quả đầu ra thực tế của phiên chạy 18 test suite với mô hình Ollama (18/18 PASS trong 30.352s, bao gồm log chi tiết của 4 bài kiểm thử đối kháng Adversarial LLM Tests) được lưu trữ nguyên bản tại [`code/test_execution_ollama.log`](code/test_execution_ollama.log) để phục vụ thẩm định độc lập.
 
 ### Tạo lại hình ảnh sơ đồ kiến trúc:
 ```bash

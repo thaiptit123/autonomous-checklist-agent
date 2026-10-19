@@ -1,0 +1,741 @@
+
+====================================================================
+🚀 KHỞI CHẠY TEST SUITE (UNIT TESTS & INTEGRATION TESTS)
+====================================================================
+test_adversarial_integration_completeness (__main__.TestIntegrationLLM) ... 
+[Integration Test] 4. Adversarial (Real LLM): Kiểm tra lỗi Completeness (Thiếu yêu cầu)
+ok
+test_adversarial_integration_correctness (__main__.TestIntegrationLLM) ... 
+[Integration Test] 3. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Sai hoàn toàn)
+ok
+test_adversarial_integration_correctness_generic (__main__.TestIntegrationLLM) ... 
+[Integration Test] 2. Adversarial (Real LLM): Kiểm tra lỗi Correctness (Mô tả chung chung, sai bản chất)
+ok
+test_adversarial_integration_groundedness (__main__.TestIntegrationLLM) ... 
+[Integration Test] 5. Adversarial (Real LLM): Kiểm tra lỗi Groundedness (Bịa đặt nguồn)
+ok
+test_full_rag_llm (__main__.TestIntegrationLLM) ... 
+[Integration Test] 1. Kịch bản LLM tự hành thực tế - Viết bài chia sẻ giải thích RAG
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: LLM-powered (Ollama: tinix-lm:latest)
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (research_points) Nghiên cứu các điểm chính về RAG
+   [2] (outline) Dàn ý bài chia sẻ
+   [3] (generate) Viết bài chia sẻ ngắn
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Nghiên cứu các điểm chính về RAG...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 902 ký tự (197 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (2.039s)
+   ✓ Kết quả tóm tắt: # RAG là gì? – Giải thích cho người mới bắt đầu  **Định nghĩa**:   RAG (Retrieval-Augmented Generation) là một phương ph...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Tập trung vào việc trình bày RAG đơn giản, dễ hiểu bằng ví dụ đời sống.
+
+▶️  [BƯỚC 2] Đang thực hiện: Dàn ý bài chia sẻ...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 892 ký tự (198 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (2.213s)
+   ✓ Kết quả tóm tắt: # RAG là gì? – Giải thích đơn giản cho người mới bắt đầu  **Mở đầu**   Bạn có bao giờ tự hỏi: "AI trả lời tôi như thế nà...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 3: Nêu rõ RAG giúp AI trả lời chính xác hơn bằng cách sử dụng thông tin thực tế từ nguồn bên ngoài.
+
+▶️  [BƯỚC 3] Đang thực hiện: Viết bài chia sẻ ngắn...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1764 ký tự (394 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (4.334s)
+   ✓ Kết quả tóm tắt: # RAG là gì? – Giải thích đơn giản cho người mới bắt đầu  ## Mở đầu   Bạn có bao giờ tự hỏi: "AI trả lời tôi như thế nào...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+Trạng thái: COMPLETED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified).
+Tổng thời gian: 12.201s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 1764 ký tự (374 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.43 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, thích, rag)
+   ✓ LLM Judge xác nhận: Văn bản chính xác mô tả RAG như một phương pháp kết hợp truy xuất thông tin từ nguồn bên ngoài và sinh nội dung dựa trên dữ liệu đó, phù hợp với định nghĩa kỹ thuật chuẩn. Nội dung bám sát tri thức mở và không bịa đặt thông số hoặc khái niệm sai lệch. Cấu trúc rõ ràng, bao quát các yếu tố cốt lõi: định nghĩa, cơ chế, lợi ích và ví dụ thực tế. (Groundedness kiểm định theo tri thức kỹ thuật chuẩn; không có tài liệu nguồn ngoài)
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# RAG là gì? – Giải thích đơn giản cho người mới bắt đầu
+
+## Mở đầu  
+Bạn có bao giờ tự hỏi: "AI trả lời tôi như thế nào nếu tôi hỏi về một chủ đề mới?" Nếu AI chỉ dựa vào kiến thức trong đầu mình, câu trả lời có thể sai hoặc cũ – vì nó không có dữ liệu thực tế để tham khảo.
+
+## RAG là gì?  
+RAG (Retrieval-Augmented Generation) là một cách giúp AI trả lời chính xác hơn. Thay vì chỉ "nói" dựa trên kiến thức trong đầu, AI sẽ **tìm kiếm** thông tin thực tế từ các nguồn bên ngoài – như sách, bài báo, hoặc trang web – trước khi tạo câu trả lời.
+
+## Làm thế nào? – 2 giai đoạn đơn giản  
+1. **Truy xuất (Retrieval)**: Khi bạn hỏi một câu hỏi, AI sẽ tự động tìm kiếm thông tin liên quan trong các nguồn dữ liệu đáng tin cậy.  
+2. **Sinh nội dung (Generation)**: Sau khi tìm được thông tin, AI sẽ dùng dữ liệu đó để tạo ra câu trả lời – không chỉ dựa vào "ký ức" trong đầu mà còn dựa trên thông tin thực tế.
+
+## Lợi ích của RAG  
+- **Độ chính xác cao**: Vì AI kiểm tra thông tin thực tế trước khi trả lời.  
+- **Cập nhật nhanh**: Dữ liệu được lấy từ nguồn mới, nên câu trả lời luôn gần với thực tế.  
+- **Giảm "suy đoán sai" (hallucination)**: AI không tự "invent" thông tin mà không có cơ sở – giúp câu trả lời đáng tin cậy hơn.
+
+## Ví dụ đời thường  
+Giả sử bạn hỏi: *"Tại sao nước sôi ở 100 độ C?"*  
+Thay vì nhớ từ đầu, AI sẽ "tìm" trong cơ sở dữ liệu để xác minh thông tin này, rồi mới trả lời – đảm bảo câu trả lời đúng và cập nhật.
+
+## Kết luận  
+RAG giúp AI không chỉ "nói" mà còn "tìm hiểu" – như một người bạn thông minh luôn kiểm tra thông tin trước khi trả lời. Điều đó làm cho câu trả lời trở nên đáng tin cậy, chính xác và phù hợp với đời sống thực tế.  
+Với RAG, AI không còn chỉ là một máy tính – mà là một người bạn luôn học hỏi và trả lời đúng hơn.
+=======================================================
+
+ok
+test_action_failure_recovery_stuck (__main__.TestUnitOffline) ... 
+[Unit Test] 7. Xử lý lỗi Action và phát hiện kẹt (Retry & Progress Stuck)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 518 ký tự (101 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho người mới bắt đầu 1. Tổng quan & Bả...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (101 từ, TTR=0.85); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   ✗ Trạng thái: FAILED (0.0s) - Mất kết nối tới máy chủ
+   🔄 [RETRY] Tự động thử lại hành động do lỗi.
+
+▶️  [BƯỚC 2] Đang thực hiện: [RETRY] Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   ✗ Trạng thái: FAILED (0.0s) - Mất kết nối tới máy chủ
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+Trạng thái: FAILED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Execution failed: Tiến trình bị kẹt do liên tiếp thất bại (Mất kết nối tới máy chủ).
+Tổng thời gian: 0.013s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✗ Thực thi thất bại: Execution failed: Tiến trình bị kẹt do liên tiếp thất bại (Mất kết nối tới máy chủ).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+
+=======================================================
+
+ok
+test_adversarial_plumbing_missing_content (__main__.TestUnitOffline) ... 
+[Unit Test] 11. Judge Plumbing Test: Xử lý nội dung thiếu bắt buộc
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết bài giải thích RAG
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: LLM-powered (Ollama: tinix-lm:latest)
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 519 ký tự (102 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho kỹ sư và người học 1. Tổng quan & B...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (102 từ, TTR=0.83); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+
+▶️  [BƯỚC 3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.022s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết bài giải thích RAG
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.).
+Tổng thời gian: 0.07s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 1639 ký tự (311 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.60 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, rag)
+   ✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?
+
+Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề "ảo giác" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.
+
+## 1. Bản chất của RAG
+RAG là một khuôn khổ kết hợp giữa hai quá trình:
+- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.
+- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.
+Điều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.
+
+## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)
+Hệ thống RAG hoạt động theo 3 bước chuẩn:
+1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.
+2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.
+3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.
+
+## 3. Ví dụ thực tế trực quan
+Hãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!
+
+RAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ.
+=======================================================
+
+ok
+test_adversarial_plumbing_not_grounded (__main__.TestUnitOffline) ... 
+[Unit Test] 12. Judge Plumbing Test: Xử lý nội dung không bám sát (Not Grounded)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết bài giải thích RAG
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: LLM-powered (Ollama: tinix-lm:latest)
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 519 ký tự (102 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho kỹ sư và người học 1. Tổng quan & B...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (102 từ, TTR=0.83); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+
+▶️  [BƯỚC 3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.022s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết bài giải thích RAG
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.).
+Tổng thời gian: 0.069s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 1639 ký tự (311 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.60 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (giải, rag)
+   ✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?
+
+Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường gặp vấn đề "ảo giác" (hallucination) khi thiếu kiến thức chuyên ngành. **RAG (Retrieval-Augmented Generation)** sinh ra để giải quyết triệt để vấn đề này.
+
+## 1. Bản chất của RAG
+RAG là một khuôn khổ kết hợp giữa hai quá trình:
+- **Truy xuất (Retrieval):** Tìm kiếm thông tin chính xác từ cơ sở dữ liệu ngoài.
+- **Sinh văn bản (Generation):** LLM sử dụng thông tin vừa tìm được để tạo ra câu trả lời.
+Điều này giúp LLM trả lời chính xác, cập nhật và có nguồn tham chiếu rõ ràng.
+
+## 2. Quy trình hoạt động (Indexing -> Retrieval -> Generation)
+Hệ thống RAG hoạt động theo 3 bước chuẩn:
+1. **Indexing (Lập chỉ mục):** Tài liệu doanh nghiệp được cắt nhỏ (chunking), mã hóa thành vector (embedding) và lưu vào Vector Database.
+2. **Retrieval (Truy xuất):** Khi người dùng đặt câu hỏi, hệ thống chuyển câu hỏi thành vector và tìm kiếm các đoạn thông tin liên quan nhất trong Vector Database.
+3. **Generation (Sinh nội dung):** LLM nhận câu hỏi ban đầu kèm theo các đoạn thông tin đã truy xuất để tổng hợp thành câu trả lời cuối cùng chính xác nhất.
+
+## 3. Ví dụ thực tế trực quan
+Hãy tưởng tượng bạn hỏi một thực tập sinh mới (LLM) về quy định công ty. Thay vì bắt thực tập sinh tự đoán (dễ sai), bạn đưa cho họ cuốn sổ tay nhân viên (Vector Database). Thực tập sinh sẽ **tìm (Retrieve)** đúng trang quy định và **trả lời (Generate)** dựa trên trang đó. Đó chính là RAG!
+
+RAG giúp hệ thống AI đáng tin cậy hơn, đặc biệt trong các ứng dụng doanh nghiệp như chatbot hỗ trợ khách hàng hoặc hệ thống phân tích tài liệu nội bộ.
+=======================================================
+
+ok
+test_adversarial_plumbing_wrong_fact_right_format (__main__.TestUnitOffline) ... 
+[Unit Test] 10. Judge Plumbing Test: Xử lý nội dung sai sự thật nhưng chuẩn format
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết bài chia sẻ ngắn giải thích RAG.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: LLM-powered (Ollama: tinix-lm:latest)
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 519 ký tự (102 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho kỹ sư và người học 1. Tổng quan & B...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Mock response
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 3: Mock response
+
+▶️  [BƯỚC 3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 191 ký tự (41 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.0s)
+   ✓ Kết quả tóm tắt: # RAG là gì?  RAG là một kỹ thuật. RAG gồm Indexing -> Retrieval -> Generation. RAG luôn đảm bảo câu trả lời chính xác 1...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ Độ dài chưa đạt: 191/250 ký tự; ✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết bài chia sẻ ngắn giải thích RAG.
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ Độ dài chưa đạt: 191/250 ký tự; ✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).).
+Tổng thời gian: 0.042s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✗ Độ dài chưa đạt: 191/250 ký tự
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.84 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (rag)
+   ✗ LLM Judge từ chối: Không trả về định dạng JSON hợp lệ (Parse fail fallback).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# RAG là gì?
+
+RAG là một kỹ thuật. RAG gồm Indexing -> Retrieval -> Generation. RAG luôn đảm bảo câu trả lời chính xác 100%. RAG luôn dựa hoàn toàn trên dữ liệu thực tế không bao giờ sai sót.
+=======================================================
+
+ok
+test_bounded_loop_validation (__main__.TestUnitOffline) ... 
+[Unit Test] 8. Kiểm định rào chắn Bounded Loop & An toàn ToolRegistry (max_steps <= 3, AST calculate)
+ok
+test_budget_exhausted_unmet_goal (__main__.TestUnitOffline) ... 
+[Unit Test] 3. Hết ngân sách bước nhưng CHƯA đạt mục tiêu (Budget Exhausted)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết bài chia sẻ chuyên sâu về Kubernetes cho đội ngũ DevOps.
+⚙️  GIỚI HẠN: Tối đa 1 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 1 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về Chuyên Sâu Về Kubernetes
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về Chuyên Sâu Về Kubernetes...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 483 ký tự (104 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện Chuyên Sâu Về Kubernetes cho kỹ sư chuyên ngành 1. Tổng quan & Bản chất: Chu...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Budget exhausted: Đã thực hiện tối đa 1/1 bước nhưng chưa tạo được sản phẩm đầu ra hoàn thiện cho mục đích 'full_article'.
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết bài chia sẻ chuyên sâu về Kubernetes cho đội ngũ DevOps.
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 1/1 (Giới hạn: 1)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 1/1 bước nhưng chưa tạo được sản phẩm đầu ra hoàn thiện cho mục đích 'full_article'.
+Tổng thời gian: 0.014s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 483 ký tự (103 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.82 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (chuyên, sâu, kubernetes)
+   ✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+Dàn ý chi tiết bài viết: Khám phá toàn diện Chuyên Sâu Về Kubernetes cho kỹ sư chuyên ngành
+1. Tổng quan & Bản chất: Chuyên Sâu Về Kubernetes là gì và giải quyết bài toán gì trong thực tiễn?
+2. Các thành phần nền tảng và nguyên lý vận hành cốt lõi của Chuyên Sâu Về Kubernetes.
+3. Lợi ích kỹ thuật vượt trội: Khả năng bảo trì, module hóa và độ tin cậy.
+4. Ví dụ minh họa trực quan và hướng dẫn áp dụng thực tế từng bước.
+5. Đánh giá ưu nhược điểm, kinh nghiệm triển khai và tổng kết.
+=======================================================
+
+ok
+test_dynamic_observation_and_adaptation (__main__.TestUnitOffline) ... 
+[Unit Test] 6. Quan sát & Thích ứng chỉ dẫn bước kế tiếp (Observe & Adapt)
+ok
+test_dynamic_replan_execution (__main__.TestUnitOffline) ... 
+[Unit Test] 13. Chứng minh REPLAN thực sự thay đổi action_queue (Replan Execution)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết bài chia sẻ ngắn.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: LLM-powered (Ollama: tinix-lm:latest)
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 1 BƯỚC:
+   [1] (generate) Bước Replan
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Bước Replan...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1394 ký tự (309 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn kỹ thuật và giải thích bản chất: .  Để xây dựng hệ thống phần mềm hiện đại và ổn định, việc hiểu sâu bản chấ...
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết bài chia sẻ ngắn.
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 1/1 (Giới hạn: 3)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 1/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ Nội dung chưa phản ánh đúng từ khóa mục tiêu; ✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.).
+Tổng thời gian: 0.026s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 1394 ký tự (293 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.70 (ngưỡng yêu cầu >= 0.35)
+   ✗ Nội dung chưa phản ánh đúng từ khóa mục tiêu
+   ✗ LLM Judge từ chối: Model không trả về kết quả đánh giá.
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# Hướng dẫn kỹ thuật và giải thích bản chất: .
+
+Để xây dựng hệ thống phần mềm hiện đại và ổn định, việc hiểu sâu bản chất kỹ thuật của **.** đóng vai trò vô cùng quan trọng đối với kỹ sư và người học. Bài viết này cung cấp góc nhìn từ nguyên lý nền tảng đến kiến trúc vận hành và phương pháp triển khai thực tế.
+
+## 1. Khái niệm cốt lõi và mục tiêu kỹ thuật
+**.** giải quyết trực tiếp bài toán phân tách logic, nâng cao tính mô đun hóa và đảm bảo tính tin cậy khi hệ thống tăng trưởng về quy mô dữ liệu cũng như số lượng người dùng. Thay vì các giải pháp chắp vá, . thiết lập một tiêu chuẩn kiến trúc rõ ràng, minh bạch.
+
+## 2. Kiến trúc và cơ chế hoạt động
+Cơ chế hoạt động của . dựa trên luồng luân chuyển thông tin tuần tự:
+1. **Tiếp nhận & Xác thực:** Tiếp nhận yêu cầu, kiểm tra tính toàn vẹn dữ liệu đầu vào.
+2. **Điều phối & Xử lý:** Phân bổ tác vụ đến các module chuyên biệt theo quy tắc logic xác định.
+3. **Lưu trữ & Phản hồi:** Cập nhật trạng thái vào kho dữ liệu và trả về kết quả cho ứng dụng gọi.
+
+## 3. Lợi ích kỹ thuật và kịch bản ứng dụng
+Triển khai . mang lại những lợi ích thiết thực:
+- **Dễ bảo trì và mở rộng:** Tách biệt trách nhiệm giữa các thành phần giúp đội ngũ phát triển làm việc độc lập.
+- **Tối ưu tài nguyên:** Giảm thiểu lãng phí năng lực tính toán và ngăn ngừa nghẽn cổ chai.
+- **Độ sẵn sàng cao:** Cô lập lỗi cục bộ để không ảnh hưởng đến toàn bộ hệ thống lớn.
+=======================================================
+
+ok
+test_open_domain_kafka (__main__.TestUnitOffline) ... 
+[Unit Test] 5. Kịch bản mục tiêu mở hoàn toàn (Open-Domain: Apache Kafka)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Hướng dẫn cơ bản về kiến trúc Event-Driven với Apache Kafka cho kỹ sư backend.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 468 ký tự (92 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Kiến trúc Event-Driven với Apache Kafka cho kỹ sư chuyên ngành 1. Apache Kafka là gì? Khái niệm...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (92 từ, TTR=0.90); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1860 ký tự (381 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn kiến trúc Event-Driven với Apache Kafka cho kỹ sư chuyên ngành  Trong các hệ thống phân tán hiện đại, nhu cầ...
+
+▶️  [BƯỚC 3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu bài viết về Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 2295 ký tự (472 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.024s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn kiến trúc Event-Driven với Apache Kafka cho kỹ sư chuyên ngành  Trong các hệ thống phân tán hiện đại, nhu cầ...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Hướng dẫn cơ bản về kiến trúc Event-Driven với Apache Kafka cho kỹ sư backend.
+Trạng thái: COMPLETED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).
+Tổng thời gian: 0.069s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 2295 ký tự (459 từ, ngưỡng tối thiểu 250 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.58 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (bản, kiến, trúc, event-driven, với, apache, kafka)
+   ℹ Chế độ Offline: Thỏa mãn bộ lọc định lượng (semantic_verified=False; không có tài liệu nguồn ngoài).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# Hướng dẫn kiến trúc Event-Driven với Apache Kafka cho kỹ sư chuyên ngành
+
+Trong các hệ thống phân tán hiện đại, nhu cầu xử lý lượng dữ liệu khổng lồ với độ trễ thấp ngày càng cấp thiết. **Apache Kafka** là nền tảng phân tán xử lý luồng sự kiện (Distributed Event Streaming) được tin cậy hàng đầu hiện nay.
+
+## 1. Apache Kafka là gì?
+Kafka hoạt động theo mô hình xuất bản - đăng ký (Publish-Subscribe) dựa trên kiến trúc Distributed Commit Log bất biến. Thay vì gọi trực tiếp giữa các microservices qua HTTP REST gây thắt nút cổ chai (tight coupling), các dịch vụ giao tiếp bất đồng bộ qua các dòng sự kiện trong Kafka.
+
+## 2. Các thành phần kiến trúc cốt lõi
+Hệ thống Kafka được xây dựng từ các thành phần chính:
+- **Producer:** Ứng dụng xuất bản (gửi) thông điệp sự kiện vào các chủ đề (Topic).
+- **Topic & Partition:** Topic là kênh chứa sự kiện, được chia nhỏ thành nhiều Partition để hỗ trợ xử lý song song và mở rộng quy mô ngang.
+- **Broker & Cluster:** Cụm máy chủ lưu trữ dữ liệu an toàn với cơ chế nhân bản (Replication) giúp hệ thống không bị gián đoạn khi có node gặp sự cố.
+- **Consumer & Consumer Group:** Đọc thông điệp từ Partition theo thứ tự cam kết (Offset), cho phép mở rộng khả năng tiêu thụ dữ liệu linh hoạt.
+
+## 3. Lợi ích vượt trội và ví dụ thực tế
+Kafka mang lại ba giá trị cốt lõi:
+1. **Khả năng mở rộng ngang:** Xử lý hàng triệu thông điệp mỗi giây mà không suy giảm hiệu năng.
+2. **Chịu lỗi bền vững:** Dữ liệu được ghi tuần tự xuống đĩa và sao lưu trên nhiều Broker.
+3. **Tách rời dịch vụ:** Các dịch vụ phía sau có thể bảo trì độc lập mà không ảnh hưởng phía gửi.
+
+Ví dụ: Khi khách hàng nhấn 'Đặt hàng' trên trang thương mại điện tử, dịch vụ Order gửi một sự kiện vào Topic `orders`. Các dịch vụ Thanh toán, Kho hàng, và Thông báo Email cùng đọc sự kiện này độc lập để hoàn tất đơn hàng mà không làm chậm trải nghiệm người dùng.
+
+## 4. Lời kết và Khuyến nghị triển khai
+Tóm lại, **Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka** không đơn thuần là một công cụ riêng lẻ, mà là một phương pháp luận kiến trúc giúp nâng tầm tư duy xây dựng hệ thống. Bằng cách nắm vững các nguyên lý nền tảng và tuân thủ quy chuẩn thực hành, bạn hoàn toàn có thể tự tin làm chủ và khai thác trọn vẹn sức mạnh của Cơ Bản Về Kiến Trúc Event-Driven Với Apache Kafka trong thực tiễn.
+=======================================================
+
+ok
+test_outline_docker_early_stop (__main__.TestUnitOffline) ... 
+[Unit Test] 1. Kịch bản mục tiêu nhỏ (outline Docker) -> Dừng sớm
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Chuẩn bị outline cho bài viết về Docker cho sinh viên IT.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 2 BƯỚC:
+   [1] (research_points) Thu thập và xác định các luận điểm cốt lõi về Docker & Container hóa
+   [2] (outline) Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker & Container hóa
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Thu thập và xác định các luận điểm cốt lõi về Docker & Container hóa...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 482 ký tự (95 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.01s)
+   ✓ Kết quả tóm tắt: [Mock Tool: search] Tìm thấy kết quả: Docker & Container hóa Nghiên cứu công nghệ Docker & Container hóa: 1. Định nghĩa:...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (95 từ, TTR=0.87); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker & Container hóa...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 367 ký tự (74 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá Docker và Container hóa cho sinh viên CNTT 1. Docker là gì và sự khác biệt giữa Contai...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge) theo đúng mục tiêu.
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Chuẩn bị outline cho bài viết về Docker cho sinh viên IT.
+Trạng thái: COMPLETED
+Số bước hoàn thành: 2/2 (Giới hạn: 3)
+Lý do kết thúc: Goal achieved: Dàn ý đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge) theo đúng mục tiêu.
+Tổng thời gian: 0.025s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 367 ký tự (72 từ, ngưỡng tối thiểu 100 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.86 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (docker)
+   ℹ Chế độ Offline: Thỏa mãn bộ lọc định lượng (semantic_verified=False; không có tài liệu nguồn ngoài).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+Dàn ý chi tiết bài viết: Khám phá Docker và Container hóa cho sinh viên CNTT
+1. Docker là gì và sự khác biệt giữa Container với Virtual Machine (VM).
+2. Ba trụ cột: Dockerfile, Docker Image và Docker Container.
+3. Cơ chế cô lập bằng Linux namespaces và cgroups.
+4. Quy trình làm việc chuẩn: Build -> Ship -> Run.
+5. Thực hành đóng gói ứng dụng web cơ bản và tổng kết.
+=======================================================
+
+ok
+test_quality_rejection_budget_exhausted (__main__.TestUnitOffline) ... 
+[Unit Test] 4. QualityEvaluator từ chối nghiệm thu -> BUDGET_EXHAUSTED
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 3 BƯỚC:
+   [1] (outline) Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)
+   [2] (generate) Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)
+   [3] (review_polish) Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Xác định các ý chính và cấu trúc dàn ý về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 518 ký tự (101 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.012s)
+   ✓ Kết quả tóm tắt: Dàn ý chi tiết bài viết: Khám phá toàn diện RAG (Retrieval-Augmented Generation) cho người mới bắt đầu 1. Tổng quan & Bả...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (101 từ, TTR=0.85); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo nội dung bài chia sẻ hoàn chỉnh về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 1639 ký tự (319 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.025s)
+   ✓ Kết quả tóm tắt: # Hướng dẫn toàn diện: RAG (Retrieval-Augmented Generation) là gì?  Trong bối cảnh trí tuệ nhân tạo hiện nay, LLM thường...
+
+▶️  [BƯỚC 3] Đang thực hiện: Rà soát, kiểm định chất lượng và nghiệm thu bài viết về RAG (Retrieval-Augmented Generation)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 42 ký tự (6 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.0s)
+   ✓ Kết quả tóm tắt: RAG là retrieval augmented generation hết....
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ Độ dài chưa đạt: 42/250 ký tự; ✗ Cấu trúc văn bản thiếu phân cấp đề mục; ✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.
+Trạng thái: BUDGET_EXHAUSTED
+Số bước hoàn thành: 3/3 (Giới hạn: 3)
+Lý do kết thúc: Budget exhausted: Đã thực hiện tối đa 3/3 bước nhưng chưa đạt chuẩn nghiệm thu (✗ Độ dài chưa đạt: 42/250 ký tự; ✗ Cấu trúc văn bản thiếu phân cấp đề mục; ✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).).
+Tổng thời gian: 0.043s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✗ Độ dài chưa đạt: 42/250 ký tự
+   ✗ Cấu trúc văn bản thiếu phân cấp đề mục
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 1.00 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (rag)
+   ✗ Deterministic Judge từ chối: Nội dung quá ngắn, thiếu thông tin cốt lõi (Completeness failed).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+RAG là retrieval augmented generation hết.
+=======================================================
+
+ok
+test_summarize_with_input_document (__main__.TestUnitOffline) ... 
+[Unit Test] 2. Tóm tắt tài liệu nguồn (Summarize with Input Document)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Tóm tắt tài liệu kỹ thuật về Model Context Protocol (MCP) cho kỹ sư phần mềm.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 2 BƯỚC:
+   [1] (research_points) Trích xuất các ý chính và thông số cốt lõi về Kỹ Thuật Về Model Context Protocol (Mcp)
+   [2] (summarize) Soạn thảo bản tóm tắt súc tích cho Kỹ Thuật Về Model Context Protocol (Mcp)
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Trích xuất các ý chính và thông số cốt lõi về Kỹ Thuật Về Model Context Protocol (Mcp)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 439 ký tự (89 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.011s)
+   ✓ Kết quả tóm tắt: [Mock Tool: read_document] Đã trích xuất nội dung từ tài liệu input_doc. Trích xuất các luận điểm cốt lõi từ tài liệu ng...
+   🔄 [ADAPT] Thích ứng chỉ dẫn Bước 2: Dàn ý đạt cấu trúc logic (89 từ, TTR=0.74); bước tiếp theo kế thừa trọn vẹn dàn bài.
+
+▶️  [BƯỚC 2] Đang thực hiện: Soạn thảo bản tóm tắt súc tích cho Kỹ Thuật Về Model Context Protocol (Mcp)...
+   👁️  [OBSERVE] Quan sát: Đã hoàn thành 401 ký tự (85 từ), cấu trúc Markdown hợp lệ.
+   ✓ Trạng thái: COMPLETED (0.015s)
+   ✓ Kết quả tóm tắt: # Bản tóm tắt súc tích: Kỹ Thuật Về Model Context Protocol (Mcp)  - **Khái niệm cốt lõi:** Model Context Protocol (MCP) ...
+
+🛑 [STOP CONDITION] Kích hoạt điều kiện dừng: Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Tóm tắt tài liệu kỹ thuật về Model Context Protocol (MCP) cho kỹ sư phần mềm.
+Trạng thái: COMPLETED
+Số bước hoàn thành: 2/2 (Giới hạn: 3)
+Lý do kết thúc: Goal achieved: Bản tóm tắt súc tích đạt chuẩn chất lượng định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge).
+Tổng thời gian: 0.029s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✓ Tiêu chuẩn độ dài: Đạt 401 ký tự (81 từ, ngưỡng tối thiểu 100 ký tự)
+   ✓ Cấu trúc định dạng: Có đề mục phân cấp hoặc danh sách Markdown
+   ✓ Đa dạng từ vựng: Đạt ngưỡng đa dạng từ vựng theo TTR = 0.81 (ngưỡng yêu cầu >= 0.35)
+   ✓ Độ bám sát chủ đề: Ghi nhận các từ khóa trọng tâm (tóm, tắt, thuật, model, context, protocol, mcp)
+   ℹ Chế độ Offline: Thỏa mãn bộ lọc định lượng và heuristic offline (semantic_verified=False).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+# Bản tóm tắt súc tích: Kỹ Thuật Về Model Context Protocol (Mcp)
+
+- **Khái niệm cốt lõi:** Model Context Protocol (MCP) là giao thức chuẩn mở do Anthropic phát triển.
+- **Đặc tính kỹ thuật trọng tâm:** MCP kết nối an toàn các mô hình AI với các công cụ cục bộ và kho dữ liệu phân tán doanh nghiệp.
+- **Giá trị ứng dụng:** Tối ưu hóa kiến trúc, đảm bảo tính mô đun hóa và độ an toàn cao trong tích hợp.
+=======================================================
+
+ok
+test_summarize_without_document_fails (__main__.TestUnitOffline) ... 
+[Unit Test] 9. Từ chối tóm tắt khi thiếu tài liệu nguồn (Missing Source Doc -> FAILED)
+
+=======================================================
+🤖 [AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ
+🎯 MỤC TIÊU: Tóm tắt tài liệu này cho ban giám đốc.
+⚙️  GIỚI HẠN: Tối đa 3 bước thực thi (Bounded Loop)
+🧠 CHẾ ĐỘ: Deterministic Fallback
+=======================================================
+
+📋 [PLANNER] ĐÃ PHÂN TÍCH VÀ KHỞI TẠO CHECKLIST 2 BƯỚC:
+   [1] (research_points) Trích xuất các ý chính và thông số cốt lõi về Cho Ban Giám Đốc.
+   [2] (summarize) Soạn thảo bản tóm tắt súc tích cho Cho Ban Giám Đốc.
+-------------------------------------------------------
+
+▶️  [BƯỚC 1] Đang thực hiện: Trích xuất các ý chính và thông số cốt lõi về Cho Ban Giám Đốc....
+   ✗ Trạng thái: FAILED (0.0s) - Thiếu tài liệu nguồn để tóm tắt (Missing source document)
+   🔄 [RETRY] Tự động thử lại hành động do lỗi.
+
+▶️  [BƯỚC 1] Đang thực hiện: [RETRY] Trích xuất các ý chính và thông số cốt lõi về Cho Ban Giám Đốc....
+   ✗ Trạng thái: FAILED (0.0s) - Thiếu tài liệu nguồn để tóm tắt (Missing source document)
+
+=======================================================
+📊 BÁO CÁO CUỐI CÙNG (FINAL AGENT REPORT)
+=======================================================
+Mục tiêu: Tóm tắt tài liệu này cho ban giám đốc.
+Trạng thái: FAILED
+Số bước hoàn thành: 2/2 (Giới hạn: 3)
+Lý do kết thúc: Execution failed: Tiến trình bị kẹt do liên tiếp thất bại (Thiếu tài liệu nguồn để tóm tắt (Missing source document)).
+Tổng thời gian: 0.0s
+
+--- ĐÁNH GIÁ CHẤT LƯỢNG ĐỊNH LƯỢNG ---
+   ✗ Thực thi thất bại: Execution failed: Tiến trình bị kẹt do liên tiếp thất bại (Thiếu tài liệu nguồn để tóm tắt (Missing source document)).
+
+--- NỘI DUNG SẢN PHẨM ĐẦU RA ---
+
+=======================================================
+
+ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 30.352s
+
+OK
