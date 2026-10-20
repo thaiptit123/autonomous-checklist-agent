@@ -83,6 +83,8 @@
 
 \usepackage{fontspec}
 \setmainfont{Times New Roman}
+\newfontfamily{\symbolfont}{DejaVu Sans}
+\newcommand{\xmark}{{\symbolfont ✗}}
 
 %-------------------------------------------------------------
 % 2) LAYOUT TRANG
@@ -560,7 +562,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
         \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng chi tiết}
 \NormalTok{        final_passed }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{)}
 \NormalTok{        semantic_ok }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \VariableTok{True}
-\NormalTok{        failed_notes }\OperatorTok{=}\NormalTok{ [n }\ControlFlowTok{for}\NormalTok{ n }\KeywordTok{in} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"review_notes"}\NormalTok{, []) }\ControlFlowTok{if}\NormalTok{ n.startswith(}\StringTok{"✗"}\NormalTok{)]}
+\NormalTok{        failed_notes }\OperatorTok{=}\NormalTok{ [n }\ControlFlowTok{for}\NormalTok{ n }\KeywordTok{in} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"review_notes"}\NormalTok{, []) }\ControlFlowTok{if}\NormalTok{ n.startswith(}\StringTok{"\xmark"}\NormalTok{)]}
 \NormalTok{        reason_detail }\OperatorTok{=} \StringTok{"; "}\NormalTok{.join(failed_notes) }\ControlFlowTok{if}\NormalTok{ failed_notes }\ControlFlowTok{else}\NormalTok{ (}\StringTok{"Chưa đạt xác minh LLM Judge"} \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ semantic_ok }\ControlFlowTok{else} \StringTok{"Chưa đạt chất lượng"}\NormalTok{)}
 
         \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\KeywordTok{in}\NormalTok{ (AgentStatus.RUNNING, AgentStatus.PLANNING):}
