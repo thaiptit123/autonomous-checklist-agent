@@ -243,24 +243,22 @@ AI Guru x TiniX
 \section*{Các thuật ngữ cơ bản}\label{cac-thuat-ngu-co-ban}}
 \phantomsection\addcontentsline{toc}{section}{Các thuật ngữ cơ bản}
 
-\renewcommand{\arraystretch}{1.7}
-
-\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}
-
-\begin{longtable}{|p{0.25\linewidth}|p{0.70\linewidth}|}
+\begin{table}[H]
+\centering
+\caption{Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}
+\label{tab:thuat-ngu}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|p{0.28\linewidth}|p{0.67\linewidth}|}
 \hline
-\thd{\raggedright Thuật ngữ\strut} & \thd{\raggedright Định nghĩa\strut}\tabularnewline \hline
-\hline
-\endhead
-\raggedright \textbf{Tác nhân tự hành (autonomous agent)}\strut & \raggedright Thực thể AI có quyền tự chủ đưa ra quyết định: tự phân tích mục tiêu tổng thể, tự lập kế hoạch hành động, tự quan sát kết quả và điều chỉnh hành vi mà không cần con người can thiệp vào từng bước rẽ nhánh.\strut \tabularnewline \hline
-\raggedright \textbf{Lập kế hoạch theo mục tiêu (goal-driven planning)}\strut & \raggedright Cơ chế lập kế hoạch hướng mục tiêu. Thay vì tuân theo các bước cố định, tác nhân tiếp nhận mục tiêu và xác định danh sách công việc (checklist) phù hợp trong giới hạn an toàn.\strut \tabularnewline \hline
-\raggedright \textbf{Vòng lặp giới hạn (bounded loop)}\strut & \raggedright Vòng lặp thực thi có giới hạn chặn trên (ví dụ \texttt{max\_steps = 3}). Đây là cơ chế chốt chặn an toàn bắt buộc trong hệ thống tự hành để triệt tiêu nguy cơ vòng lặp vô hạn (Infinite Loop) gây tốn kém chi phí token hoặc treo máy.\strut \tabularnewline \hline
-\raggedright \textbf{Điều kiện dừng (stop condition)}\strut & \raggedright Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}).\strut \tabularnewline \hline
-\raggedright \textbf{Bộ nhớ trạng thái ngữ cảnh (context memory)}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
-\raggedright \textbf{Nhật ký từng bước \& báo cáo tổng kết}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
-\hline
-\end{longtable}
-\renewcommand{\arraystretch}{1.0}
+\thd{Thuật ngữ} & \thd{Định nghĩa trong ngữ cảnh Checklist Agent} \\ \hline
+\textbf{Tác nhân tự hành (autonomous agent)} & Thực thể AI có quyền tự chủ đưa ra quyết định: tự phân tích mục tiêu tổng thể, tự lập kế hoạch hành động, tự quan sát kết quả và điều chỉnh hành vi mà không cần con người can thiệp vào từng bước rẽ nhánh. \\ \hline
+\textbf{Lập kế hoạch theo mục tiêu (goal-driven planning)} & Cơ chế lập kế hoạch hướng mục tiêu. Thay vì tuân theo các bước cố định, tác nhân tiếp nhận mục tiêu và xác định danh sách công việc (checklist) phù hợp trong giới hạn an toàn. \\ \hline
+\textbf{Vòng lặp giới hạn (bounded loop)} & Vòng lặp thực thi có giới hạn chặn trên (ví dụ \texttt{max\_steps = 3}). Đây là cơ chế chốt chặn an toàn bắt buộc trong hệ thống tự hành để triệt tiêu nguy cơ vòng lặp vô hạn (Infinite Loop) gây tốn kém chi phí token hoặc treo máy. \\ \hline
+\textbf{Điều kiện dừng (stop condition)} & Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}). \\ \hline
+\textbf{Bộ nhớ trạng thái ngữ cảnh (context memory)} & Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát). \\ \hline
+\textbf{Nhật ký từng bước \& báo cáo tổng kết} & Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành. \\ \hline
+\end{tabular}
+\end{table}
 
 \section{Lý thuyết cơ bản: Kiến trúc tác nhân tự hành và vòng lặp quyết định}\label{ly-thuyet-co-ban}
 
@@ -556,10 +554,18 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop: stop_reason }\OperatorTok{=}\NormalTok{ reason; }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status; }\ControlFlowTok{break}
 
+        \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng}
         \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\KeywordTok{in}\NormalTok{ (AgentStatus.RUNNING, AgentStatus.PLANNING):}
-            \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.COMPLETED }\ControlFlowTok{if}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{and}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \VariableTok{True}\NormalTok{)) }\ControlFlowTok{else}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
-        \ControlFlowTok{elif} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{or}\NormalTok{ (}\VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{))):}
+            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{and}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \ConstantTok{True}\NormalTok{):}
+                \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.COMPLETED}
+                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \StringTok{f"Goal achieved: Đạt chuẩn sau \{steps_executed\} bước."}
+            \ControlFlowTok{else}\NormalTok{:}
+                \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
+                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \StringTok{f"Budget exhausted: Hết bước nhưng chưa đạt chuẩn."}
+        \CommentTok{# Hạ trạng thái COMPLETED nếu lần kiểm tra báo cáo cuối thất bại}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{or}\NormalTok{ (}\VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{))):}
             \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
+            \NormalTok{stop_reason }\OperatorTok{=} \StringTok{"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau khi kiểm tra lại báo cáo."}
         \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
@@ -573,7 +579,7 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
 \begin{figure}[H]
     \centering
     \vspace{-4mm}
-    \includegraphics[width=0.81\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.92\textwidth]{images/terminal_execution.png}
     \vspace{-3mm}
     \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
@@ -598,33 +604,38 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
-
-\renewcommand{\arraystretch}{0.55}
-\begin{longtable}{|p{0.45\linewidth}|p{0.49\linewidth}|}
+\begin{table}[H]
+\centering
+\caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}
+\label{tab:so-sanh-chat-luong}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.46\linewidth}|p{0.48\linewidth}|}
 \hline
-\thd{\raggedright Sản phẩm sau Bước 2 (Dàn ý chi tiết)\strut} & \thd{\raggedright Sản phẩm sau Bước 3 (Bài viết hoàn thiện)\strut}\tabularnewline \hline
-\hline
-\endhead
-Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
-Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
-Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 1.872 ký tự (391 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
-\raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.43 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề và LLM Judge xác nhận.\strut \tabularnewline \hline
-\hline
-\end{longtable}
-\renewcommand{\arraystretch}{1.0}
+\thd{Sản phẩm sau Bước 2 (Dàn ý chi tiết)} & \thd{Sản phẩm sau Bước 3 (Bài viết hoàn thiện)} \\ \hline
+Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới. \\ \hline
+Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay. \\ \hline
+Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài). & Hoàn thiện toàn bộ văn bản đạt 1.872 ký tự (391 từ), cấu trúc Markdown phân cấp rõ ràng. \\ \hline
+Chưa qua khâu nghiệm thu chất lượng. & Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.43 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề và LLM Judge xác nhận. \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
-
-\renewcommand{\arraystretch}{0.38}
-\begin{longtable}{|c|p{0.41\linewidth}|c|p{0.27\linewidth}|}
+\renewcommand{\arraystretch}{0.85}
+\begin{longtable}{|c|p{0.34\linewidth}|c|p{0.25\linewidth}|}
+\caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}\\
 \hline
-\thd{\centering STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\centering Trạng thái\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
+\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \\ \hline
+\endfirsthead
+\multicolumn{4}{c}{\textit{Bảng \thetable\ (tiếp theo): Kết quả kiểm thử 18 kịch bản}} \\
 \hline
+\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \\ \hline
 \endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
 \multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
 1 & Chuẩn bị outline Docker (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
 2 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Kế thừa \texttt{input\_doc}) \\ \hline
@@ -645,7 +656,6 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 16 & Adversarial (Real LLM): Lỗi Correctness (sai hoàn toàn) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
 17 & Adversarial (Real LLM): Lỗi Completeness (thiếu ý) & \texttt{PASS (Ollama)} & LLM Judge từ chối: completeness=0 \\ \hline
 18 & Adversarial (Real LLM): Lỗi Groundedness (bịa đặt) & \texttt{PASS (Ollama)} & LLM Judge từ chối: groundedness=0 \\ \hline
-\hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 \vspace{-2mm}
