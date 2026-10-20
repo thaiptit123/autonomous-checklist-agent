@@ -21,90 +21,90 @@ plt.rcParams["axes.unicode_minus"] = False
 
 
 def generate_architecture_diagram():
-    fig, ax = plt.subplots(figsize=(9.2, 5.2), dpi=300)
+    fig, ax = plt.subplots(figsize=(11.0, 5.8), dpi=300)
     ax.set_facecolor("#FFFFFF")
     fig.patch.set_facecolor("#FFFFFF")
 
     # Tiêu đề chính
-    ax.text(4.60, 4.88, "KIẾN TRÚC TÁC NHÂN TỰ HÀNH CHECKLIST (TỐI ĐA 3 BƯỚC)", 
-            fontsize=13.5, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(4.60, 4.62, "Mô hình tác nhân tự hành 5 khối với cơ chế phản hồi và kiểm định an toàn", 
-            fontsize=9.0, ha="center", color="#475569", style="italic")
+    ax.text(5.50, 5.45, "KIẾN TRÚC TÁC NHÂN TỰ HÀNH CHECKLIST (TỐI ĐA 3 BƯỚC)", 
+            fontsize=14.5, fontweight="bold", ha="center", color="#004AAD")
+    ax.text(5.50, 5.15, "Mô hình tác nhân tự hành 5 khối với cơ chế phản hồi và kiểm định an toàn", 
+            fontsize=10.5, ha="center", color="#475569", style="italic")
 
     # Hộp 1: Mục tiêu người dùng
-    box_goal = patches.FancyBboxPatch((0.35, 2.20), 1.70, 1.75, boxstyle="round,pad=0.10", 
+    box_goal = patches.FancyBboxPatch((0.40, 2.20), 2.00, 2.40, boxstyle="round,pad=0.10", 
                                       edgecolor="#004AAD", facecolor="#EFF6FF", linewidth=2.0)
     ax.add_patch(box_goal)
-    ax.text(1.20, 3.65, "1. MỤC TIÊU", fontsize=10.5, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(1.20, 3.40, "(User Goal)", fontsize=8.5, ha="center", color="#004AAD", style="italic")
-    ax.text(1.20, 2.75, "Tiếp nhận mục tiêu\n(VD: Viết bài RAG\ncho người mới)", 
-            fontsize=9.0, fontweight="medium", ha="center", color="#0F172A", linespacing=1.28)
+    ax.text(1.40, 4.15, "1. MỤC TIÊU", fontsize=12.2, fontweight="bold", ha="center", color="#004AAD")
+    ax.text(1.40, 3.85, "(User Goal)", fontsize=10.2, ha="center", color="#004AAD", style="italic")
+    ax.text(1.40, 3.05, "Tiếp nhận mục tiêu\n(VD: Viết bài RAG\ncho người mới)", 
+            fontsize=11.0, fontweight="medium", ha="center", color="#0F172A", linespacing=1.35)
 
     # Mũi tên 1 -> 2
-    ax.annotate("", xy=(2.50, 3.05), xytext=(2.10, 3.05),
+    ax.annotate("", xy=(2.70, 3.40), xytext=(2.40, 3.40),
                 arrowprops=dict(arrowstyle="-|>", color="#004AAD", lw=2.2, mutation_scale=14))
 
     # Hộp 2: Bộ lập kế hoạch động (Planner Node)
-    box_plan = patches.FancyBboxPatch((2.55, 2.20), 1.85, 1.75, boxstyle="round,pad=0.10", 
+    box_plan = patches.FancyBboxPatch((2.70, 2.20), 2.25, 2.40, boxstyle="round,pad=0.10", 
                                       edgecolor="#E8630A", facecolor="#FFF7ED", linewidth=2.0)
     ax.add_patch(box_plan)
-    ax.text(3.475, 3.65, "2. LẬP KẾ HOẠCH", fontsize=10.5, fontweight="bold", ha="center", color="#E8630A")
-    ax.text(3.475, 3.40, "(Dynamic Planner)", fontsize=8.5, ha="center", color="#E8630A", style="italic")
-    ax.text(3.475, 2.75, "Phân rã mục tiêu\nChecklist động (LLM)\n(Tối đa ≤ 3 bước)", 
-            fontsize=9.0, fontweight="medium", ha="center", color="#0F172A", linespacing=1.28)
+    ax.text(3.825, 4.15, "2. LẬP KẾ HOẠCH", fontsize=12.2, fontweight="bold", ha="center", color="#E8630A")
+    ax.text(3.825, 3.85, "(Dynamic Planner)", fontsize=10.2, ha="center", color="#E8630A", style="italic")
+    ax.text(3.825, 3.05, "Phân rã mục tiêu\nChecklist động (LLM)\n(Tối đa ≤ 3 bước)", 
+            fontsize=11.0, fontweight="medium", ha="center", color="#0F172A", linespacing=1.35)
 
     # Mũi tên 2 -> 3
-    ax.annotate("", xy=(4.85, 3.05), xytext=(4.45, 3.05),
+    ax.annotate("", xy=(5.25, 3.40), xytext=(4.95, 3.40),
                 arrowprops=dict(arrowstyle="-|>", color="#E8630A", lw=2.2, mutation_scale=14))
 
     # Hộp 3: Bộ thực thi & Bộ nhớ ngữ cảnh (Execution Engine)
-    box_exec = patches.FancyBboxPatch((4.90, 2.05), 2.35, 1.95, boxstyle="round,pad=0.10", 
+    box_exec = patches.FancyBboxPatch((5.25, 2.10), 3.35, 2.50, boxstyle="round,pad=0.10", 
                                       edgecolor="#059669", facecolor="#ECFDF5", linewidth=2.0)
     ax.add_patch(box_exec)
-    ax.text(6.075, 3.70, "3. THỰC THI & BỘ NHỚ", fontsize=10.5, fontweight="bold", ha="center", color="#059669")
-    ax.text(6.075, 3.45, "(Execution & Memory)", fontsize=8.5, ha="center", color="#059669", style="italic")
-    ax.text(5.05, 2.82, "• Bước 1: Luận điểm (research)\n• Bước 2: Dàn ý chi tiết (outline)\n• Bước 3: Hoàn thiện bài viết", 
-            fontsize=8.6, fontweight="medium", ha="left", color="#0F172A", linespacing=1.25)
-    ax.text(6.075, 2.25, "[Bộ nhớ ngữ cảnh & Step Logs]", fontsize=8.2, fontweight="bold", ha="center", color="#047857")
+    ax.text(6.925, 4.18, "3. THỰC THI & BỘ NHỚ", fontsize=12.2, fontweight="bold", ha="center", color="#059669")
+    ax.text(6.925, 3.88, "(Execution & Memory)", fontsize=10.2, ha="center", color="#059669", style="italic")
+    ax.text(5.45, 3.08, "• Bước 1: Luận điểm (research)\n• Bước 2: Dàn ý chi tiết (outline)\n• Bước 3: Hoàn thiện bài viết", 
+            fontsize=10.8, fontweight="medium", ha="left", color="#0F172A", linespacing=1.35)
+    ax.text(6.925, 2.38, "[Bộ nhớ ngữ cảnh & Step Logs]", fontsize=10.0, fontweight="bold", ha="center", color="#047857")
 
     # Mũi tên 3 -> 4
-    ax.annotate("", xy=(7.65, 3.05), xytext=(7.30, 3.05),
+    ax.annotate("", xy=(8.90, 3.40), xytext=(8.60, 3.40),
                 arrowprops=dict(arrowstyle="-|>", color="#059669", lw=2.2, mutation_scale=14))
 
     # Hộp 4: Bộ đánh giá điều kiện dừng (Stop Condition Evaluator)
-    box_stop = patches.FancyBboxPatch((7.70, 2.20), 1.25, 1.75, boxstyle="round,pad=0.10", 
+    box_stop = patches.FancyBboxPatch((8.90, 2.20), 1.70, 2.40, boxstyle="round,pad=0.10", 
                                       edgecolor="#DC2626", facecolor="#FEF2F2", linewidth=2.0)
     ax.add_patch(box_stop)
-    ax.text(8.325, 3.65, "4. ĐIỀU KIỆN", fontsize=10.2, fontweight="bold", ha="center", color="#DC2626")
-    ax.text(8.325, 3.40, "(Stop Check)", fontsize=8.5, ha="center", color="#DC2626", style="italic")
-    ax.text(8.325, 2.75, "Đạt chuẩn?\nHoặc Bước ≥ 3\n→ DỪNG", 
-            fontsize=8.8, fontweight="medium", ha="center", color="#0F172A", linespacing=1.25)
+    ax.text(9.75, 4.15, "4. ĐIỀU KIỆN", fontsize=12.0, fontweight="bold", ha="center", color="#DC2626")
+    ax.text(9.75, 3.85, "(Stop Check)", fontsize=10.2, ha="center", color="#DC2626", style="italic")
+    ax.text(9.75, 3.05, "Đạt chuẩn?\nHoặc Bước ≥ 3\n→ DỪNG", 
+            fontsize=11.0, fontweight="medium", ha="center", color="#0F172A", linespacing=1.35)
 
     # Mũi tên lặp phản hồi (Loopback khi chưa dừng) - Uốn cong phía trên các hộp
-    ax.annotate("", xy=(6.075, 4.02), xytext=(8.325, 4.02),
+    ax.annotate("", xy=(6.925, 4.65), xytext=(9.75, 4.65),
                 arrowprops=dict(arrowstyle="-|>", color="#475569", lw=2.0, connectionstyle="arc3,rad=0.25", ls="--", mutation_scale=13))
-    ax.text(7.20, 4.38, "Lặp tiếp (chưa đạt & còn bước)", fontsize=8.5, color="#1E293B", ha="center", fontweight="bold",
-            bbox=dict(boxstyle="round,pad=0.2", facecolor="#F8FAFC", edgecolor="#94A3B8", lw=0.8))
+    ax.text(8.337, 4.95, "Lặp tiếp (chưa đạt & còn bước)", fontsize=9.8, color="#1E293B", ha="center", fontweight="bold",
+            zorder=5, bbox=dict(boxstyle="round,pad=0.28", facecolor="#FFFFFF", edgecolor="#64748B", lw=1.2))
 
     # Mũi tên dừng -> Xuống báo cáo cuối
-    ax.annotate("", xy=(8.325, 1.55), xytext=(8.325, 2.15),
+    ax.annotate("", xy=(9.75, 1.70), xytext=(9.75, 2.20),
                 arrowprops=dict(arrowstyle="-|>", color="#004AAD", lw=2.2, mutation_scale=14))
-    ax.text(8.325, 1.85, "Thỏa dừng / hết bước", fontsize=8.2, color="#004AAD", ha="center", fontweight="bold",
-            bbox=dict(boxstyle="round,pad=0.2", facecolor="#EFF6FF", edgecolor="#004AAD", lw=1.0))
+    ax.text(9.75, 1.95, "Thỏa dừng / hết bước", fontsize=9.8, color="#004AAD", ha="center", fontweight="bold",
+            zorder=5, bbox=dict(boxstyle="round,pad=0.25", facecolor="#EFF6FF", edgecolor="#004AAD", lw=1.2))
 
     # Hộp 5: Báo cáo cuối cùng & Sản phẩm nghiệm thu
-    box_out = patches.FancyBboxPatch((0.35, 0.20), 8.55, 1.30, boxstyle="round,pad=0.12", 
+    box_out = patches.FancyBboxPatch((0.40, 0.20), 10.20, 1.45, boxstyle="round,pad=0.12", 
                                      edgecolor="#004AAD", facecolor="#FFFFFF", linewidth=2.0)
     ax.add_patch(box_out)
-    ax.text(4.60, 1.18, "5. BÁO CÁO TỔNG KẾT & SẢN PHẨM NGHIỆM THU (FINAL REPORT & ARTIFACTS)", 
-            fontsize=10.5, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(4.60, 0.82, "• Kế hoạch ban đầu (Plan)   • Nhật ký kiểm toán (Audit Trail)   • Trạng thái (COMPLETED / BUDGET_EXHAUSTED)", 
-            fontsize=8.8, ha="center", color="#0F172A", fontweight="semibold")
-    ax.text(4.60, 0.48, "• Lý do dừng chi tiết   • Kiểm định chất lượng (TTR, Độ dài, LLM Judge)   • Sản phẩm hoàn chỉnh", 
-            fontsize=8.8, ha="center", color="#334155", fontweight="semibold")
+    ax.text(5.50, 1.28, "5. BÁO CÁO TỔNG KẾT & SẢN PHẨM NGHIỆM THU (FINAL REPORT & ARTIFACTS)", 
+            fontsize=12.0, fontweight="bold", ha="center", color="#004AAD")
+    ax.text(5.50, 0.88, "• Kế hoạch ban đầu (Plan)   • Nhật ký kiểm toán (Audit Trail)   • Trạng thái (COMPLETED / BUDGET_EXHAUSTED)", 
+            fontsize=9.8, ha="center", color="#0F172A", fontweight="semibold")
+    ax.text(5.50, 0.50, "• Lý do dừng chi tiết   • Kiểm định chất lượng (TTR, Độ dài, LLM Judge)   • Sản phẩm hoàn chỉnh", 
+            fontsize=9.8, ha="center", color="#334155", fontweight="semibold")
 
-    ax.set_xlim(0, 9.2)
-    ax.set_ylim(0, 5.2)
+    ax.set_xlim(0, 11.0)
+    ax.set_ylim(0, 5.8)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "architecture_diagram.png")

@@ -28,7 +28,7 @@ Bai44/
 │   ├── eval_agent.py           # Bộ 18 kịch bản kiểm thử toàn diện đánh giá năng lực tự hành
 │   ├── generate_assets.py      # Script tự động tạo sơ đồ kiến trúc và nhật ký terminal thực tế
 │   ├── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM benchmark thực tế (19.8s / 19.812s)
-│   └── test_execution_ollama.log # Nhật ký chạy thực tế toàn bộ 18/18 tests với Ollama thật (30.352s)
+│   └── test_execution_ollama.log # Nhật ký chạy thực tế toàn bộ 18/18 tests với Ollama thật (29.811s)
 └── images/
     ├── architecture_diagram.png # Sơ đồ kiến trúc tổng thể tác nhân
     ├── state_flow_diagram.png   # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
@@ -40,7 +40,7 @@ Bai44/
 | Hạng mục thực nghiệm | Thời gian đo được | Mô hình & Môi trường | Ý nghĩa & Nguồn dữ liệu |
 |---|---|---|---|
 | **Phiên chạy Agent mẫu (RAG Article)** | **19.812s** (làm tròn **19.8s**) | `tinix-lm:latest` (Ollama GPU) | Bài viết RAG hoàn chỉnh (1.872 ký tự, 391 từ, TTR 0.427, 3/3 bước `COMPLETED`, LLM Judge Verified). Lưu tại `code/agent_final_report.json` và minh họa ở PDF Trang 14, 18. |
-| **Suite 18 Tests (Khi có Ollama)** | **29.811s** (chạy thực tế: **30.352s**) | `tinix-lm:latest` (Ollama GPU) | 13 Offline Unit Tests PASS + 5 Real LLM Integration Tests PASS (18/18 PASS, gồm 4 kịch bản kiểm thử đối kháng). Nhật ký thực nghiệm lưu tại `code/test_execution_ollama.log` và minh họa ở PDF Trang 17. |
+| **Suite 18 Tests (Khi có Ollama)** | **29.811s** | `tinix-lm:latest` (Ollama GPU) | 13 Offline Unit Tests PASS + 5 Real LLM Integration Tests PASS (18/18 PASS, gồm 4 kịch bản kiểm thử đối kháng). Nhật ký thực nghiệm lưu tại `code/test_execution_ollama.log` và minh họa ở PDF Trang 17. |
 | **Suite 18 Tests (Chế độ Offline)** | **0.045s** | Deterministic Fallback (Không có Ollama) | 13 Offline Unit Tests PASS, 5 Integration Tests tự động bỏ qua (`skipped=5`). Minh họa ở PDF Trang 17. |
 | *Lưu ý về các lần đo cũ* | *~35.6s / 21.5s* | *Môi trường thử nghiệm ban đầu* | *Các con số ước lượng trên phần cứng cũ trong quá trình phát triển ban đầu đã được thay thế hoàn toàn bằng bộ số liệu benchmark chuẩn 19.812s.* |
 
@@ -90,7 +90,7 @@ Bộ kiểm thử `code/eval_agent.py` bao gồm tổng cộng **18 kịch bản
 python3 code/eval_agent.py
 ```
 
-> **Nhật ký chạy thực tế với LLM thật:** Toàn bộ kết quả đầu ra thực tế của phiên chạy 18 test suite với mô hình Ollama (18/18 PASS trong 30.352s, bao gồm log chi tiết của 4 bài kiểm thử đối kháng Adversarial LLM Tests) được lưu trữ nguyên bản tại [`code/test_execution_ollama.log`](code/test_execution_ollama.log) để phục vụ thẩm định độc lập.
+> **Nhật ký chạy thực tế với LLM thật:** Toàn bộ kết quả đầu ra thực tế của phiên chạy 18 test suite với mô hình Ollama (18/18 PASS trong 29.811s, bao gồm log chi tiết của 4 bài kiểm thử đối kháng Adversarial LLM Tests) được lưu trữ nguyên bản tại [`code/test_execution_ollama.log`](code/test_execution_ollama.log) để phục vụ thẩm định độc lập.
 
 ### Tạo lại hình ảnh sơ đồ kiến trúc:
 ```bash

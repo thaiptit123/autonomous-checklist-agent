@@ -481,54 +481,50 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{class}\NormalTok{ }\DataTypeTok{AutonomousChecklistAgent}\NormalTok{:}
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{__init__}\NormalTok{(}\VariableTok{self}\NormalTok{, max_steps: }\DataTypeTok{int} \OperatorTok{=}\NormalTok{ }\DecValTok{3}\NormalTok{, use_llm: }\DataTypeTok{bool} \OperatorTok{=}\NormalTok{ }\ConstantTok{True}\NormalTok{):}
-        \ControlFlowTok{if}\NormalTok{ max_steps }\OperatorTok{>}\NormalTok{ }\DecValTok{3}\NormalTok{: }\ControlFlowTok{raise} \DataTypeTok{ValueError}\NormalTok{(}\StringTok{f"Vi phạm Bounded Loop: max_steps > 3!"}\NormalTok{)}
+\KeywordTok{class}\NormalTok{ AutonomousChecklistAgent:}
+    \KeywordTok{def} \FunctionTok{__init__}\NormalTok{(}\VariableTok{self}\NormalTok{, max_steps: }\BuiltInTok{int} \OperatorTok{=} \DecValTok{3}\NormalTok{, use_llm: }\BuiltInTok{bool} \OperatorTok{=} \VariableTok{True}\NormalTok{):}
+        \ControlFlowTok{if}\NormalTok{ max_steps }\OperatorTok{>} \DecValTok{3}\NormalTok{: }\ControlFlowTok{raise} \PreprocessorTok{ValueError}\NormalTok{(}\StringTok{"Vi phạm Bounded Loop: max_steps > 3!"}\NormalTok{)}
         \VariableTok{self}\NormalTok{.max_steps, }\VariableTok{self}\NormalTok{.use_llm }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, max_steps), }\DecValTok{3}\NormalTok{), use_llm}
-        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient() }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}\NormalTok{; }\VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
-        \VariableTok{self}\NormalTok{.context_memory: }\DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
+        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient() }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \VariableTok{None}\OperatorTok{;} \VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
+        \VariableTok{self}\NormalTok{.context_memory: Dict[}\BuiltInTok{str}\NormalTok{, Any] }\OperatorTok{=}\NormalTok{ \{\}}
 
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{plan_steps}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, max_steps: }\DataTypeTok{int}\NormalTok{ }\OperatorTok{=}\NormalTok{ }\VariableTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{List}\NormalTok{[Step]:}
+    \KeywordTok{def}\NormalTok{ plan_steps(}\VariableTok{self}\NormalTok{, goal: }\BuiltInTok{str}\NormalTok{, max_steps: }\BuiltInTok{int} \OperatorTok{=} \VariableTok{None}\NormalTok{) }\OperatorTok{->}\NormalTok{ List[Step]:}
         \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.PLANNING}
 \NormalTok{        topic, intent }\OperatorTok{=} \VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
-\NormalTok{        steps: }\DataTypeTok{List}\NormalTok{[Step] }\OperatorTok{=}\NormalTok{ []}
+\NormalTok{        steps: List[Step] }\OperatorTok{=}\NormalTok{ []}
         \CommentTok{# 1. Gọi trực tiếp LLM Ollama sinh checklist JSON động}
         \ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \VariableTok{self}\NormalTok{.llm }\KeywordTok{and} \VariableTok{self}\NormalTok{.llm.is_available():}
-\NormalTok{            prompt }\OperatorTok{=} \StringTok{f"Lập checklist tối đa 3 bước cho mục tiêu: '\{goal\}'. Trả về JSON..."}
+\NormalTok{            prompt }\OperatorTok{=} \SpecialStringTok{f"Lập checklist tối đa 3 bước cho mục tiêu: '}\SpecialCharTok{\{}\NormalTok{goal}\SpecialCharTok{\}}\SpecialStringTok{'. Trả về JSON..."}
 \NormalTok{            resp }\OperatorTok{=} \VariableTok{self}\NormalTok{.llm.generate(prompt, max_tokens}\OperatorTok{=}\DecValTok{320}\NormalTok{)}
             \ControlFlowTok{if}\NormalTok{ resp:}
                 \ControlFlowTok{try}\NormalTok{:}
-                    \NormalTok{match }\OperatorTok{=}\NormalTok{ re.search(}\StringTok{r"\textbackslash{}[\textbackslash{}s*\{.*\}\textbackslash{}s*\textbackslash{}]"}\NormalTok{, resp, re.DOTALL)}
-                    \ControlFlowTok{if}\NormalTok{ match:}
-\NormalTok{                        raw }\OperatorTok{=}\NormalTok{ json.loads(match.group(}\DecValTok{0}\NormalTok{))}
-                        \ControlFlowTok{for}\NormalTok{ idx, s }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(raw[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)], }\DecValTok{1}\NormalTok{):}
-\NormalTok{                            steps.append(Step(idx, s.get(}\StringTok{"title"}\NormalTok{, }\StringTok{f"Bước \{idx\}"}\NormalTok{), s.get(}\StringTok{"description"}\NormalTok{, }\StringTok{""}\NormalTok{), s.get(}\StringTok{"action_type"}\NormalTok{, }\StringTok{"generate"}\NormalTok{)))}
-                \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
-\NormalTok{                    steps }\OperatorTok{=}\NormalTok{ []}
+\NormalTok{                    m }\OperatorTok{=}\NormalTok{ re.search(}\VerbatimStringTok{r"\textbackslash{}[\textbackslash{}s*\{.*\}\textbackslash{}s*\textbackslash{}]"}\NormalTok{, resp, re.DOTALL)}
+                    \ControlFlowTok{if}\NormalTok{ m:}
+\NormalTok{                        raw }\OperatorTok{=}\NormalTok{ json.loads(m.group(}\DecValTok{0}\NormalTok{))[:(max_steps }\KeywordTok{or} \VariableTok{self}\NormalTok{.max_steps)]}
+\NormalTok{                        steps }\OperatorTok{=}\NormalTok{ [Step(i, s.get(}\StringTok{"title"}\NormalTok{, }\SpecialStringTok{f"Bước }\SpecialCharTok{\{i\}}\SpecialStringTok{"}\NormalTok{), s.get(}\StringTok{"description"}\NormalTok{, }\StringTok{""}\NormalTok{), s.get(}\StringTok{"action_type"}\NormalTok{, }\StringTok{"generate"}\NormalTok{)) }\ControlFlowTok{for}\NormalTok{ i, s }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(raw, }\DecValTok{1}\NormalTok{)]}
+                \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ []}
         \CommentTok{# 2. Fallback cấu trúc xác định khi LLM ngoại tuyến}
         \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ steps:}
-            \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Luận điểm: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Dàn ý: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{)]}
-            \ControlFlowTok{elif}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"summarize"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Ý chính: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Tóm tắt: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"summarize"}\NormalTok{)]}
-            \ControlFlowTok{else}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Dàn ý \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Soạn \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"generate"}\NormalTok{), Step(}\DecValTok{3}\NormalTok{, }\StringTok{f"Rà soát \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"review_polish"}\NormalTok{)]}
-        \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)]}
+            \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==} \StringTok{"outline_only"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\SpecialStringTok{f"Luận điểm: }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\SpecialStringTok{f"Dàn ý: }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{)]}
+            \ControlFlowTok{elif}\NormalTok{ intent }\OperatorTok{==} \StringTok{"summarize"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\SpecialStringTok{f"Ý chính: }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\SpecialStringTok{f"Tóm tắt: }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"summarize"}\NormalTok{)]}
+            \ControlFlowTok{else}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\SpecialStringTok{f"Dàn ý }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\SpecialStringTok{f"Soạn }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"generate"}\NormalTok{), Step(}\DecValTok{3}\NormalTok{, }\SpecialStringTok{f"Rà soát }\SpecialCharTok{\{}\NormalTok{topic}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"review_polish"}\NormalTok{)]}
+        \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:(max_steps }\KeywordTok{or} \VariableTok{self}\NormalTok{.max_steps)]}
         \ControlFlowTok{return} \VariableTok{self}\NormalTok{.plan}
 
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{_evaluate_stop_condition}\NormalTok{(}\VariableTok{self}\NormalTok{, current_step_index: }\DataTypeTok{int}\NormalTok{, total_steps: }\DataTypeTok{int}\NormalTok{, intent: }\DataTypeTok{str}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{) }\OperatorTok{->} \DataTypeTok{Tuple}\NormalTok{[}\DataTypeTok{bool}\NormalTok{, }\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Optional}\NormalTok{[AgentStatus]]:}
+    \KeywordTok{def}\NormalTok{ _evaluate_stop_condition(}\VariableTok{self}\NormalTok{, step_idx: }\BuiltInTok{int}\NormalTok{, total_steps: }\BuiltInTok{int}\NormalTok{, intent: }\BuiltInTok{str}\NormalTok{, goal: }\BuiltInTok{str}\NormalTok{) }\OperatorTok{->}\NormalTok{ Tuple[}\BuiltInTok{bool}\NormalTok{, }\BuiltInTok{str}\NormalTok{, Optional[AgentStatus]]:}
 \NormalTok{        src }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"input_document"}\NormalTok{)}
-        \CommentTok{# 1. Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True (kèm require_llm_judge=self.use_llm)}
-        \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"} \KeywordTok{and} \StringTok{"outline"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
-            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"outline"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Dàn ý đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
-        \ControlFlowTok{if} \StringTok{"final_article"} \KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
-            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"final_article"}\NormalTok{], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Bài viết đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
+        \CommentTok{# 1. Nghiệm thu sớm: Chỉ khi QualityEvaluator.passed == True}
+        \ControlFlowTok{for}\NormalTok{ k, name }\KeywordTok{in}\NormalTok{ [(}\StringTok{"outline"}\NormalTok{, }\StringTok{"Dàn ý"}\NormalTok{), (}\StringTok{"final_article"}\NormalTok{, }\StringTok{"Bài viết"}\NormalTok{)]:}
+            \ControlFlowTok{if}\NormalTok{ (intent }\OperatorTok{==} \StringTok{"outline_only"} \ControlFlowTok{if}\NormalTok{ k }\OperatorTok{==} \StringTok{"outline"} \ControlFlowTok{else} \VariableTok{True}\NormalTok{) }\KeywordTok{and}\NormalTok{ k }\KeywordTok{in} \VariableTok{self}\NormalTok{.context_memory:}
+                \ControlFlowTok{if} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.context_memory[k], goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
+                    \ControlFlowTok{return} \VariableTok{True}\NormalTok{, }\SpecialStringTok{f"Goal achieved: }\SpecialCharTok{\{}\NormalTok{name}\SpecialCharTok{\}}\SpecialStringTok{ đạt chuẩn định lượng."}\NormalTok{, AgentStatus.COMPLETED}
         \CommentTok{# 2. Hết ngân sách bước thực thi: Bắt buộc thẩm định lại chất lượng}
-        \ControlFlowTok{if}\NormalTok{ current_step_index }\OperatorTok{>=}\NormalTok{ total_steps:}
+        \ControlFlowTok{if}\NormalTok{ step_idx }\OperatorTok{>=}\NormalTok{ total_steps:}
 \NormalTok{            target }\OperatorTok{=} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"final_article"}\NormalTok{) }\KeywordTok{or} \VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"outline"}\NormalTok{)}
             \ControlFlowTok{if}\NormalTok{ target }\KeywordTok{and} \VariableTok{self}\NormalTok{.evaluator.evaluate(target, goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\NormalTok{src, require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)[}\StringTok{"passed"}\NormalTok{]:}
-                \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Goal achieved: Sản phẩm đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.COMPLETED}
-            \ControlFlowTok{return} \ConstantTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
-        \ControlFlowTok{return} \ConstantTok{False}\NormalTok{, }\StringTok{"Continue"}\NormalTok{, }\ConstantTok{None}
+                \ControlFlowTok{return} \VariableTok{True}\NormalTok{, }\StringTok{"Goal achieved: Sản phẩm đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.COMPLETED}
+            \ControlFlowTok{return} \VariableTok{True}\NormalTok{, }\StringTok{"Budget exhausted: Hết bước nhưng chưa đạt chuẩn nghiệm thu."}\NormalTok{, AgentStatus.BUDGET_EXHAUSTED}
+        \ControlFlowTok{return} \VariableTok{False}\NormalTok{, }\StringTok{"Continue"}\NormalTok{, }\VariableTok{None}
 \end{Highlighting}
 \end{Shaded}
 
@@ -537,36 +533,50 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 
 \begin{Shaded}
 \begin{Highlighting}[]
-    \KeywordTok{def}\NormalTok{ }\FunctionTok{run}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, input_document: }\DataTypeTok{Optional}\NormalTok{[}\DataTypeTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ }\ConstantTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{FinalReport}\NormalTok{:}
-\NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter(); }\ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
+    \KeywordTok{def}\NormalTok{ run(}\VariableTok{self}\NormalTok{, goal: }\BuiltInTok{str}\NormalTok{, input_document: Optional[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=} \VariableTok{None}\NormalTok{) }\OperatorTok{->}\NormalTok{ FinalReport:}
+\NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter()}
+        \ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
 \NormalTok{        plan, (topic, intent) }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal), }\VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
         \VariableTok{self}\NormalTok{.status, action_queue }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, plan.copy()}
+\NormalTok{        consecutive_failures, steps_executed }\OperatorTok{=} \DecValTok{0}\NormalTok{, }\DecValTok{0}
         \ControlFlowTok{while}\NormalTok{ action_queue }\KeywordTok{and}\NormalTok{ steps_executed }\OperatorTok{<} \VariableTok{self}\NormalTok{.max_steps:}
-            \NormalTok{step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}
-            \ControlFlowTok{try}\NormalTok{: result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal); step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"COMPLETED"}
-            \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
+\NormalTok{            step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}\OperatorTok{;}\NormalTok{ steps_executed }\OperatorTok{+=} \DecValTok{1}
+            \ControlFlowTok{try}\NormalTok{:}
+\NormalTok{                result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal)}\OperatorTok{;}\NormalTok{ step.status }\OperatorTok{=} \StringTok{"COMPLETED"}
+\NormalTok{                consecutive_failures }\OperatorTok{=} \DecValTok{0}
+            \ControlFlowTok{except} \PreprocessorTok{Exception}\NormalTok{:}
 \NormalTok{                consecutive_failures }\OperatorTok{+=} \DecValTok{1}
-                \ControlFlowTok{if}\NormalTok{ consecutive_failures }\OperatorTok{>=} \DecValTok{2}\NormalTok{: step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED; stop_reason }\OperatorTok{=} \StringTok{"Lỗi liên tiếp"}\NormalTok{; }\ControlFlowTok{break}
-\NormalTok{                action_queue.insert(}\DecValTok{0}\NormalTok{, step); }\ControlFlowTok{continue}
+                \ControlFlowTok{if}\NormalTok{ consecutive_failures }\OperatorTok{>=} \DecValTok{2}\NormalTok{:}
+\NormalTok{                    step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=} \StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED}
+\NormalTok{                    stop_reason }\OperatorTok{=} \StringTok{"Lỗi liên tiếp"}\OperatorTok{;} \ControlFlowTok{break}
+\NormalTok{                action_queue.insert(}\DecValTok{0}\NormalTok{, step)}\OperatorTok{;} \ControlFlowTok{continue}
             \ControlFlowTok{if}\NormalTok{ action_queue }\KeywordTok{and} \VariableTok{self}\NormalTok{._observe_and_adapt(step, result, action_queue[}\DecValTok{0}\NormalTok{], goal) }\OperatorTok{==} \StringTok{"REPLAN"}\NormalTok{:}
 \NormalTok{                rem }\OperatorTok{=} \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{-}\NormalTok{ steps_executed}
-                \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{: action_queue }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\StringTok{f"Khắc phục: \{goal\}"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem); }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING}
-\NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
-            \ControlFlowTok{if}\NormalTok{ should_stop: stop_reason }\OperatorTok{=}\NormalTok{ reason; }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status; }\ControlFlowTok{break}
+                \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{: action_queue, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\SpecialStringTok{f"Khắc phục: }\SpecialCharTok{\{}\NormalTok{goal}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem), AgentStatus.RUNNING}
+\NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(steps_executed, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
+            \ControlFlowTok{if}\NormalTok{ should_stop:}
+\NormalTok{                stop_reason, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ reason, final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status}\OperatorTok{;} \ControlFlowTok{break}
 
-        \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng}
+        \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng chi tiết}
+\NormalTok{        final_passed }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{)}
+\NormalTok{        semantic_ok }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \VariableTok{True}
+\NormalTok{        failed_notes }\OperatorTok{=}\NormalTok{ [n }\ControlFlowTok{for}\NormalTok{ n }\KeywordTok{in} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"review_notes"}\NormalTok{, []) }\ControlFlowTok{if}\NormalTok{ n.startswith(}\StringTok{"✗"}\NormalTok{)]}
+\NormalTok{        reason_detail }\OperatorTok{=} \StringTok{"; "}\NormalTok{.join(failed_notes) }\ControlFlowTok{if}\NormalTok{ failed_notes }\ControlFlowTok{else}\NormalTok{ (}\StringTok{"Chưa đạt xác minh LLM Judge"} \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ semantic_ok }\ControlFlowTok{else} \StringTok{"Chưa đạt chất lượng"}\NormalTok{)}
+
         \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\KeywordTok{in}\NormalTok{ (AgentStatus.RUNNING, AgentStatus.PLANNING):}
-            \ControlFlowTok{if} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{and}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \ConstantTok{True}\NormalTok{):}
+            \ControlFlowTok{if}\NormalTok{ final_passed }\KeywordTok{and}\NormalTok{ semantic_ok:}
                 \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.COMPLETED}
-                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \StringTok{f"Goal achieved: Đạt chuẩn sau \{steps_executed\} bước."}
+                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \SpecialStringTok{f"Goal achieved: Đạt chuẩn sau }\SpecialCharTok{\{}\NormalTok{steps_executed}\SpecialCharTok{\}}\SpecialStringTok{ bước."}
             \ControlFlowTok{else}\NormalTok{:}
                 \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
-                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \StringTok{f"Budget exhausted: Hết bước nhưng chưa đạt chuẩn."}
-        \CommentTok{# Hạ trạng thái COMPLETED nếu lần kiểm tra báo cáo cuối thất bại}
-        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{or}\NormalTok{ (}\VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{))):}
+                \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ stop_reason: stop_reason }\OperatorTok{=} \SpecialStringTok{f"Budget exhausted: Hết bước (}\SpecialCharTok{\{}\NormalTok{reason_detail}\SpecialCharTok{\}}\SpecialStringTok{)."}
+
+        \CommentTok{# Kiểm tra tính nhất quán cuối cùng: Hạ COMPLETED nếu kiểm tra lại báo cáo thất bại}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not}\NormalTok{ final_passed }\KeywordTok{or} \KeywordTok{not}\NormalTok{ semantic_ok):}
             \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
-            \NormalTok{stop_reason }\OperatorTok{=} \StringTok{"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau khi kiểm tra lại báo cáo."}
-        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
+\NormalTok{            stop_reason }\OperatorTok{=} \SpecialStringTok{f"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau kiểm tra lại (}\SpecialCharTok{\{}\NormalTok{reason_detail}\SpecialCharTok{\}}\SpecialStringTok{)."}
+
+        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{steps_executed, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
