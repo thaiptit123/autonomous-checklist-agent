@@ -671,7 +671,7 @@ class AutonomousChecklistAgent:
                     )
                 ]
 
-        return steps[:(max_steps or self.max_steps)]
+        self.plan = steps[:(max_steps or self.max_steps)]
         return self.plan
 
     def _observe_and_adapt(self, current_step: Step, result: str, next_step: Optional[Step], goal: str) -> Optional[str]:
@@ -1139,6 +1139,8 @@ class AutonomousChecklistAgent:
         self.status = AgentStatus.RUNNING
         stop_reason = ""
         steps_executed = 0
+        all_planned_steps = plan.copy()
+        self.plan = all_planned_steps.copy()
 
         # 2. Vòng lặp thực thi tự chủ (Autonomous Execution Loop)
         action_queue = plan.copy()
@@ -1228,9 +1230,18 @@ class AutonomousChecklistAgent:
                         print(f"   🔄 [REPLAN] Phát hiện nhu cầu Replan từ LLM. Tạo lại kế hoạch mới...")
                         rem = self.max_steps - steps_executed
                         if rem > 0:
-                            action_queue = self.plan_steps(f"Khắc phục và hoàn thiện mục tiêu: {goal}", max_steps=rem)
+                            new_steps = self.plan_steps(f"Khắc phục và hoàn thiện mục tiêu: {goal}", max_steps=rem)
+                            for idx, ns in enumerate(new_steps, start=steps_executed + 1):
+                                ns.step_id = idx
+                            action_queue = new_steps.copy()
+                            all_planned_steps.extend(new_steps)
+                            self.plan = all_planned_steps.copy()
                             self.status = AgentStatus.RUNNING
-                        continue
+                            continue
+                        else:
+                            self.status = AgentStatus.BUDGET_EXHAUSTED
+                            stop_reason = f"Budget exhausted: Phát hiện nhu cầu REPLAN nhưng đã hết ngân sách bước ({steps_executed}/{self.max_steps})."
+                            break
                     else:
                         print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
 
@@ -1334,11 +1345,11 @@ class AutonomousChecklistAgent:
 
         report = FinalReport(
             goal=goal,
-            total_steps_planned=len(plan),
+            total_steps_planned=len(all_planned_steps),
             steps_executed=steps_executed,
             status=self.status,
             stop_reason=stop_reason,
-            plan=[asdict(s) for s in plan],
+            plan=[asdict(s) for s in all_planned_steps],
             execution_logs=[asdict(l) for l in self.logs], # Bao gồm log thực tế
             final_output=self.final_output,
             quality_metrics=self.quality_metrics,

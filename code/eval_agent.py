@@ -240,11 +240,16 @@ class TestUnitOffline(unittest.TestCase):
         
         # Bắt agent trả về 'REPLAN' ở bước observe
         original_generate = agent.llm.generate
+        call_plan = {"count": 0}
         def mock_generate(prompt, max_tokens=100):
             if "MỘT câu chỉ dẫn ngắn gọn" in prompt:
                 return "Cần phải REPLAN toàn bộ kế hoạch."
             if "lập kế hoạch" in prompt.lower() or "checklist" in prompt.lower():
-                return '[{"step_id": "REPLAN_1", "title": "Bước Replan", "description": "Làm lại", "action_type": "generate"}]'
+                call_plan["count"] += 1
+                if call_plan["count"] == 1:
+                    return '[{"step_id": 1, "title": "Bước 1 Gốc", "description": "Khảo sát", "action_type": "research_points"}, {"step_id": 2, "title": "Bước 2 Gốc", "description": "Dàn ý", "action_type": "outline"}]'
+                else:
+                    return '[{"step_id": "REPLAN_1", "title": "Bước Replan", "description": "Làm lại", "action_type": "generate"}]'
             return original_generate(prompt, max_tokens)
         agent.llm.generate = mock_generate
         
@@ -253,10 +258,24 @@ class TestUnitOffline(unittest.TestCase):
         self.assertIsNotNone(report)
         replan_executed = any("Bước Replan" in log["step_title"] for log in report.execution_logs)
         self.assertTrue(replan_executed, "Bước mới từ REPLAN chưa thực sự được thực thi và ghi nhận vào execution_logs")
+        replan_in_plan = any("Bước Replan" in p["title"] for p in report.plan)
+        self.assertTrue(replan_in_plan, "Kế hoạch trong FinalReport chưa phản ánh bước mới sau khi REPLAN")
+        self.assertEqual(report.total_steps_planned, 3, "total_steps_planned chưa tổng hợp đủ các bước (2 gốc + 1 replan)")
         assert_status_stop_reason_consistent(report)
         self.assertNotEqual(report.status, AgentStatus.PLANNING, "Trạng thái sau REPLAN không được kết thúc ở PLANNING")
         self.assertNotEqual(report.status, AgentStatus.RUNNING, "Trạng thái sau REPLAN không được kết thúc ở RUNNING")
         self.assertTrue(len(report.stop_reason) > 0, "stop_reason không được để trống sau khi hoàn tất plan mới")
+
+        # Kiểm chứng nhánh REPLAN khi rem == 0 (hết ngân sách bước để lập kế hoạch mới)
+        agent_rem0 = AutonomousChecklistAgent(max_steps=1, use_llm=False)
+        agent_rem0.use_llm = True
+        agent_rem0.llm = OllamaClient()
+        agent_rem0.llm.is_available = lambda: True
+        agent_rem0.llm.generate = lambda prompt, max_tokens=100: "Cần phải REPLAN."
+        report_rem0 = agent_rem0.run("Viết bài giải thích RAG.")
+        self.assertEqual(report_rem0.status, AgentStatus.BUDGET_EXHAUSTED)
+        self.assertTrue("Budget exhausted:" in report_rem0.stop_reason)
+        assert_status_stop_reason_consistent(report_rem0)
 
         # Kiểm chứng nhánh REPLAN chạy hết bước nhưng chưa đạt chuẩn nghiệm thu (Budget Exhausted)
         agent_exhausted = AutonomousChecklistAgent(max_steps=2, use_llm=False)

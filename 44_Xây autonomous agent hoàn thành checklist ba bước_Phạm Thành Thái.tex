@@ -530,16 +530,18 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 \end{Highlighting}
 \end{Shaded}
 
+\newpage
 \subsection{5. Vòng lặp thực thi tự hành}
 Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc tự động khép kín kèm cơ chế bắt lỗi an toàn:
 
 \begin{Shaded}
-\begin{Highlighting}[]
+\begin{Highlighting}[fontsize=\scriptsize]
     \KeywordTok{def}\NormalTok{ run(}\VariableTok{self}\NormalTok{, goal: }\BuiltInTok{str}\NormalTok{, input_document: Optional[}\BuiltInTok{str}\NormalTok{] }\OperatorTok{=} \VariableTok{None}\NormalTok{) }\OperatorTok{->}\NormalTok{ FinalReport:}
 \NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter()}
         \ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
 \NormalTok{        plan, (topic, intent) }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal), }\VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
-        \VariableTok{self}\NormalTok{.status, action_queue }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, plan.copy()}
+\NormalTok{        all_planned_steps }\OperatorTok{=}\NormalTok{ plan.copy()}
+        \VariableTok{self}\NormalTok{.status, action_queue, stop_reason }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, plan.copy(), }\StringTok{""}
 \NormalTok{        consecutive_failures, steps_executed }\OperatorTok{=} \DecValTok{0}\NormalTok{, }\DecValTok{0}
         \ControlFlowTok{while}\NormalTok{ action_queue }\KeywordTok{and}\NormalTok{ steps_executed }\OperatorTok{<} \VariableTok{self}\NormalTok{.max_steps:}
 \NormalTok{            step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}\OperatorTok{;}\NormalTok{ steps_executed }\OperatorTok{+=} \DecValTok{1}
@@ -554,10 +556,15 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{                action_queue.insert(}\DecValTok{0}\NormalTok{, step)}\OperatorTok{;} \ControlFlowTok{continue}
             \ControlFlowTok{if}\NormalTok{ action_queue }\KeywordTok{and} \VariableTok{self}\NormalTok{._observe_and_adapt(step, result, action_queue[}\DecValTok{0}\NormalTok{], goal) }\OperatorTok{==} \StringTok{"REPLAN"}\NormalTok{:}
 \NormalTok{                rem }\OperatorTok{=} \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{-}\NormalTok{ steps_executed}
-                \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{: action_queue, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\SpecialStringTok{f"Khắc phục: }\SpecialCharTok{\{}\NormalTok{goal}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem), AgentStatus.RUNNING}
+                \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{:}
+\NormalTok{                    action_queue, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\SpecialStringTok{f"Khắc phục: }\SpecialCharTok{\{}\NormalTok{goal}\SpecialCharTok{\}}\SpecialStringTok{"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem), AgentStatus.RUNNING}
+\NormalTok{                    all_planned_steps.extend(action_queue)}\OperatorTok{;} \ControlFlowTok{continue}
+                \ControlFlowTok{else}\NormalTok{:}
+                    \VariableTok{self}\NormalTok{.status, stop_reason }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED, }\SpecialStringTok{f"Budget exhausted: Hết bước khi REPLAN (}\SpecialCharTok{\{}\NormalTok{steps_executed}\SpecialCharTok{\}}\SpecialStringTok{/}\SpecialCharTok{\{}\VariableTok{self}\NormalTok{.max_steps}\SpecialCharTok{\}}\SpecialStringTok{)."}\OperatorTok{;} \ControlFlowTok{break}
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(steps_executed, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop:}
 \NormalTok{                stop_reason, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ reason, final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status}\OperatorTok{;} \ControlFlowTok{break}
+\NormalTok{        }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.final_output: }\VariableTok{self}\NormalTok{.quality_metrics }\OperatorTok{=} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.final_output, goal, intent, }\VariableTok{self}\NormalTok{.llm)}
 
         \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng chi tiết}
 \NormalTok{        final_passed }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{)}
@@ -578,7 +585,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
             \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
 \NormalTok{            stop_reason }\OperatorTok{=} \SpecialStringTok{f"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau kiểm tra lại (}\SpecialCharTok{\{}\NormalTok{reason_detail}\SpecialCharTok{\}}\SpecialStringTok{)."}
 
-        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{steps_executed, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
+        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(all_planned_steps), steps_executed}\OperatorTok{=}\NormalTok{steps_executed, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ all_planned_steps], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
