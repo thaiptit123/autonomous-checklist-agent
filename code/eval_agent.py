@@ -248,15 +248,46 @@ class TestUnitOffline(unittest.TestCase):
             return original_generate(prompt, max_tokens)
         agent.llm.generate = mock_generate
         
-        # Test sẽ thất bại hoặc dừng sớm, nhưng quan trọng là log/queue có REPLAN
+        # Test sẽ kết thúc và kiểm chứng việc chuyển đổi trạng thái
         report = agent.run("Viết bài chia sẻ ngắn.")
-        # Nếu replan xảy ra, kế hoạch mới sẽ được thực thi và lưu vào execution_logs
         self.assertIsNotNone(report)
         replan_executed = any("Bước Replan" in log["step_title"] for log in report.execution_logs)
         self.assertTrue(replan_executed, "Bước mới từ REPLAN chưa thực sự được thực thi và ghi nhận vào execution_logs")
         assert_status_stop_reason_consistent(report)
         self.assertNotEqual(report.status, AgentStatus.PLANNING, "Trạng thái sau REPLAN không được kết thúc ở PLANNING")
+        self.assertNotEqual(report.status, AgentStatus.RUNNING, "Trạng thái sau REPLAN không được kết thúc ở RUNNING")
         self.assertTrue(len(report.stop_reason) > 0, "stop_reason không được để trống sau khi hoàn tất plan mới")
+
+        # Kiểm chứng nhánh REPLAN chạy hết bước nhưng chưa đạt chuẩn nghiệm thu (Budget Exhausted)
+        agent_exhausted = AutonomousChecklistAgent(max_steps=2, use_llm=False)
+        agent_exhausted.use_llm = True
+        agent_exhausted.llm = OllamaClient()
+        agent_exhausted.llm.is_available = lambda: True
+        agent_exhausted.llm.generate = lambda prompt, max_tokens=100: (
+            "Cần phải REPLAN." if "MỘT câu chỉ dẫn ngắn gọn" in prompt
+            else '[{"step_id": "REPLAN_1", "title": "Bước Replan Không Đạt", "description": "Làm lại", "action_type": "generate"}]'
+        )
+        # Giả lập sản phẩm sau replan không thỏa mãn QualityEvaluator
+        report_ex = agent_exhausted.run("Viết bài về Docker.")
+        self.assertNotEqual(report_ex.status, AgentStatus.PLANNING)
+        self.assertNotEqual(report_ex.status, AgentStatus.RUNNING)
+        self.assertEqual(report_ex.status, AgentStatus.BUDGET_EXHAUSTED)
+        self.assertTrue(report_ex.stop_reason.startswith("Budget exhausted:"))
+        assert_status_stop_reason_consistent(report_ex)
+
+        # Kiểm chứng nhánh hạ cấp: nếu COMPLETED nhưng lần thẩm định báo cáo cuối không đạt
+        agent_dg = AutonomousChecklistAgent(max_steps=2, use_llm=False)
+        # Mock stop condition kích hoạt COMPLETED
+        orig_eval_stop = agent_dg._evaluate_stop_condition
+        agent_dg._evaluate_stop_condition = lambda idx, tot, intent, goal: (True, "Goal achieved: Tạm thời đạt", AgentStatus.COMPLETED)
+        # Nhưng mock evaluator ở khâu tổng kết báo cáo trả về passed=False
+        orig_evaluate = agent_dg.evaluator.evaluate
+        agent_dg.evaluator.evaluate = lambda *args, **kwargs: {"passed": False, "review_notes": ["✗ Phát hiện lỗi ở khâu báo cáo"]}
+        report_dg = agent_dg.run("Kiểm thử hạ cấp nghiệm thu")
+        self.assertEqual(report_dg.status, AgentStatus.BUDGET_EXHAUSTED, "Chưa hạ cấp COMPLETED xuống BUDGET_EXHAUSTED khi report re-evaluation thất bại")
+        self.assertTrue("Budget exhausted:" in report_dg.stop_reason)
+        self.assertNotIn("Goal achieved", report_dg.stop_reason)
+        assert_status_stop_reason_consistent(report_dg)
 
 
 

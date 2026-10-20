@@ -306,7 +306,7 @@ Hệ thống thiết kế hai phương án phân rã checklist 3 bước tương
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.70\textwidth]{images/state_flow_diagram.png}
+    \includegraphics[width=0.88\textwidth]{images/state_flow_diagram.png}
     \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
@@ -573,7 +573,7 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
 \begin{figure}[H]
     \centering
     \vspace{-4mm}
-    \includegraphics[width=0.56\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.81\textwidth]{images/terminal_execution.png}
     \vspace{-3mm}
     \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
@@ -582,8 +582,8 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
 Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \tightlist
-    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với kịch bản fallback định sẵn (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish} ở Mục \ref{thiet-ke-checklist}), LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết (cả hai action đều định tuyến vào \texttt{final\_article} trước khi nghiệm thu dừng).
-    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}). Nếu kết quả quan sát cho thấy kế hoạch không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại, khôi phục trạng thái \texttt{RUNNING} và thay thế các action chưa thực thi trong \texttt{action\_queue}.
+    \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến LLM để phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với fallback định sẵn (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}), LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết để nghiệm thu.
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng (\textit{"Giải thích đơn giản cho người mới"}). Nếu phát hiện cần đổi hướng, Agent kích hoạt nhánh \textbf{REPLAN}, lập lại kế hoạch với ngân sách còn lại, khôi phục trạng thái \texttt{RUNNING} và cập nhật \texttt{action\_queue}.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 ($\ge 0.35$), 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
@@ -620,9 +620,9 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
 
 \renewcommand{\arraystretch}{0.38}
-\begin{longtable}{|p{0.045\linewidth}|p{0.39\linewidth}|p{0.22\linewidth}|p{0.27\linewidth}|}
+\begin{longtable}{|c|p{0.41\linewidth}|c|p{0.27\linewidth}|}
 \hline
-\thd{\raggedright STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\raggedright Trạng thái kiểm thử\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
+\thd{\centering STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\centering Trạng thái\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
 \hline
 \endhead
 \multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
@@ -698,16 +698,16 @@ Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở 
 
 \begin{enumerate}
     \tightlist
-    \item \textbf{Trợ lý tự động viết tài liệu API (technical documentation agent):} Khi kỹ sư hoàn thành một endpoint mới, họ chỉ cần đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API thanh toán"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách tham số và error codes) $\rightarrow$ Bước 2 (Sinh tài liệu chi tiết kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI Spec $\rightarrow$ Lưu file).
-    \item \textbf{Trợ lý rà soát pull request (code review agent):} Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn coding style cho PR \#104"}: Bước 1 (Trích xuất git diff những file thay đổi) $\rightarrow$ Bước 2 (Đối chiếu bộ quy tắc an ninh: secret, SQL injection, null check) $\rightarrow$ Bước 3 (Tổng hợp comment góp ý và thông báo lên GitHub/GitLab).
-    \item \textbf{Trợ lý tự động hóa chăm sóc khách hàng:} Nhận khiếu nại phức tạp từ khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng trong CSDL nội bộ) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả hiện hành) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đưa ra phương án bồi hoàn và lưu log CRM).
+    \item \textbf{Trợ lý viết tài liệu API (technical doc agent):} Khi có endpoint mới, kỹ sư đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách mã lỗi) $\rightarrow$ Bước 2 (Sinh tài liệu kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI $\rightarrow$ Lưu file).
+    \item \textbf{Trợ lý rà soát pull request (code review agent):} Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn style PR \#104"}: Bước 1 (Trích xuất git diff) $\rightarrow$ Bước 2 (Đối chiếu quy tắc an ninh: secret, SQL injection) $\rightarrow$ Bước 3 (Tổng hợp comment gửi lên GitHub/GitLab).
+    \item \textbf{Trợ lý tự động hóa CSKH:} Tiếp nhận khiếu nại khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng CSDL) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đề xuất bồi hoàn và lưu CRM).
 \end{enumerate}
 
 \section{Kết luận}\label{ket-luan}
 
-Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình ma thuật phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Lập kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát và Đánh giá (Observe \& Evaluate) $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
+Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát \& Đánh giá $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
 
-Thông qua bài học này, bạn đã thiết kế và vận hành thành công mô hình thử nghiệm Bounded Checklist Agent với các cơ chế lập kế hoạch động, quan sát thích ứng, retry/replan và kiểm định chất lượng đa tầng trong phạm vi kiểm soát an toàn ($\le 3$ bước). Đây là mô hình nền tảng trong môi trường đào tạo và nghiên cứu kỹ thuật tác nhân, đóng vai trò bước đệm quan trọng trước khi tích hợp công cụ thực tế và phát triển các hệ thống tác nhân đa tầng (Multi-Agent Systems) phức tạp hơn trong tương lai.
+Thông qua bài học này, bạn đã thiết kế và vận hành thành công mô hình Bounded Checklist Agent với các cơ chế lập kế hoạch động, quan sát thích ứng, retry/replan và kiểm định chất lượng đa tầng trong phạm vi kiểm soát an toàn ($\le 3$ bước). Đây là mô hình nền tảng trong nghiên cứu kỹ thuật tác nhân, đóng vai trò bước đệm quan trọng trước khi tích hợp công cụ thực tế và phát triển các hệ thống tác nhân đa tầng (Multi-Agent Systems) phức tạp hơn.
 
 \textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):} Toàn bộ mã nguồn và báo cáo thực nghiệm được lưu trữ công khai tại GitHub: \url{https://github.com/thaiptit123/autonomous-checklist-agent}.
 
