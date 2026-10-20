@@ -1229,6 +1229,7 @@ class AutonomousChecklistAgent:
                         rem = self.max_steps - steps_executed
                         if rem > 0:
                             action_queue = self.plan_steps(f"Khắc phục và hoàn thiện mục tiêu: {goal}", max_steps=rem)
+                            self.status = AgentStatus.RUNNING
                         continue
                     else:
                         print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
@@ -1276,21 +1277,33 @@ class AutonomousChecklistAgent:
             else:
                 self.quality_metrics = {"passed": False, "review_notes": ["Không có sản phẩm đầu ra."]}
 
-        # Đảm bảo tính nhất quán trạng thái nếu chưa được gán bởi điều kiện dừng
-        if self.status == AgentStatus.RUNNING:
-            if self.quality_metrics.get("passed", False):
+        # Đảm bảo tính nhất quán trạng thái nếu chưa được gán bởi điều kiện dừng (hoặc còn ở PLANNING / RUNNING)
+        if self.status in (AgentStatus.RUNNING, AgentStatus.PLANNING):
+            final_passed = self.quality_metrics.get("passed", False)
+            semantic_ok = self.quality_metrics.get("semantic_verified", False) if self.use_llm else True
+            if final_passed and semantic_ok:
                 self.status = AgentStatus.COMPLETED
                 if not stop_reason:
-                    if self.quality_metrics.get("semantic_verified", False):
+                    if self.use_llm and self.quality_metrics.get("semantic_verified", False):
                         stop_reason = f"Goal achieved: Đã hoàn thành mục tiêu và đạt chuẩn chất lượng (LLM Judge Verified) sau {steps_executed} bước."
                     else:
-                        stop_reason = f"Goal achieved: Đã hoàn thành theo chuẩn định lượng (Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {steps_executed} bước."
+                        stop_reason = f"Goal achieved: Đã hoàn thành theo chuẩn định lượng (Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge) sau {steps_executed} bước."
             else:
                 self.status = AgentStatus.BUDGET_EXHAUSTED
                 if not stop_reason:
                     failed_notes = [n for n in self.quality_metrics.get("review_notes", []) if n.startswith("✗")]
-                    reason_detail = "; ".join(failed_notes) if failed_notes else "Chưa thỏa mãn tiêu chí chất lượng"
+                    reason_detail = "; ".join(failed_notes) if failed_notes else ("Chưa đạt xác minh ngữ nghĩa LLM Judge" if not semantic_ok else "Chưa thỏa mãn tiêu chí chất lượng")
                     stop_reason = f"Budget exhausted: Đã thực hiện tối đa {steps_executed}/{self.max_steps} bước nhưng chưa đạt chuẩn nghiệm thu ({reason_detail})."
+
+        # Kiểm tra tính nhất quán cuối cùng: nếu trạng thái là COMPLETED nhưng kết quả đánh giá chất lượng cuối lại không đạt
+        if self.status == AgentStatus.COMPLETED:
+            final_passed = self.quality_metrics.get("passed", False)
+            semantic_ok = self.quality_metrics.get("semantic_verified", False) if self.use_llm else True
+            if not final_passed or not semantic_ok:
+                self.status = AgentStatus.BUDGET_EXHAUSTED
+                failed_notes = [n for n in self.quality_metrics.get("review_notes", []) if n.startswith("✗")]
+                reason_detail = "; ".join(failed_notes) if failed_notes else ("Chưa đạt xác minh ngữ nghĩa LLM Judge" if not semantic_ok else "Chưa thỏa mãn tiêu chí chất lượng")
+                stop_reason = f"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau khi kiểm tra lại báo cáo ({reason_detail})."
 
         if self.status == AgentStatus.COMPLETED and not stop_reason:
             if self.quality_metrics.get("semantic_verified", False):

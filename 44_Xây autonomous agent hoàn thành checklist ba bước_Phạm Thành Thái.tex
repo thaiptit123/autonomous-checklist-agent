@@ -332,7 +332,7 @@ Trong các hệ thống tự hành không có kiểm soát, mô hình ngôn ng�
 \subsection{2. Thiết kế vòng lặp giới hạn và bộ đánh giá dừng đa trạng thái}
 Để giải quyết triệt để rủi ro trên, hệ thống của chúng ta thiết lập cơ chế kiểm soát kép phân định rõ ràng 3 trạng thái kết thúc:
 \begin{enumerate}
-    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không: ở chế độ LLM (\texttt{use\_llm=True}), hệ thống siết chặt điều kiện nghiệm thu bắt buộc phải đạt xác minh ngữ nghĩa (\texttt{semantic\_verified=True}); ở chế độ offline (\texttt{use\_llm=False}), hệ thống nghiệm thu theo chuẩn logic định lượng và ghi rõ chưa qua thẩm định ngữ nghĩa. Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED}).
+    \item \textbf{Trạng thái hoàn thành mục tiêu (\texttt{COMPLETED} / \texttt{GOAL\_ACHIEVED}):} Sau mỗi bước, hàm \texttt{\_evaluate\_stop\_condition()} đánh giá xem sản phẩm tạo ra có thỏa mãn điều kiện nghiệm thu theo đúng mục tiêu hay không: ở chế độ LLM (\texttt{use\_llm=True}), hệ thống siết chặt điều kiện nghiệm thu bắt buộc phải đạt xác minh ngữ nghĩa (\texttt{semantic\_verified=True}); ở chế độ offline (\texttt{use\_llm=False}), hệ thống nghiệm thu theo chuẩn logic định lượng và ghi rõ chưa qua thẩm định ngữ nghĩa. Khi thỏa mãn, hệ thống kích hoạt dừng với lý do \texttt{Goal achieved} (trạng thái \texttt{COMPLETED}). Đồng thời, trong khâu tổng hợp báo cáo cuối cùng, hệ thống kiểm tra tính nhất quán lần nữa: nếu sản phẩm chưa đạt chuẩn chất lượng hoặc thiếu xác minh ngữ nghĩa, trạng thái được cập nhật hạ cấp về \texttt{BUDGET\_EXHAUSTED} cùng lý do dừng chi tiết, tuyệt đối không để lọt trạng thái \texttt{COMPLETED} khi kết quả kiểm định không đạt.
     \item \textbf{Trạng thái hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}):} Khi số bước thực thi đạt ngưỡng cho phép (ví dụ \texttt{max\_steps = 1} với mục tiêu viết bài, hệ thống mới chỉ xong dàn ý), tác nhân ngắt vòng lặp an toàn và ghi nhận trạng thái \texttt{BUDGET\_EXHAUSTED} chứ không báo nhầm là \texttt{COMPLETED}.
     \item \textbf{Trạng thái thất bại (\texttt{FAILED}):} Khi một bước thực thi gặp sự cố ngoại lệ (Action failure), Agent tự động thử lại một lần. Nếu lỗi liên tiếp vượt ngưỡng cho phép, hệ thống mới chuyển trạng thái sang \texttt{FAILED} và lưu vết lỗi vào nhật ký từng bước (Step Log).
 \end{enumerate}
@@ -485,12 +485,9 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
 \begin{Highlighting}[]
 \KeywordTok{class}\NormalTok{ }\DataTypeTok{AutonomousChecklistAgent}\NormalTok{:}
     \KeywordTok{def}\NormalTok{ }\FunctionTok{__init__}\NormalTok{(}\VariableTok{self}\NormalTok{, max_steps: }\DataTypeTok{int} \OperatorTok{=}\NormalTok{ }\DecValTok{3}\NormalTok{, use_llm: }\DataTypeTok{bool} \OperatorTok{=}\NormalTok{ }\ConstantTok{True}\NormalTok{):}
-        \ControlFlowTok{if}\NormalTok{ max_steps }\OperatorTok{>}\NormalTok{ }\DecValTok{3}\NormalTok{:}
-            \ControlFlowTok{raise} \DataTypeTok{ValueError}\NormalTok{(}\StringTok{f"Vi phạm Bounded Loop: max_steps (\{max_steps\}) > 3!"}\NormalTok{)}
-        \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, max_steps), }\DecValTok{3}\NormalTok{)}
-        \VariableTok{self}\NormalTok{.use_llm }\OperatorTok{=}\NormalTok{ use_llm}
-        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient() }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}
-        \VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
+        \ControlFlowTok{if}\NormalTok{ max_steps }\OperatorTok{>}\NormalTok{ }\DecValTok{3}\NormalTok{: }\ControlFlowTok{raise} \DataTypeTok{ValueError}\NormalTok{(}\StringTok{f"Vi phạm Bounded Loop: max_steps > 3!"}\NormalTok{)}
+        \VariableTok{self}\NormalTok{.max_steps, }\VariableTok{self}\NormalTok{.use_llm }\OperatorTok{=} \BuiltInTok{min}\NormalTok{(}\BuiltInTok{max}\NormalTok{(}\DecValTok{1}\NormalTok{, max_steps), }\DecValTok{3}\NormalTok{), use_llm}
+        \VariableTok{self}\NormalTok{.llm }\OperatorTok{=}\NormalTok{ OllamaClient() }\ControlFlowTok{if}\NormalTok{ use_llm }\ControlFlowTok{else} \ConstantTok{None}\NormalTok{; }\VariableTok{self}\NormalTok{.evaluator }\OperatorTok{=}\NormalTok{ QualityEvaluator()}
         \VariableTok{self}\NormalTok{.context_memory: }\DataTypeTok{Dict}\NormalTok{[}\DataTypeTok{str}\NormalTok{, }\DataTypeTok{Any}\NormalTok{] }\OperatorTok{=}\NormalTok{ \{\}}
 
     \KeywordTok{def}\NormalTok{ }\FunctionTok{plan_steps}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, max_steps: }\DataTypeTok{int}\NormalTok{ }\OperatorTok{=}\NormalTok{ }\VariableTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{List}\NormalTok{[Step]:}
@@ -507,22 +504,14 @@ Lớp \texttt{AutonomousChecklistAgent} kết hợp LLM để tự động phân
                     \ControlFlowTok{if}\NormalTok{ match:}
 \NormalTok{                        raw }\OperatorTok{=}\NormalTok{ json.loads(match.group(}\DecValTok{0}\NormalTok{))}
                         \ControlFlowTok{for}\NormalTok{ idx, s }\KeywordTok{in} \BuiltInTok{enumerate}\NormalTok{(raw[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)], }\DecValTok{1}\NormalTok{):}
-\NormalTok{                            steps.append(Step(idx, s.get(}\StringTok{"title"}\NormalTok{, }\StringTok{f"Bước \{idx\}"}\NormalTok{),}
-\NormalTok{                                              s.get(}\StringTok{"description"}\NormalTok{, }\StringTok{""}\NormalTok{), s.get(}\StringTok{"action_type"}\NormalTok{, }\StringTok{"generate"}\NormalTok{)))}
+\NormalTok{                            steps.append(Step(idx, s.get(}\StringTok{"title"}\NormalTok{, }\StringTok{f"Bước \{idx\}"}\NormalTok{), s.get(}\StringTok{"description"}\NormalTok{, }\StringTok{""}\NormalTok{), s.get(}\StringTok{"action_type"}\NormalTok{, }\StringTok{"generate"}\NormalTok{)))}
                 \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
 \NormalTok{                    steps }\OperatorTok{=}\NormalTok{ []}
         \CommentTok{# 2. Fallback cấu trúc xác định khi LLM ngoại tuyến}
         \ControlFlowTok{if} \KeywordTok{not}\NormalTok{ steps:}
-            \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"}\NormalTok{:}
-\NormalTok{                steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Luận điểm về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{),}
-\NormalTok{                         Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Dàn ý chi tiết về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{)]}
-            \ControlFlowTok{elif}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"summarize"}\NormalTok{:}
-\NormalTok{                steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Trích xuất ý chính về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{),}
-\NormalTok{                         Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Bản tóm tắt cho \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"summarize"}\NormalTok{)]}
-            \ControlFlowTok{else}\NormalTok{:}
-\NormalTok{                steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Xác định dàn ý về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{),}
-\NormalTok{                         Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Soạn bài viết về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"generate"}\NormalTok{),}
-\NormalTok{                         Step(}\DecValTok{3}\NormalTok{, }\StringTok{f"Rà soát chất lượng về \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"review_polish"}\NormalTok{)]}
+            \ControlFlowTok{if}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"outline_only"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Luận điểm: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Dàn ý: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{)]}
+            \ControlFlowTok{elif}\NormalTok{ intent }\OperatorTok{==}\NormalTok{ }\StringTok{"summarize"}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Ý chính: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"research_points"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Tóm tắt: \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"summarize"}\NormalTok{)]}
+            \ControlFlowTok{else}\NormalTok{: steps }\OperatorTok{=}\NormalTok{ [Step(}\DecValTok{1}\NormalTok{, }\StringTok{f"Dàn ý \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"outline"}\NormalTok{), Step(}\DecValTok{2}\NormalTok{, }\StringTok{f"Soạn \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"generate"}\NormalTok{), Step(}\DecValTok{3}\NormalTok{, }\StringTok{f"Rà soát \{topic\}"}\NormalTok{, }\StringTok{""}\NormalTok{, }\StringTok{"review_polish"}\NormalTok{)]}
         \VariableTok{self}\NormalTok{.plan }\OperatorTok{=}\NormalTok{ steps[:(max_steps }\KeywordTok{or}\NormalTok{ }\VariableTok{self}\NormalTok{.max_steps)]}
         \ControlFlowTok{return} \VariableTok{self}\NormalTok{.plan}
 
@@ -551,90 +540,71 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \begin{Shaded}
 \begin{Highlighting}[]
     \KeywordTok{def}\NormalTok{ }\FunctionTok{run}\NormalTok{(}\VariableTok{self}\NormalTok{, goal: }\DataTypeTok{str}\NormalTok{, input_document: }\DataTypeTok{Optional}\NormalTok{[}\DataTypeTok{str}\NormalTok{] }\OperatorTok{=}\NormalTok{ }\ConstantTok{None}\NormalTok{) }\OperatorTok{->} \DataTypeTok{FinalReport}\NormalTok{:}
-\NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter()}
-        \ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
-\NormalTok{        plan }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal)}
-\NormalTok{        topic, intent }\OperatorTok{=} \VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
-        \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING}
-
-        \NormalTok{action_queue }\OperatorTok{=}\NormalTok{ plan.copy()}
+\NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter(); }\ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
+\NormalTok{        plan, (topic, intent) }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal), }\VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
+        \VariableTok{self}\NormalTok{.status, action_queue }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, plan.copy()}
         \ControlFlowTok{while}\NormalTok{ action_queue }\KeywordTok{and}\NormalTok{ steps_executed }\OperatorTok{<} \VariableTok{self}\NormalTok{.max_steps:}
             \NormalTok{step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}
-            \ControlFlowTok{try}\NormalTok{:}
-\NormalTok{                result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal)}
-\NormalTok{                step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"COMPLETED"}
+            \ControlFlowTok{try}\NormalTok{: result }\OperatorTok{=} \VariableTok{self}\NormalTok{._execute_step_action(step, topic, goal); step.status }\OperatorTok{=}\NormalTok{ }\StringTok{"COMPLETED"}
             \ControlFlowTok{except} \DataTypeTok{Exception}\NormalTok{:}
 \NormalTok{                consecutive_failures }\OperatorTok{+=} \DecValTok{1}
-                \ControlFlowTok{if}\NormalTok{ consecutive_failures }\OperatorTok{>=} \DecValTok{2}\NormalTok{:}
-\NormalTok{                    step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED}
-\NormalTok{                    stop_reason }\OperatorTok{=} \StringTok{f"Lỗi liên tiếp"}; \ControlFlowTok{break}
+                \ControlFlowTok{if}\NormalTok{ consecutive_failures }\OperatorTok{>=} \DecValTok{2}\NormalTok{: step.status, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ }\StringTok{"FAILED"}\NormalTok{, AgentStatus.FAILED; stop_reason }\OperatorTok{=} \StringTok{"Lỗi liên tiếp"}\NormalTok{; }\ControlFlowTok{break}
 \NormalTok{                action_queue.insert(}\DecValTok{0}\NormalTok{, step); }\ControlFlowTok{continue}
-            \ControlFlowTok{if}\NormalTok{ action_queue:}
-\NormalTok{                adapt_msg }\OperatorTok{=} \VariableTok{self}\NormalTok{._observe_and_adapt(step, result, action_queue[}\DecValTok{0}\NormalTok{], goal)}
-                \ControlFlowTok{if}\NormalTok{ adapt_msg }\OperatorTok{==} \StringTok{"REPLAN"}\NormalTok{:}
-\NormalTok{                    rem }\OperatorTok{=} \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{-}\NormalTok{ steps_executed}
-                    \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{: action_queue }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\StringTok{f"Khắc phục: \{goal\}"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem)}
-
+            \ControlFlowTok{if}\NormalTok{ action_queue }\KeywordTok{and} \VariableTok{self}\NormalTok{._observe_and_adapt(step, result, action_queue[}\DecValTok{0}\NormalTok{], goal) }\OperatorTok{==} \StringTok{"REPLAN"}\NormalTok{:}
+\NormalTok{                rem }\OperatorTok{=} \VariableTok{self}\NormalTok{.max_steps }\OperatorTok{-}\NormalTok{ steps_executed}
+                \ControlFlowTok{if}\NormalTok{ rem }\OperatorTok{>} \DecValTok{0}\NormalTok{: action_queue }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(}\StringTok{f"Khắc phục: \{goal\}"}\NormalTok{, max_steps}\OperatorTok{=}\NormalTok{rem); }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING}
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(idx, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
-            \ControlFlowTok{if}\NormalTok{ should_stop:}
-\NormalTok{                stop_reason }\OperatorTok{=}\NormalTok{ reason}
-                \ControlFlowTok{if}\NormalTok{ final_status: }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status}
-                \ControlFlowTok{break}
+            \ControlFlowTok{if}\NormalTok{ should_stop: stop_reason }\OperatorTok{=}\NormalTok{ reason; }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status; }\ControlFlowTok{break}
 
-        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx,}
-\NormalTok{            status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan],}
-\NormalTok{            execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output,}
-\NormalTok{            quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter() }\OperatorTok{-}\NormalTok{ start_time, }\DecValTok{3}\NormalTok{))}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\KeywordTok{in}\NormalTok{ (AgentStatus.RUNNING, AgentStatus.PLANNING):}
+            \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.COMPLETED }\ControlFlowTok{if}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{and}\NormalTok{ (}\VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.use_llm }\ControlFlowTok{else} \VariableTok{True}\NormalTok{)) }\ControlFlowTok{else}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
+        \ControlFlowTok{elif} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{) }\KeywordTok{or}\NormalTok{ (}\VariableTok{self}\NormalTok{.use_llm }\KeywordTok{and} \KeywordTok{not} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"semantic_verified"}\NormalTok{, }\VariableTok{False}\NormalTok{))):}
+            \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
+        \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(plan), steps_executed}\OperatorTok{=}\NormalTok{idx, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ plan], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
 \end{Shaded}
 
+\newpage
 \section{Thực nghiệm kịch bản: Kiểm chứng năng lực tác nhân tự hành}\label{thuc-nghiem}
 
 \subsection{1. Kịch bản 1: Viết bài chia sẻ hoàn chỉnh về RAG (3 bước đầy đủ)}
-Trong kịch bản này, người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner phân tích mục tiêu và tự động sinh checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), lần lượt thực thi và thích ứng như thể hiện ở đồ họa minh họa Hình \ref{fig:terminal}.
+Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu"}. Planner tự động phân rã checklist 3 bước (\texttt{research\_points} $\rightarrow$ \texttt{outline} $\rightarrow$ \texttt{generate}), thực thi và thích ứng như minh họa ở Hình \ref{fig:terminal}:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.32\textwidth]{images/terminal_execution.png}
-    \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện trực quan nhật ký thực thi của Agent trên Terminal}
+    \vspace{-4mm}
+    \includegraphics[width=0.56\textwidth]{images/terminal_execution.png}
+    \vspace{-3mm}
+    \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
 \end{figure}
 
-Từ nhật ký thực thi minh họa, ta có thể phân tích rõ 3 chặng diễn ra dưới sự điều khiển của mô hình LLM \texttt{tinix-lm:latest} cục bộ:
+Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
+    \tightlist
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến mô hình ngôn ngữ lớn để tự động phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với kịch bản fallback định sẵn (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish} ở Mục \ref{thiet-ke-checklist}), LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết (cả hai action đều định tuyến vào \texttt{final\_article} trước khi nghiệm thu dừng).
-    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}). Nếu kết quả quan sát cho thấy kế hoạch không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại và thay thế các action chưa thực thi trong \texttt{action\_queue}.
-    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian phiên benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 (ngưỡng $\ge 0.35$), độ dài 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved} (trong phạm vi kiểm định thử nghiệm).
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và Bước 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng cho bước kế tiếp (\textit{"Tập trung giải thích đơn giản, gần gũi với người mới"}). Nếu kết quả quan sát cho thấy kế hoạch không còn phù hợp, Agent kích hoạt nhánh \textbf{REPLAN}, tạo lại kế hoạch với ngân sách bước còn lại, khôi phục trạng thái \texttt{RUNNING} và thay thế các action chưa thực thi trong \texttt{action\_queue}.
+    \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 ($\ge 0.35$), 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
-Để minh chứng rõ nét rằng Agent \textbf{không bắt buộc phải thực thi đủ 3 bước trong mọi mục tiêu}, chúng ta kiểm thử với mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi nhận yêu cầu này:
+Để minh chứng Agent \textbf{không bắt buộc chạy đủ 3 bước trong mọi mục tiêu}, ta kiểm thử mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi chạy ở chế độ dự phòng (\texttt{use\_llm=False}):
 \begin{itemize}
     \tightlist
-    \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Kịch bản này cố ý chạy ở chế độ dự phòng (\texttt{use\_llm=False}) nhằm kiểm chứng độc lập khả năng nhận diện ý định và dừng sớm an toàn khi LLM ngoại tuyến (năng lực lập kế hoạch động qua LLM đã được kiểm chứng riêng ở Kịch bản 1). Agent sử dụng luật nhận diện ý định (Intent) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}:
-    \begin{enumerate}
-        \tightlist
-        \item \textit{Bước 1 (\texttt{research\_points}):} Thu thập và xác định các luận điểm cốt lõi về Docker \& Container hóa.
-        \item \textit{Bước 2 (\texttt{outline}):} Xây dựng và chuẩn hóa dàn ý chi tiết cho bài viết về Docker \& Container hóa.
-    \end{enumerate}
-    \item \textbf{Kích hoạt điều kiện dừng sớm (stop condition):} Ngay khi Bước 2 hoàn thành, bộ thẩm định \texttt{QualityEvaluator} trực tiếp đánh giá sản phẩm dàn ý (kiểm tra độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa.
+    \item \textbf{Phân rã kế hoạch 2 bước khi chạy fallback:} Agent áp dụng luật nhận diện ý định (\texttt{outline\_only}) để xác định mục tiêu chỉ cần đúng \textbf{2 bước}: Bước 1 (\texttt{research\_points}: xác định luận điểm cốt lõi) $\rightarrow$ Bước 2 (\texttt{outline}: chuẩn hóa dàn ý chi tiết).
+    \item \textbf{Kích hoạt điều kiện dừng sớm (stop condition):} Ngay khi Bước 2 hoàn thành, \texttt{QualityEvaluator} trực tiếp thẩm định dàn ý (độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa và dừng an toàn.
 \end{itemize}
-
-Điều này minh họa khả năng thích ứng của hệ thống: Agent \textbf{không bắt buộc chạy đủ 3 bước trong mọi mục tiêu}, mà biết khi nào nhiệm vụ đã hoàn thành để chủ động dừng lại an toàn.
 
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\renewcommand{\arraystretch}{0.72}
-\begin{longtable}{|p{0.45\textwidth}|p{0.48\textwidth}|}
-\caption{Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái} \label{tab:so-sanh-chat-luong} \\
+\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
+
+\renewcommand{\arraystretch}{0.55}
+\begin{longtable}{|p{0.45\linewidth}|p{0.49\linewidth}|}
 \hline
-\rowcolor{primary!15}
-\textbf{Sản phẩm sau Bước 2 (Dàn ý chi tiết)} & \textbf{Sản phẩm sau Bước 3 (Bài viết hoàn thiện)} \\ \hline
-\endfirsthead
+\thd{\raggedright Sản phẩm sau Bước 2 (Dàn ý chi tiết)\strut} & \thd{\raggedright Sản phẩm sau Bước 3 (Bài viết hoàn thiện)\strut}\tabularnewline \hline
 \hline
-\rowcolor{primary!15}
-\textbf{Sản phẩm sau Bước 2 (Dàn ý chi tiết)} & \textbf{Sản phẩm sau Bước 3 (Bài viết hoàn thiện)} \\ \hline
 \endhead
 Khung cấu trúc 4 phần: mở đầu, giải thích RAG, ví dụ thực tế và lời kết. & Triển khai thành bài viết hoàn chỉnh với văn phong tự nhiên, mạch lạc cho người mới.\strut \tabularnewline \hline
 Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng. & Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi "mở sách" vs "đóng sách" giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
@@ -647,16 +617,13 @@ Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn b�
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.48}
-\begin{longtable}{|p{0.05\textwidth}|p{0.38\textwidth}|p{0.20\textwidth}|p{0.25\textwidth}|}
-\caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)} \label{tab:test-cases} \\
+\textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
+
+\renewcommand{\arraystretch}{0.38}
+\begin{longtable}{|p{0.045\linewidth}|p{0.39\linewidth}|p{0.22\linewidth}|p{0.27\linewidth}|}
 \hline
-\rowcolor{primary!15}
-\textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
-\endfirsthead
+\thd{\raggedright STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\raggedright Trạng thái kiểm thử\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
 \hline
-\rowcolor{primary!15}
-\textbf{STT} & \textbf{Kịch bản kiểm thử (Test Scenario)} & \textbf{Trạng thái kiểm thử} & \textbf{Điều kiện dừng / Kết quả} \\ \hline
 \endhead
 \multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
 1 & Chuẩn bị outline Docker (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline

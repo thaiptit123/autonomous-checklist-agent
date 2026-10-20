@@ -191,6 +191,7 @@ class TestUnitOffline(unittest.TestCase):
         goal = "Viết bài chia sẻ ngắn giải thích RAG."
         report = agent.run(goal)
         
+        assert_status_stop_reason_consistent(report)
         self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
@@ -208,6 +209,8 @@ class TestUnitOffline(unittest.TestCase):
         agent.llm.generate = mock_generate
         
         report = agent.run("Viết bài giải thích RAG")
+        assert_status_stop_reason_consistent(report)
+        self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
     def test_adversarial_plumbing_not_grounded(self):
@@ -224,6 +227,8 @@ class TestUnitOffline(unittest.TestCase):
         agent.llm.generate = mock_generate
         
         report = agent.run("Viết bài giải thích RAG")
+        assert_status_stop_reason_consistent(report)
+        self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
     def test_dynamic_replan_execution(self):
@@ -249,6 +254,9 @@ class TestUnitOffline(unittest.TestCase):
         self.assertIsNotNone(report)
         replan_executed = any("Bước Replan" in log["step_title"] for log in report.execution_logs)
         self.assertTrue(replan_executed, "Bước mới từ REPLAN chưa thực sự được thực thi và ghi nhận vào execution_logs")
+        assert_status_stop_reason_consistent(report)
+        self.assertNotEqual(report.status, AgentStatus.PLANNING, "Trạng thái sau REPLAN không được kết thúc ở PLANNING")
+        self.assertTrue(len(report.stop_reason) > 0, "stop_reason không được để trống sau khi hoàn tất plan mới")
 
 
 
