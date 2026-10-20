@@ -561,7 +561,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{                    all_planned_steps.extend(action_queue)}\OperatorTok{;} \ControlFlowTok{continue}
                 \ControlFlowTok{else}\NormalTok{:}
                     \VariableTok{self}\NormalTok{.status, stop_reason }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED, }\SpecialStringTok{f"Budget exhausted: Hết bước khi REPLAN (}\SpecialCharTok{\{}\NormalTok{steps_executed}\SpecialCharTok{\}}\SpecialStringTok{/}\SpecialCharTok{\{}\VariableTok{self}\NormalTok{.max_steps}\SpecialCharTok{\}}\SpecialStringTok{)."}\OperatorTok{;} \ControlFlowTok{break}
-\NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(steps_executed, }\BuiltInTok{len}\NormalTok{(plan), intent, goal)}
+\NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(steps_executed, }\BuiltInTok{len}\NormalTok{(all_planned_steps), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop:}
 \NormalTok{                stop_reason, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ reason, final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status}\OperatorTok{;} \ControlFlowTok{break}
 \NormalTok{        }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.final_output: }\VariableTok{self}\NormalTok{.quality_metrics }\OperatorTok{=} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.final_output, goal, intent, }\VariableTok{self}\NormalTok{.llm)}

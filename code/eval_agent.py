@@ -195,6 +195,27 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertFalse(report.quality_metrics["passed"])
 
+        # Kiểm chứng Fail-Closed khi LLM Judge không khả dụng (llm_client is None / is_available = False)
+        res_unavail = agent.evaluator.evaluate(
+            "# RAG cơ bản\nRAG là retrieval augmented generation hoàn chỉnh với ví dụ chi tiết.",
+            goal, "full_article", llm_client=None, require_llm_judge=True
+        )
+        self.assertFalse(res_unavail["passed"], "LLM Judge không khả dụng nhưng lại trả về passed=True")
+        self.assertFalse(res_unavail.get("semantic_verified", False))
+        self.assertEqual(res_unavail.get("judge_verdict", {}).get("judge_status"), "LLM_UNAVAILABLE")
+
+        # Kiểm chứng Fail-Closed khi LLM Judge trả về JSON không hợp lệ (Parse Error fallback)
+        mock_bad_json = OllamaClient()
+        mock_bad_json.is_available = lambda: True
+        mock_bad_json.generate = lambda p, max_tokens=100: "Đây là nhận xét bằng văn bản thường, hoàn toàn không có JSON."
+        res_bad_json = agent.evaluator.evaluate(
+            "# RAG cơ bản\nRAG là retrieval augmented generation hoàn chỉnh với ví dụ chi tiết.",
+            goal, "full_article", llm_client=mock_bad_json, require_llm_judge=True
+        )
+        self.assertFalse(res_bad_json["passed"], "LLM Judge trả về văn bản không chứa JSON nhưng lại pass")
+        self.assertFalse(res_bad_json.get("semantic_verified", False))
+        self.assertIn(res_bad_json.get("judge_verdict", {}).get("judge_status"), ("PARSE_ERROR", "PARSE_EXCEPTION"))
+
     def test_adversarial_plumbing_missing_content(self):
         print("\n[Unit Test] 11. Judge Plumbing Test: Xử lý nội dung thiếu bắt buộc")
         agent = AutonomousChecklistAgent(max_steps=3, use_llm=False)
@@ -276,6 +297,28 @@ class TestUnitOffline(unittest.TestCase):
         self.assertEqual(report_rem0.status, AgentStatus.BUDGET_EXHAUSTED)
         self.assertTrue("Budget exhausted:" in report_rem0.stop_reason)
         assert_status_stop_reason_consistent(report_rem0)
+
+        # Kiểm chứng nhánh REPLAN khi rem == 1 (chỉ còn đúng 1 bước ngân sách kế hoạch mới)
+        agent_rem1 = AutonomousChecklistAgent(max_steps=2, use_llm=False)
+        agent_rem1.use_llm = True
+        agent_rem1.llm = OllamaClient()
+        agent_rem1.llm.is_available = lambda: True
+        rem1_calls = {"count": 0}
+        def mock_gen_rem1(prompt, max_tokens=100):
+            if "MỘT câu chỉ dẫn ngắn gọn" in prompt:
+                return "Cần phải REPLAN."
+            if "lập kế hoạch" in prompt.lower() or "checklist" in prompt.lower():
+                rem1_calls["count"] += 1
+                if rem1_calls["count"] == 1:
+                    return '[{"step_id": 1, "title": "Bước 1 Gốc", "description": "Ý chính", "action_type": "research_points"}, {"step_id": 2, "title": "Bước 2 Gốc", "description": "Dàn ý", "action_type": "outline"}]'
+                else:
+                    return '[{"step_id": "REPLAN_1", "title": "Bước Cứu Nguy Duy Nhất", "description": "Làm lại", "action_type": "outline"}]'
+            return "Mock content"
+        agent_rem1.llm.generate = mock_gen_rem1
+        report_rem1 = agent_rem1.run("Chuẩn bị outline Docker.")
+        self.assertEqual(report_rem1.steps_executed, 2)
+        self.assertTrue(any("Bước Cứu Nguy Duy Nhất" in s["title"] for s in report_rem1.plan))
+        assert_status_stop_reason_consistent(report_rem1)
 
         # Kiểm chứng nhánh REPLAN chạy hết bước nhưng chưa đạt chuẩn nghiệm thu (Budget Exhausted)
         agent_exhausted = AutonomousChecklistAgent(max_steps=2, use_llm=False)

@@ -1245,8 +1245,8 @@ class AutonomousChecklistAgent:
                     else:
                         print(f"   🔄 [ADAPT] Thích ứng chỉ dẫn Bước {next_step.step_id}: {adapt_msg}")
 
-            # Đánh giá điều kiện dừng sau mỗi bước
-            should_stop, reason, final_status = self._evaluate_stop_condition(steps_executed, self.max_steps, intent, goal)
+            # Đánh giá điều kiện dừng sau mỗi bước (dựa trên toàn bộ kế hoạch thực tế all_planned_steps)
+            should_stop, reason, final_status = self._evaluate_stop_condition(steps_executed, len(all_planned_steps), intent, goal)
             if should_stop:
                 stop_reason = reason
                 if final_status:
