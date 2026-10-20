@@ -273,7 +273,7 @@ Mô hình này (thường thấy trong các sequential chain cơ bản) hoạt �
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.95\textwidth]{images/architecture_diagram.png}
+    \includegraphics[width=0.98\textwidth]{images/architecture_diagram.png}
     \caption{Kiến trúc tổng thể của tác nhân tự hành với vòng lặp giới hạn (bounded loop)}
     \label{fig:architecture}
 \end{figure}
@@ -306,7 +306,7 @@ Hệ thống thiết kế hai phương án phân rã checklist 3 bước tương
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.88\textwidth]{images/state_flow_diagram.png}
+    \includegraphics[width=0.96\textwidth]{images/state_flow_diagram.png}
     \caption{Luồng truyền dữ liệu qua bộ nhớ trạng thái và cơ chế rà soát điều kiện dừng ở từng bước}
     \label{fig:state_flow}
 \end{figure}
@@ -540,9 +540,8 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{        start_time }\OperatorTok{=}\NormalTok{ time.perf_counter()}
         \ControlFlowTok{if}\NormalTok{ input_document: }\VariableTok{self}\NormalTok{.context_memory[}\StringTok{"input_document"}\NormalTok{] }\OperatorTok{=}\NormalTok{ input_document.strip()}
 \NormalTok{        plan, (topic, intent) }\OperatorTok{=} \VariableTok{self}\NormalTok{.plan_steps(goal), }\VariableTok{self}\NormalTok{._extract_topic_and_intent(goal)}
-\NormalTok{        all_planned_steps }\OperatorTok{=}\NormalTok{ plan.copy()}
-        \VariableTok{self}\NormalTok{.status, action_queue, stop_reason }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, plan.copy(), }\StringTok{""}
-\NormalTok{        consecutive_failures, steps_executed }\OperatorTok{=} \DecValTok{0}\NormalTok{, }\DecValTok{0}
+\NormalTok{        all_planned_steps, action_queue, stop_reason }\OperatorTok{=}\NormalTok{ plan.copy(), plan.copy(), }\StringTok{""}
+\NormalTok{        }\VariableTok{self}\NormalTok{.status, consecutive_failures, steps_executed }\OperatorTok{=}\NormalTok{ AgentStatus.RUNNING, }\DecValTok{0}\NormalTok{, }\DecValTok{0}
         \ControlFlowTok{while}\NormalTok{ action_queue }\KeywordTok{and}\NormalTok{ steps_executed }\OperatorTok{<} \VariableTok{self}\NormalTok{.max_steps:}
 \NormalTok{            step }\OperatorTok{=}\NormalTok{ action_queue.pop(}\DecValTok{0}\NormalTok{)}\OperatorTok{;}\NormalTok{ steps_executed }\OperatorTok{+=} \DecValTok{1}
             \ControlFlowTok{try}\NormalTok{:}
@@ -564,7 +563,10 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 \NormalTok{            should_stop, reason, final_status }\OperatorTok{=} \VariableTok{self}\NormalTok{._evaluate_stop_condition(steps_executed, }\BuiltInTok{len}\NormalTok{(all_planned_steps), intent, goal)}
             \ControlFlowTok{if}\NormalTok{ should_stop:}
 \NormalTok{                stop_reason, }\VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ reason, final_status }\KeywordTok{or} \VariableTok{self}\NormalTok{.status}\OperatorTok{;} \ControlFlowTok{break}
-\NormalTok{        }\ControlFlowTok{if} \VariableTok{self}\NormalTok{.final_output: }\VariableTok{self}\NormalTok{.quality_metrics }\OperatorTok{=} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.final_output, goal, intent, }\VariableTok{self}\NormalTok{.llm)}
+        \ControlFlowTok{if} \VariableTok{self}\NormalTok{.final_output:}
+            \VariableTok{self}\NormalTok{.quality_metrics }\OperatorTok{=} \VariableTok{self}\NormalTok{.evaluator.evaluate(}\VariableTok{self}\NormalTok{.final_output, goal, intent, }\VariableTok{self}\NormalTok{.llm, source_doc}\OperatorTok{=}\VariableTok{self}\NormalTok{.context_memory.get(}\StringTok{"input_document"}\NormalTok{), require_llm_judge}\OperatorTok{=}\VariableTok{self}\NormalTok{.use_llm)}
+        \ControlFlowTok{else}\NormalTok{:}
+            \VariableTok{self}\NormalTok{.quality_metrics }\OperatorTok{=}\NormalTok{ \{}\StringTok{"passed"}\NormalTok{: }\VariableTok{False}\NormalTok{, }\StringTok{"review_notes"}\NormalTok{: [}\StringTok{"Không có sản phẩm đầu ra."}\NormalTok{]\}}
 
         \CommentTok{# Đảm bảo nhất quán trạng thái và cập nhật lý do dừng chi tiết}
 \NormalTok{        final_passed }\OperatorTok{=} \VariableTok{self}\NormalTok{.quality_metrics.get(}\StringTok{"passed"}\NormalTok{, }\VariableTok{False}\NormalTok{)}
@@ -582,8 +584,7 @@ Phương thức \texttt{run()} quản trị trọn vẹn chu trình làm việc 
 
         \CommentTok{# Kiểm tra tính nhất quán cuối cùng: Hạ COMPLETED nếu kiểm tra lại báo cáo thất bại}
         \ControlFlowTok{if} \VariableTok{self}\NormalTok{.status }\OperatorTok{==}\NormalTok{ AgentStatus.COMPLETED }\KeywordTok{and}\NormalTok{ (}\KeywordTok{not}\NormalTok{ final_passed }\KeywordTok{or} \KeywordTok{not}\NormalTok{ semantic_ok):}
-            \VariableTok{self}\NormalTok{.status }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED}
-\NormalTok{            stop_reason }\OperatorTok{=} \SpecialStringTok{f"Budget exhausted: Sản phẩm chưa đạt nghiệm thu sau kiểm tra lại (}\SpecialCharTok{\{}\NormalTok{reason_detail}\SpecialCharTok{\}}\SpecialStringTok{)."}
+            \VariableTok{self}\NormalTok{.status, stop_reason }\OperatorTok{=}\NormalTok{ AgentStatus.BUDGET_EXHAUSTED, }\SpecialStringTok{f"Budget exhausted: Chưa đạt nghiệm thu sau kiểm tra lại (}\SpecialCharTok{\{}\NormalTok{reason_detail}\SpecialCharTok{\}}\SpecialStringTok{)."}
 
         \ControlFlowTok{return}\NormalTok{ FinalReport(goal}\OperatorTok{=}\NormalTok{goal, total_steps_planned}\OperatorTok{=}\BuiltInTok{len}\NormalTok{(all_planned_steps), steps_executed}\OperatorTok{=}\NormalTok{steps_executed, status}\OperatorTok{=}\VariableTok{self}\NormalTok{.status, stop_reason}\OperatorTok{=}\NormalTok{stop_reason, plan}\OperatorTok{=}\NormalTok{[asdict(s) }\ControlFlowTok{for}\NormalTok{ s }\KeywordTok{in}\NormalTok{ all_planned_steps], execution_logs}\OperatorTok{=}\NormalTok{[asdict(l) }\ControlFlowTok{for}\NormalTok{ l }\KeywordTok{in} \VariableTok{self}\NormalTok{.logs], final_output}\OperatorTok{=}\VariableTok{self}\NormalTok{.final_output, quality_metrics}\OperatorTok{=}\VariableTok{self}\NormalTok{.quality_metrics, total_duration_sec}\OperatorTok{=}\BuiltInTok{round}\NormalTok{(time.perf_counter()}\OperatorTok{-}\NormalTok{start_time, }\DecValTok{3}\NormalTok{))}
 \end{Highlighting}
@@ -597,18 +598,19 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
 
 \begin{figure}[H]
     \centering
-    \vspace{-4mm}
+    \vspace{-5mm}
     \includegraphics[width=0.92\textwidth]{images/terminal_execution.png}
-    \vspace{-3mm}
+    \vspace{-4mm}
     \caption{Đồ họa minh họa (kết xuất từ dữ liệu kiểm toán \texttt{agent\_final\_report.json}) tái hiện nhật ký thực thi của Agent trên Terminal}
     \label{fig:terminal}
+    \vspace{-3.5mm}
 \end{figure}
 
 Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LLM \texttt{tinix-lm:latest} cục bộ:
 \begin{enumerate}
     \tightlist
     \item \textbf{Lập kế hoạch động qua LLM (dynamic planning):} Agent gửi mục tiêu đến LLM để phân rã checklist 3 bước JSON: Bước 1 (\texttt{research\_points}), Bước 2 (\texttt{outline}), Bước 3 (\texttt{generate}). Khác với fallback định sẵn (\texttt{outline} $\rightarrow$ \texttt{generate} $\rightarrow$ \texttt{review\_polish}), LLM linh hoạt chọn \texttt{generate} làm bước hoàn thiện bài viết để nghiệm thu.
-    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng (\textit{"Giải thích đơn giản cho người mới"}). Nếu phát hiện cần đổi hướng, Agent kích hoạt nhánh \textbf{REPLAN}, lập lại kế hoạch với ngân sách còn lại, khôi phục trạng thái \texttt{RUNNING} và cập nhật \texttt{action\_queue}.
+    \item \textbf{Quan sát và thích ứng bước kế tiếp (Observe \& Adapt):} Sau Bước 1 và 2, Agent quan sát kết quả trung gian và kích hoạt chỉ dẫn thích ứng (\textit{"Giải thích đơn giản cho người mới"}). Nếu phát hiện cần đổi hướng, Agent kích hoạt nhánh \textbf{REPLAN}, lập lại kế hoạch với ngân sách còn lại, khôi phục trạng thái \texttt{RUNNING} và cập nhật \texttt{action\_queue}. \textit{Lưu ý bộ đếm bước}: Trần $\le 3$ là giới hạn thực thi an toàn (\texttt{steps\_executed}); còn \texttt{total\_steps\_planned} lưu tổng số bước qua các lần lập kế hoạch (kế hoạch gốc cộng các bước REPLAN) để kiểm toán minh bạch.
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 ($\ge 0.35$), 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
