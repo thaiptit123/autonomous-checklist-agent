@@ -188,7 +188,7 @@ def generate_terminal_screenshot():
         d3 = report["execution_logs"][2].get("duration_sec", 7.380)
         tot_time = report.get("total_duration_sec", 19.812)
         chars = len(report.get("final_output", "")) or 1872
-        words = len((report.get("final_output", "") or "").split()) or 391
+        words = report.get("quality_metrics", {}).get("word_count") or 391
         status = report.get("status", "COMPLETED")
         ttr_val = report.get("quality_metrics", {}).get("ttr", 0.427)
     else:

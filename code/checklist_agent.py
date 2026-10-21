@@ -124,6 +124,17 @@ class QualityEvaluator:
     """
 
     @staticmethod
+    def count_words(text: str) -> int:
+        """
+        Đếm số từ sau khi đã chuẩn hóa và loại bỏ các ký tự dấu câu / cú pháp Markdown đơn lẻ.
+        Bảo đảm sự đồng nhất 100% giữa khâu quan sát [OBSERVE] và báo cáo nghiệm thu [QualityEvaluator].
+        """
+        if not text:
+            return 0
+        words = [re.sub(r"^[^\w]+|[^\w]+$", "", w) for w in text.lower().split() if len(re.sub(r"^[^\w]+|[^\w]+$", "", w)) > 0]
+        return len(words)
+
+    @staticmethod
     def calculate_ttr(text: str) -> float:
         """
         Tính Type-Token Ratio (TTR): Tỷ lệ từ vựng duy nhất trên tổng số từ.
@@ -174,7 +185,7 @@ class QualityEvaluator:
 
         words = [re.sub(r"^[^\w]+|[^\w]+$", "", w) for w in content.lower().split() if len(re.sub(r"^[^\w]+|[^\w]+$", "", w)) > 0]
         char_count = len(content)
-        word_count = len(words)
+        word_count = cls.count_words(content)
         ttr = cls.calculate_ttr(content)
 
         # 1. Tiêu chí độ dài
@@ -683,7 +694,7 @@ class AutonomousChecklistAgent:
         if not next_step:
             return None
 
-        words_count = len(result.split())
+        words_count = QualityEvaluator.count_words(result)
         ttr_val = QualityEvaluator.calculate_ttr(result)
         adaptation_note = None
 
@@ -1213,7 +1224,7 @@ class AutonomousChecklistAgent:
             )
             self.logs.append(log_entry)
 
-            words_c = len(result.split())
+            words_c = QualityEvaluator.count_words(result)
             chars_c = len(result)
             obs_msg = f"Đã hoàn thành {chars_c} ký tự ({words_c} từ), cấu trúc Markdown hợp lệ."
             print(f"   👁️  [OBSERVE] Quan sát: {obs_msg}")
