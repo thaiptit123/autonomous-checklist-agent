@@ -48,6 +48,13 @@ Bai44/
 > - **Trong chế độ LLM (`use_llm=True`):** `COMPLETED` là sự nghiệm thu chất lượng kép (**Dual-Gate Verified**): bắt buộc phải thỏa mãn cả tiêu chuẩn định lượng lẫn xác thực ngữ nghĩa thành công từ LLM Judge (`semantic_verified=True`, `judge_status="VERIFIED_SUCCESS"`). Nếu LLM Judge từ chối (correctness/groundedness/completeness = 0) hoặc gặp lỗi kết nối/JSON, hệ thống kích hoạt Fail-Closed: tuyệt đối không cho phép dừng ở `COMPLETED` mà chuyển sang `BUDGET_EXHAUSTED` khi hết bước.
 > - **Trong chế độ Offline Heuristic (`use_llm=False`):** `COMPLETED` chỉ đại diện cho việc thỏa mãn bộ lọc logic định lượng (độ dài, đề mục Markdown, đa dạng từ vựng TTR, từ khóa) phục vụ kiểm thử đơn vị độc lập (Unit Test) không phụ thuộc GPU/Ollama. Hệ thống ghi nhận tường minh trong `stop_reason` và nhật ký kiểm toán: `(Chế độ offline heuristic: Chưa xác minh ngữ nghĩa bởi LLM Judge)` với `semantic_verified=False`. Trạng thái này không đồng nghĩa với việc nội dung đã được LLM thẩm định ngữ nghĩa.
 
+### Đánh giá khách quan về phạm vi tự hành và ranh giới nghiên cứu (Scope of Autonomy & Research Boundary)
+Nhằm phản ánh trung thực bản chất kỹ thuật theo đúng phạm vi thực nghiệm:
+1. **Lập kế hoạch động (Dynamic Planning):** LLM tự động phân rã mục tiêu thành checklist hành động JSON (ví dụ: `research_points` $\rightarrow$ `outline` $\rightarrow$ `generate`), khác biệt bản chất so với pipeline cố định hardcoded.
+2. **Quan sát, thích ứng và lập lại kế hoạch (Observe, Adapt & REPLAN):** Sau mỗi bước, Agent quan sát độ dài, cấu trúc và chèn chỉ dẫn thích ứng vào prompt bước sau; khi gặp trở ngại, kích hoạt REPLAN để sinh kế hoạch mới với ngân sách còn lại.
+3. **Giới hạn an toàn kép (Bounded Loop & Fail-Closed Guardrails):** Khóa trần thực thi $\le 3$ bước (`steps_executed`), tự động hạ cấp trạng thái về `BUDGET_EXHAUSTED` nếu kiểm định cuối thất bại.
+4. **Ranh giới thực nghiệm (Research Sandbox):** Hệ thống được thiết kế như một mô hình nghiên cứu/thử nghiệm sandbox nhằm kiểm chứng logic điều khiển khép kín và cơ chế an toàn. Các công cụ trong `ToolRegistry` hiện tại là mô phỏng (mock tools), và cơ chế fallback khi LLM ngoại tuyến dựa trên luật xác định. Đây là bước đệm kiến trúc vững chắc trước khi tích hợp API thực tế và phát triển các hệ thống Multi-Agent phức tạp hơn.
+
 ## 3. Hướng dẫn thiết lập môi trường và mô hình (Setup & Model Access)
 
 Để đảm bảo khả năng tái lập kết quả (reproducibility), hệ thống hỗ trợ 2 phương án thiết lập mô hình độc lập:

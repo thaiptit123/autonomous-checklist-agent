@@ -722,26 +722,25 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \end{Shaded}
 \end{footnotesize}
 
-Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian thực thi (19.812s, làm tròn 19.8s), khóa ngữ cảnh tiêu thụ, giúp hỗ trợ truy vết lỗi. \textbf{Phân định nguồn kiểm chứng Groundedness:} Trường \texttt{groundedness\_source: "none\_open\_domain"} cho bài viết RAG thể hiện trung thực đây là nhiệm vụ giải thích tri thức mở (open-domain), không có tài liệu ngoài (\texttt{input\_document = None}); tiêu chí Groundedness do LLM Judge thẩm định dựa trên tri thức nội tại của mô hình để kiểm tra việc không bịa đặt thuật ngữ sai lệch, tuyệt đối không ngộ nhận đã đối chiếu tài liệu độc lập ngoài hệ thống. Ngược lại, khi được cung cấp tài liệu nguồn (với tác vụ tóm tắt \texttt{intent == "summarize"} qua tham số \texttt{input\_document}), hệ thống lưu nhận \texttt{groundedness\_source: "external\_document"} và LLM Judge đối chiếu trực tiếp từng câu với văn bản nguồn để xác minh tính bám sát; nếu thiếu tài liệu nguồn cho tác vụ này, Agent từ chối thực thi và chuyển trạng thái \texttt{FAILED} an toàn (như kiểm chứng tại Test 9). Đặc biệt, để \textbf{hỗ trợ khả năng tái lập (reproducibility)}, hệ thống lưu vết các siêu dữ liệu (metadata): \texttt{model\_version}, \texttt{git\_commit}, \texttt{python\_version}, \texttt{temperature}, \texttt{seed} và \texttt{prompt\_template\_summary} nhằm hỗ trợ truy vết (lưu dưới dạng metadata chứ không nhất thiết bị bắt buộc ép kiểu ở request Ollama thực tế).
+Báo cáo này mang lại giá trị cốt lõi về \textbf{Tính minh bạch (Observability)} khi thể hiện rõ thời gian thực thi (19.812s, làm tròn 19.8s), khóa ngữ cảnh tiêu thụ và lịch sử các bước. \textbf{Phân định nguồn Groundedness:} Giá trị \texttt{"none\_open\_domain"} cho bài viết RAG phản ánh trung thực đây là tác vụ giải thích tri thức mở (\texttt{input\_document=None}), LLM Judge thẩm định theo tri thức chuẩn để chống bịa đặt, tuyệt đối không ngộ nhận đã đối chiếu tài liệu bên ngoài. Với tác vụ tóm tắt (\texttt{input\_document} có sẵn), trường này chuyển thành \texttt{"external\_document"} để đối chiếu trực tiếp văn bản nguồn; nếu thiếu nguồn, Agent chuyển sang \texttt{FAILED} (Test 9). Về \textbf{khả năng tái lập (reproducibility)}, hệ thống lưu vết đầy đủ siêu dữ liệu (\texttt{model\_version}, \texttt{git\_commit}, \texttt{temperature}, \texttt{seed}) hỗ trợ kiểm toán minh bạch.
 
 \section{Mở rộng và ứng dụng thực tế của tác nhân tự hành}\label{mo-rong-ung-dung}
 
-Mô hình tác nhân tự hành hoàn thành checklist 3 bước có thể mở rộng linh hoạt cho rất nhiều bài toán sản xuất thực tế tại doanh nghiệp:
-
+Mô hình tác nhân hoàn thành checklist 3 bước có thể mở rộng linh hoạt cho nhiều bài toán thực tế:
 \begin{enumerate}
     \tightlist
-    \item \textbf{Trợ lý viết tài liệu API (technical doc agent):} Khi có endpoint mới, kỹ sư đưa mã nguồn vào với mục tiêu: \textit{"Viết tài liệu Swagger/Markdown cho API"}. Agent tự phân rã: Bước 1 (Quét hàm bóc tách mã lỗi) $\rightarrow$ Bước 2 (Sinh tài liệu kèm ví dụ cURL) $\rightarrow$ Bước 3 (Rà soát chuẩn OpenAPI $\rightarrow$ Lưu file).
-    \item \textbf{Trợ lý rà soát pull request (code review agent):} Với mục tiêu: \textit{"Kiểm tra bảo mật và chuẩn style PR \#104"}: Bước 1 (Trích xuất git diff) $\rightarrow$ Bước 2 (Đối chiếu quy tắc an ninh: secret, SQL injection) $\rightarrow$ Bước 3 (Tổng hợp comment gửi lên GitHub/GitLab).
-    \item \textbf{Trợ lý tự động hóa CSKH:} Tiếp nhận khiếu nại khách hàng, Agent tự phân rã: Bước 1 (Tra cứu lịch sử đơn hàng CSDL) $\rightarrow$ Bước 2 (Đối chiếu chính sách đổi trả) $\rightarrow$ Bước 3 (Soạn email phản hồi thấu cảm, đề xuất bồi hoàn và lưu CRM).
+    \item \textbf{Trợ lý viết tài liệu API:} Khi có endpoint mới: Quét hàm bóc tách mã lỗi $\rightarrow$ Sinh tài liệu kèm ví dụ cURL $\rightarrow$ Rà soát chuẩn OpenAPI và lưu file.
+    \item \textbf{Trợ lý rà soát pull request:} Khi có PR mới: Trích xuất git diff $\rightarrow$ Đối chiếu quy tắc an ninh (secret, SQL injection) $\rightarrow$ Gửi comment phản hồi lên Git.
+    \item \textbf{Trợ lý tự động hóa CSKH:} Khi tiếp nhận khiếu nại: Tra cứu đơn hàng CSDL $\rightarrow$ Đối chiếu chính sách đổi trả $\rightarrow$ Soạn email phản hồi thấu cảm và cập nhật CRM.
 \end{enumerate}
 
-\section{Kết luận}\label{ket-luan}
+\section{Kết luận: Đánh giá phạm vi tự hành và hướng phát triển}\label{ket-luan}
 
 Xây dựng hệ thống tác nhân tự hành (\textbf{Autonomous Systems}) không đòi hỏi những mô hình phức tạp, mà bắt đầu từ những nguyên lý kỹ thuật vững chắc: \textbf{Mục tiêu rõ ràng $\rightarrow$ Kế hoạch có cấu trúc $\rightarrow$ Thực thi tuần tự $\rightarrow$ Quan sát \& Đánh giá $\rightarrow$ Retry/Replan $\rightarrow$ Điều kiện dừng chuẩn xác} (trong giới hạn số bước an toàn).
 
-Thông qua bài học này, bạn đã thiết kế và vận hành thành công mô hình Bounded Checklist Agent với các cơ chế lập kế hoạch động, quan sát thích ứng, retry/replan và kiểm định chất lượng đa tầng trong phạm vi kiểm soát an toàn ($\le 3$ bước). Đây là mô hình nền tảng trong nghiên cứu kỹ thuật tác nhân, đóng vai trò bước đệm quan trọng trước khi tích hợp công cụ thực tế và phát triển các hệ thống tác nhân đa tầng (Multi-Agent Systems) phức tạp hơn.
+\textbf{Phạm vi tự hành và ranh giới nghiên cứu:} Nhìn nhận một cách khách quan và trung thực, hệ thống Checklist Agent đã kiểm chứng thành công các năng lực cốt lõi: (1) \textit{Lập kế hoạch động qua LLM}: tự động phân rã bước theo mục tiêu thay vì chuỗi cố định; (2) \textit{Vòng lặp quan sát thích ứng}: thu nhận phản hồi để điều chỉnh chỉ dẫn bước kế tiếp và kích hoạt REPLAN khi gặp rào cản; (3) \textit{Chốt chặn an toàn Bounded Loop}: khóa trần $\le 3$ bước và từ chối nghiệm thu (\texttt{BUDGET\_EXHAUSTED}) khi chưa đạt chuẩn. Tuy nhiên, trong phạm vi bài học kỹ thuật này, hệ thống đóng vai trò mô hình nghiên cứu/thử nghiệm (sandbox prototype): các công cụ trong \texttt{ToolRegistry} hoạt động dưới dạng mô phỏng (mock), và cơ chế fallback khi LLM ngoại tuyến dựa trên luật xác định để bảo đảm an toàn. Đây là bước đệm kiến trúc thiết yếu trước khi tích hợp API thực tế và phát triển các hệ thống Multi-Agent phức tạp hơn.
 
-\textbf{Mã nguồn đầy đủ và Kịch bản kiểm thử (Repository):} Toàn bộ mã nguồn và báo cáo thực nghiệm được lưu trữ công khai tại GitHub: \url{https://github.com/thaiptit123/autonomous-checklist-agent}.
+\textbf{Mã nguồn đầy đủ, Nhật ký chạy thật và Báo cáo kiểm toán (Repository):} Toàn bộ mã nguồn, dữ liệu kiểm toán (\texttt{agent\_final\_report.json}) và nhật ký thực thi nguyên bản trên terminal (\texttt{test\_execution\_ollama.log}) được lưu trữ công khai tại GitHub: \url{https://github.com/thaiptit123/autonomous-checklist-agent}.
 
 \section{Tài liệu tham khảo}\label{tai-lieu-tham-khao}
 
