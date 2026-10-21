@@ -644,21 +644,21 @@ Chưa qua khâu nghiệm thu chất lượng. & Đạt chuẩn định lượng 
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.85}
+\renewcommand{\arraystretch}{0.90}
 \begin{longtable}{|c|p{0.34\linewidth}|c|p{0.25\linewidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}\\
 \hline
-\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \\ \hline
+\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \rule{0pt}{2.6ex}\rule[-0.9ex]{0pt}{0pt} \\ \hline
 \endfirsthead
 \multicolumn{4}{c}{\textit{Bảng \thetable\ (tiếp theo): Kết quả kiểm thử 18 kịch bản}} \\
 \hline
-\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \\ \hline
+\thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \rule{0pt}{2.6ex}\rule[-0.9ex]{0pt}{0pt} \\ \hline
 \endhead
 \hline
 \endfoot
 \hline
 \endlastfoot
-\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{primary!10}\rule{0pt}{2.8ex}\rule[-1.0ex]{0pt}{0pt}\textbf{\color{primary}Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
 1 & Chuẩn bị outline Docker (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
 2 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Kế thừa \texttt{input\_doc}) \\ \hline
 3 & Hết ngân sách bước (\texttt{max\_steps=1}) & \texttt{PASS (EXHAUSTED)} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
@@ -672,7 +672,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 11 & Thiếu nội dung bắt buộc (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock completeness=0) \\ \hline
 12 & Bịa đặt nguồn, không bám sát (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock groundedness=0) \\ \hline
 13 & Thay đổi \texttt{action\_queue} khi REPLAN & \texttt{PASS (Replan)} & Kế hoạch mới được thực thi và lưu log \\ \hline
-\multicolumn{4}{|c|}{\cellcolor{gray!20}\textbf{Nhóm 2: Real LLM Integration Tests (5 kịch bản -- Chạy với Ollama thật: 5/5 PASS)}} \\ \hline
+\multicolumn{4}{|c|}{\cellcolor{primary!10}\rule{0pt}{2.8ex}\rule[-1.0ex]{0pt}{0pt}\textbf{\color{primary}Nhóm 2: Real LLM Integration Tests (5 kịch bản -- Chạy với Ollama thật: 5/5 PASS)}} \\ \hline
 14 & Viết bài RAG hoàn chỉnh với LLM thật & \texttt{PASS (Ollama)} & Hoàn thành 3 bước, Judge nghiệm thu \\ \hline
 15 & Adversarial (Real LLM): Lỗi Correctness (chung chung) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
 16 & Adversarial (Real LLM): Lỗi Correctness (sai hoàn toàn) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
@@ -716,7 +716,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{    \}}
 \NormalTok{  \},}
 \NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.812}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"bf5585d"}\NormalTok{, }\DataTypeTok{"temperature"}\NormalTok{: }\FloatTok{0.25}\NormalTok{, }\DataTypeTok{"seed"}\NormalTok{: }\KeywordTok{null}\NormalTok{, }\DataTypeTok{"python\_version"}\NormalTok{: }\StringTok{"3.8.10"}\NormalTok{, }\DataTypeTok{"prompt\_template\_summary"}\NormalTok{: }\StringTok{"Lập checklist..."}\NormalTok{\}}
+\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"df6c0aa"}\NormalTok{, }\DataTypeTok{"temperature"}\NormalTok{: }\FloatTok{0.25}\NormalTok{, }\DataTypeTok{"seed"}\NormalTok{: }\KeywordTok{null}\NormalTok{, }\DataTypeTok{"python\_version"}\NormalTok{: }\StringTok{"3.8.10"}\NormalTok{, }\DataTypeTok{"prompt\_template\_summary"}\NormalTok{: }\StringTok{"Lập checklist..."}\NormalTok{\}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}

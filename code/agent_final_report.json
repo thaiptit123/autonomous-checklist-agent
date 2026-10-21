@@ -111,7 +111,7 @@
     "model_version": "tinix-lm:latest",
     "temperature": 0.25,
     "seed": null,
-    "git_commit": "bf5585d",
+    "git_commit": "df6c0aa",
     "planner_prompt_template_summary": "Hãy lập một kế hoạch checklist tối đa 3 bước...",
     "executor_prompt_template_summary": "Bạn là Autonomous Content Agent đang thực thi nhiệm vụ...",
     "judge_prompt_template_summary": "Đánh giá chất lượng văn bản theo 3 tiêu chí: Tính chính xác (Correctness)...",
