@@ -153,6 +153,7 @@ def generate_terminal_screenshot():
             fontsize=10.8, color="#94A3B8", ha="center", family="monospace", fontweight="bold")
 
     terminal_text = [
+        ("$ python3 code/checklist_agent.py", "#38BDF8"),
         ("================================================================================", "#38BDF8"),
         ("[AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ | Model: tinix-lm:latest (Ollama LLM)", "#38BDF8"),
         ("MỤC TIÊU: Viết bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.", "#F8FAFC"),
@@ -172,10 +173,10 @@ def generate_terminal_screenshot():
         (f"BÁO CÁO: {status} | 3/3 bước | {tot_time:.3f}s | TTR={ttr_val:.2f} >= 0.35 | Output: agent_final_report.json", "#FCD34D"),
     ]
 
-    y_pos = 3.98
+    y_pos = 4.08
     for line, color in terminal_text:
-        ax.text(0.16, y_pos, line, fontsize=11.4, color=color, family="monospace", va="center", fontweight="bold")
-        y_pos -= 0.228
+        ax.text(0.16, y_pos, line, fontsize=11.0, color=color, family="monospace", va="center", fontweight="bold")
+        y_pos -= 0.220
 
     ax.set_xlim(0, 9.6)
     ax.set_ylim(0, 4.65)
