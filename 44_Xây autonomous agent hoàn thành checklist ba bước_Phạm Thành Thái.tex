@@ -602,7 +602,7 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
     \vspace{-1mm}
     \includegraphics[width=0.78\textwidth]{images/terminal_execution.png}
     \vspace{-3mm}
-    \caption{Nhật ký thực thi trên terminal và dữ liệu kiểm toán từ phiên chạy LLM thực tế (\texttt{test\_execution\_ollama.log} và \texttt{agent\_final\_report.json})}
+    \caption{Giao diện phiên thực thi trên terminal đối chiếu đồng bộ với dữ liệu kiểm toán thực tế (\texttt{test\_execution\_ollama.log} và \texttt{agent\_final\_report.json})}
     \label{fig:terminal}
     \vspace{-4mm}
 \end{figure}
@@ -705,7 +705,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{  }\DataTypeTok{"total_steps_planned"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"steps_executed"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"status"}\NormalTok{: }\StringTok{"COMPLETED"}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"stop_reason"}\NormalTok{: }\StringTok{"Goal achieved: Bài viết hoàn chỉnh đạt chuẩn định lượng và ngữ nghĩa của QualityEvaluator (LLM Judge Verified)."}\NormalTok{,}
 \NormalTok{  }\DataTypeTok{"plan"}\NormalTok{: [\{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Nghiên cứu RAG"}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Dàn ý bài viết"}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"title"}\NormalTok{: }\StringTok{"Viết bài chia sẻ"}\NormalTok{\}],}
-\NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [\{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.21}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.52}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{8.50}\NormalTok{\}],}
+\NormalTok{  }\DataTypeTok{"execution_logs"}\NormalTok{: [\{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{1}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.176}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{2}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{3.356}\NormalTok{\}, \{}\DataTypeTok{"step"}\NormalTok{: }\DecValTok{3}\NormalTok{, }\DataTypeTok{"duration_sec"}\NormalTok{: }\FloatTok{7.380}\NormalTok{\}],}
 \NormalTok{  }\DataTypeTok{"quality\_metrics"}\NormalTok{: \{}
 \NormalTok{    }\DataTypeTok{"passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"quality\_passed"}\NormalTok{: }\KeywordTok{true}\NormalTok{, }\DataTypeTok{"semantic\_verified"}\NormalTok{: }\KeywordTok{true}\NormalTok{,}
 \NormalTok{    }\DataTypeTok{"char\_count"}\NormalTok{: }\DecValTok{1872}\NormalTok{, }\DataTypeTok{"word\_count"}\NormalTok{: }\DecValTok{391}\NormalTok{, }\DataTypeTok{"ttr"}\NormalTok{: }\FloatTok{0.427}\NormalTok{, }\DataTypeTok{"matched\_keywords"}\NormalTok{: [}\StringTok{"giải"}\NormalTok{, }\StringTok{"thích"}\NormalTok{, }\StringTok{"rag"}\NormalTok{],}
