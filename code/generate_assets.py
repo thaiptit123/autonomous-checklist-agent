@@ -252,8 +252,70 @@ def generate_state_flow_diagram():
     print(f"Generated: {img_path}")
 
 
+def generate_eval_terminal_screenshot():
+    fig, ax = plt.subplots(figsize=(10.0, 5.2), dpi=300)
+    ax.set_facecolor("#0F172A")
+    fig.patch.set_facecolor("#0F172A")
+
+    # Vẽ khung cửa sổ terminal
+    header_box = patches.Rectangle((0, 4.80), 10.0, 0.40, facecolor="#1E293B", edgecolor="none")
+    ax.add_patch(header_box)
+
+    # Nút bấm cửa sổ Mac/Linux
+    circle_red = patches.Circle((0.25, 5.00), 0.08, facecolor="#EF4444", edgecolor="none")
+    circle_yellow = patches.Circle((0.50, 5.00), 0.08, facecolor="#F59E0B", edgecolor="none")
+    circle_green = patches.Circle((0.75, 5.00), 0.08, facecolor="#10B981", edgecolor="none")
+    ax.add_patch(circle_red)
+    ax.add_patch(circle_yellow)
+    ax.add_patch(circle_green)
+
+    ax.text(5.00, 5.00, "bash - thaipt@tinix-aiguru: ~/checklist-agent (python3 code/eval_agent.py)", 
+            fontsize=10.5, color="#94A3B8", ha="center", family="monospace", fontweight="bold", va="center")
+
+    eval_terminal_text = [
+        ("================================================================================", "#38BDF8"),
+        ("[TEST SUITE] KHỞI CHẠY 18 TESTS: 13 UNIT TESTS & 5 INTEGRATION TESTS", "#38BDF8"),
+        ("MÔI TRƯỜNG: Ollama GPU (tinix-lm:latest) | Python 3.8.10 | OS: Linux", "#FCD34D"),
+        ("================================================================================", "#38BDF8"),
+        ("test_adversarial_integration_completeness (TestIntegrationLLM) ... ok", "#34D399"),
+        ("test_adversarial_integration_correctness (TestIntegrationLLM) ... ok", "#34D399"),
+        ("test_adversarial_integration_correctness_generic (TestIntegrationLLM) ... ok", "#34D399"),
+        ("test_adversarial_integration_groundedness (TestIntegrationLLM) ... ok", "#34D399"),
+        ("test_full_rag_llm: Viết bài giải thích RAG 3 bước (TestIntegrationLLM) ... ok (12.201s)", "#34D399"),
+        ("--------------------------------------------------------------------------------", "#475569"),
+        ("test_action_failure_recovery_stuck: Retry 2 lần -> FAILED (TestUnitOffline) ... ok", "#F1F5F9"),
+        ("test_bounded_loop_validation: Giới hạn cứng max_steps <= 3 (TestUnitOffline) ... ok", "#F1F5F9"),
+        ("test_budget_exhausted_unmet_goal: Hết bước chuyển BUDGET_EXHAUSTED ... ok", "#F1F5F9"),
+        ("test_dynamic_observation_and_adaptation: Observe & Adapt prompt ... ok", "#F1F5F9"),
+        ("test_dynamic_replan_execution: Replan rem=0, rem=1, multi-step replan ... ok", "#F1F5F9"),
+        ("test_outline_docker_early_stop: Dừng sớm 1 bước outline Docker ... ok", "#F1F5F9"),
+        ("test_quality_rejection_budget_exhausted: Hạ cấp COMPLETED khi fail ... ok", "#F1F5F9"),
+        ("test_summarize_with_input_document & test_summarize_without_document_fails ... ok", "#F1F5F9"),
+        ("test_adversarial_plumbing (correctness, groundedness, completeness) ... ok (3 tests)", "#F1F5F9"),
+        ("--------------------------------------------------------------------------------", "#475569"),
+        ("Ran 18 tests in 29.811s", "#38BDF8"),
+        ("OK", "#4ADE80")
+    ]
+
+    y_pos = 4.58
+    for line, color in eval_terminal_text:
+        ax.text(0.16, y_pos, line, fontsize=10.5, color=color, family="monospace", va="center", fontweight="bold")
+        y_pos -= 0.208
+
+    ax.set_xlim(0, 10.0)
+    ax.set_ylim(0, 5.25)
+    ax.axis("off")
+
+    img_path = os.path.join(OUTPUT_DIR, "terminal_eval_18_pass.png")
+    plt.tight_layout()
+    plt.savefig(img_path, dpi=300, bbox_inches="tight")
+    plt.close()
+    print(f"Generated: {img_path}")
+
+
 if __name__ == "__main__":
     generate_architecture_diagram()
     generate_terminal_screenshot()
     generate_state_flow_diagram()
+    generate_eval_terminal_screenshot()
 

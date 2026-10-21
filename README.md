@@ -30,9 +30,10 @@ Bai44/
 │   ├── agent_final_report.json # Dữ liệu báo cáo mẫu xuất từ phiên chạy LLM benchmark thực tế (19.8s / 19.812s)
 │   └── test_execution_ollama.log # Nhật ký chạy thực tế toàn bộ 18/18 tests với Ollama thật (29.811s)
 └── images/
-    ├── architecture_diagram.png # Sơ đồ kiến trúc tổng thể tác nhân
-    ├── state_flow_diagram.png   # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
-    └── terminal_execution.png   # Nhật ký thực thi trực quan trên Terminal với LLM thật
+    ├── architecture_diagram.png    # Sơ đồ kiến trúc tổng thể tác nhân
+    ├── state_flow_diagram.png      # Sơ đồ truyền trạng thái và kiểm tra điều kiện dừng
+    ├── terminal_execution.png      # Nhật ký thực thi trực quan trên Terminal với LLM thật
+    └── terminal_eval_18_pass.png   # Ảnh chụp terminal chạy 18/18 PASS test suite (29.811s)
 ```
 
 ### Bảng đối chiếu số liệu thời gian và kết quả thực nghiệm (Benchmark Summary)
@@ -97,7 +98,7 @@ Bộ kiểm thử `code/eval_agent.py` bao gồm tổng cộng **18 kịch bản
 python3 code/eval_agent.py
 ```
 
-> **Nhật ký chạy thực tế với LLM thật:** Toàn bộ kết quả đầu ra thực tế của phiên chạy 18 test suite với mô hình Ollama (18/18 PASS trong 29.811s, bao gồm log chi tiết của 4 bài kiểm thử đối kháng Adversarial LLM Tests) được lưu trữ nguyên bản tại [`code/test_execution_ollama.log`](code/test_execution_ollama.log) để phục vụ thẩm định độc lập.
+> **Nhật ký chạy thực tế với LLM thật:** Toàn bộ kết quả đầu ra thực tế của phiên chạy 18 test suite với mô hình Ollama (18/18 PASS trong 29.811s, bao gồm log chi tiết của 4 bài kiểm thử đối kháng Adversarial LLM Tests) được lưu trữ nguyên bản tại [`code/test_execution_ollama.log`](code/test_execution_ollama.log) và ảnh chụp terminal tại [`images/terminal_eval_18_pass.png`](images/terminal_eval_18_pass.png) để phục vụ thẩm định độc lập.
 
 ### Tạo lại hình ảnh sơ đồ kiến trúc:
 ```bash

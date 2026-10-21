@@ -337,6 +337,23 @@ class TestUnitOffline(unittest.TestCase):
         self.assertTrue(report_ex.stop_reason.startswith("Budget exhausted:"))
         assert_status_stop_reason_consistent(report_ex)
 
+        # Kiểm chứng nhiều lần REPLAN liên tiếp: ngân sách bước giảm dần và dừng an toàn tại BUDGET_EXHAUSTED
+        agent_multi = AutonomousChecklistAgent(max_steps=3, use_llm=False)
+        agent_multi.use_llm = True
+        agent_multi.llm = OllamaClient()
+        agent_multi.llm.is_available = lambda: True
+        # Mỗi lần observe đều yêu cầu REPLAN
+        agent_multi.llm.generate = lambda prompt, max_tokens=100: (
+            "Cần phải REPLAN." if "MỘT câu chỉ dẫn ngắn gọn" in prompt
+            else '[{"step_id": 1, "title": "Bước Replan", "description": "Làm lại", "action_type": "outline"}, {"step_id": 2, "title": "Bước Dự Phòng", "description": "Làm tiếp", "action_type": "outline"}]'
+        )
+        report_multi = agent_multi.run("Mục tiêu thử nghiệm Replan lặp lại.")
+        self.assertEqual(report_multi.steps_executed, 3, "Số bước thực thi phải chạm trần max_steps=3 và dừng lại")
+        self.assertLessEqual(report_multi.steps_executed, agent_multi.max_steps)
+        self.assertEqual(report_multi.status, AgentStatus.BUDGET_EXHAUSTED)
+        self.assertTrue("Budget exhausted:" in report_multi.stop_reason)
+        assert_status_stop_reason_consistent(report_multi)
+
         # Kiểm chứng nhánh hạ cấp: nếu COMPLETED nhưng lần thẩm định báo cáo cuối không đạt
         agent_dg = AutonomousChecklistAgent(max_steps=2, use_llm=False)
         # Mock stop condition kích hoạt COMPLETED
