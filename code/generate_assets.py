@@ -20,16 +20,16 @@ plt.rcParams["axes.unicode_minus"] = False
 
 
 def generate_architecture_diagram():
-    # Tỷ lệ 11.5 x 6.4 cho bố cục thoáng đãng, tuyệt đối không đè chữ
+    # Tỷ lệ 11.5 x 6.4 cho bố cục rộng rãi, chữ to rõ ràng như sách giáo trình
     fig, ax = plt.subplots(figsize=(11.5, 6.4), dpi=300)
     ax.set_facecolor("#FFFFFF")
     fig.patch.set_facecolor("#FFFFFF")
 
     # Tiêu đề chính
     ax.text(5.75, 6.08, "KIẾN TRÚC TÁC NHÂN TỰ HÀNH CHECKLIST (TỐI ĐA 3 BƯỚC)", 
-            fontsize=17.5, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(5.75, 5.72, "Mô hình tác nhân tự hành 5 khối với cơ chế phản hồi và kiểm định an toàn", 
-            fontsize=13.0, ha="center", color="#475569", style="italic")
+            fontsize=18.5, fontweight="bold", ha="center", color="#004AAD")
+    ax.text(5.75, 5.72, "Mô hình 5 khối với vòng lặp quyết định và kiểm định chất lượng an toàn", 
+            fontsize=13.5, ha="center", color="#475569", style="italic")
 
     # Hộp 1: Mục tiêu người dùng
     box_goal = patches.FancyBboxPatch((0.35, 2.00), 2.25, 2.65, boxstyle="round,pad=0.10", 
@@ -37,8 +37,8 @@ def generate_architecture_diagram():
     ax.add_patch(box_goal)
     ax.text(1.475, 4.28, "1. MỤC TIÊU", fontsize=14.5, fontweight="bold", ha="center", color="#004AAD")
     ax.text(1.475, 3.96, "(User Goal)", fontsize=12.0, ha="center", color="#004AAD", style="italic")
-    ax.text(1.475, 2.95, "Tiếp nhận mục tiêu\n(VD: Viết bài RAG\ncho người mới)", 
-            fontsize=12.5, fontweight="bold", ha="center", color="#0F172A", linespacing=1.30)
+    ax.text(1.475, 2.95, "Tiếp nhận\nmục tiêu & phân\ntích ý định", 
+            fontsize=12.2, fontweight="bold", ha="center", color="#0F172A", linespacing=1.28)
 
     # Mũi tên 1 -> 2
     ax.annotate("", xy=(2.85, 3.32), xytext=(2.60, 3.32),
@@ -51,7 +51,7 @@ def generate_architecture_diagram():
     ax.text(4.025, 4.28, "2. LẬP KẾ HOẠCH", fontsize=14.5, fontweight="bold", ha="center", color="#E8630A")
     ax.text(4.025, 3.96, "(Dynamic Planner)", fontsize=12.0, ha="center", color="#E8630A", style="italic")
     ax.text(4.025, 2.95, "Phân rã mục tiêu\nChecklist động (LLM)\n(Tối đa ≤ 3 bước)", 
-            fontsize=12.5, fontweight="bold", ha="center", color="#0F172A", linespacing=1.30)
+            fontsize=12.2, fontweight="bold", ha="center", color="#0F172A", linespacing=1.28)
 
     # Mũi tên 2 -> 3
     ax.annotate("", xy=(5.45, 3.32), xytext=(5.20, 3.32),
@@ -63,8 +63,8 @@ def generate_architecture_diagram():
     ax.add_patch(box_exec)
     ax.text(7.275, 4.32, "3. THỰC THI & BỘ NHỚ", fontsize=14.5, fontweight="bold", ha="center", color="#059669")
     ax.text(7.275, 4.00, "(Execution & Memory)", fontsize=12.0, ha="center", color="#059669", style="italic")
-    ax.text(5.65, 3.15, "• Bước 1: Luận điểm (research)\n• Bước 2: Dàn ý chi tiết (outline)\n• Bước 3: Hoàn thiện bài viết", 
-            fontsize=12.5, fontweight="bold", ha="left", color="#0F172A", linespacing=1.35)
+    ax.text(5.60, 3.15, "• Bước 1: Luận điểm (research)\n• Bước 2: Dàn ý (outline)\n• Bước 3: Hoàn thiện (generate)", 
+            fontsize=12.2, fontweight="bold", ha="left", color="#0F172A", linespacing=1.35)
     ax.text(7.275, 2.20, "[Bộ nhớ ngữ cảnh & Step Logs]", fontsize=12.0, fontweight="bold", ha="center", color="#047857")
 
     # Mũi tên 3 -> 4
@@ -78,7 +78,7 @@ def generate_architecture_diagram():
     ax.text(10.25, 4.28, "4. ĐIỀU KIỆN", fontsize=14.0, fontweight="bold", ha="center", color="#DC2626")
     ax.text(10.25, 3.96, "(Stop Check)", fontsize=11.8, ha="center", color="#DC2626", style="italic")
     ax.text(10.25, 2.95, "Đạt chuẩn?\nHoặc\nBước ≥ 3\n→ DỪNG", 
-            fontsize=12.5, fontweight="bold", ha="center", color="#0F172A", linespacing=1.30)
+            fontsize=12.2, fontweight="bold", ha="center", color="#0F172A", linespacing=1.28)
 
     # Mũi tên lặp phản hồi (Loopback khi chưa dừng)
     ax.annotate("", xy=(7.275, 4.70), xytext=(10.25, 4.65),
@@ -98,10 +98,10 @@ def generate_architecture_diagram():
     ax.add_patch(box_out)
     ax.text(5.75, 1.22, "5. BÁO CÁO TỔNG KẾT & SẢN PHẨM NGHIỆM THU (FINAL REPORT & ARTIFACTS)", 
             fontsize=14.0, fontweight="bold", ha="center", color="#004AAD")
-    ax.text(5.75, 0.80, "• Kế hoạch ban đầu (Plan)   • Nhật ký kiểm toán (Audit Trail)   • Trạng thái (COMPLETED / BUDGET_EXHAUSTED)", 
-            fontsize=12.0, ha="center", color="#0F172A", fontweight="bold")
+    ax.text(5.75, 0.80, "• Kế hoạch ban đầu (Plan)   • Nhật ký kiểm toán (Audit Trail)   • Trạng thái (COMPLETED / EXHAUSTED)", 
+            fontsize=11.6, ha="center", color="#0F172A", fontweight="bold")
     ax.text(5.75, 0.42, "• Lý do dừng chi tiết   • Kiểm định chất lượng (TTR, Độ dài, LLM Judge)   • Sản phẩm hoàn chỉnh", 
-            fontsize=12.0, ha="center", color="#334155", fontweight="bold")
+            fontsize=11.6, ha="center", color="#334155", fontweight="bold")
 
     ax.set_xlim(0, 11.5)
     ax.set_ylim(0, 6.4)
@@ -179,50 +179,50 @@ def generate_state_flow_diagram():
 
 
 def generate_terminal_screenshot():
-    # Render terminal đồ họa cao cấp: font monospace lớn, sắc nét, chiều rộng 10.0
-    fig, ax = plt.subplots(figsize=(10.0, 5.0), dpi=300)
+    # Render terminal đồ họa cao cấp: font monospace lớn 11.8pt, sắc nét, tương phản hoàn hảo
+    fig, ax = plt.subplots(figsize=(10.0, 5.2), dpi=300)
     fig.patch.set_facecolor("#0F172A")
     ax.set_facecolor("#0F172A")
 
     # Header window buttons (macOS/Terminal style)
-    circle_red = patches.Circle((0.35, 4.68), 0.08, color="#EF4444")
-    circle_yellow = patches.Circle((0.58, 4.68), 0.08, color="#F59E0B")
-    circle_green = patches.Circle((0.81, 4.68), 0.08, color="#10B981")
+    circle_red = patches.Circle((0.35, 4.86), 0.08, color="#EF4444")
+    circle_yellow = patches.Circle((0.58, 4.86), 0.08, color="#F59E0B")
+    circle_green = patches.Circle((0.81, 4.86), 0.08, color="#10B981")
     ax.add_patch(circle_red)
     ax.add_patch(circle_yellow)
     ax.add_patch(circle_green)
 
-    ax.text(5.00, 4.68, "bash - thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
-            fontsize=10.8, color="#94A3B8", ha="center", family="monospace", fontweight="bold", va="center")
+    ax.text(5.00, 4.86, "bash - thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
+            fontsize=11.2, color="#94A3B8", ha="center", family="monospace", fontweight="bold", va="center")
 
     terminal_text = [
         ("$ python3 code/checklist_agent.py", "#38BDF8"),
-        ("============================================================================", "#38BDF8"),
+        ("==========================================================================", "#38BDF8"),
         ("[AUTONOMOUS AGENT] BẮT ĐẦU NHIỆM VỤ | Model: tinix-lm:latest (Ollama LLM)", "#38BDF8"),
         ("MỤC TIÊU: Viết bài chia sẻ ngắn giải thích RAG là gì cho người mới bắt đầu.", "#F8FAFC"),
         ("GIỚI HẠN: Tối đa 3 bước thực thi an toàn (Bounded Execution Loop)", "#FCD34D"),
-        ("============================================================================", "#38BDF8"),
+        ("==========================================================================", "#38BDF8"),
         ("[PLANNER] KHỞI TẠO CHECKLIST 3 BƯỚC ĐỘNG BẰNG LLM:", "#A7F3D0"),
         ("  [1] (research_points) Xác định nội dung và luận điểm cốt lõi về RAG", "#F1F5F9"),
         ("  [2] (outline) Dàn ý bài chia sẻ ngắn 4 phần (mở đầu, cơ chế, ví dụ, kết)", "#F1F5F9"),
         ("  [3] (generate) Viết và hoàn thiện bài viết theo cấu trúc dàn ý", "#F1F5F9"),
-        ("----------------------------------------------------------------------------", "#475569"),
+        ("--------------------------------------------------------------------------", "#475569"),
         ("[BƯỚC 1] research_points -> [OK] COMPLETED (3.176s) | [ADAPT] Nhấn mạnh RAG", "#34D399"),
         ("[BƯỚC 2] outline         -> [OK] COMPLETED (3.356s) | [ADAPT] Ví dụ mở sách", "#34D399"),
-        ("[BƯỚC 3] generate        -> [OK] COMPLETED (7.380s | 1,872 ký tự, 391 từ)", "#34D399"),
+        ("[BƯỚC 3] generate        -> [OK] COMPLETED (7.380s | 1.872 ký tự, 391 từ)", "#34D399"),
         ("  [LLM JUDGE] Thẩm định: correctness=1, groundedness=1, completeness=1 -> ĐẠT", "#A7F3D0"),
         ("[STOP CONDITION] Kích hoạt dừng: Goal achieved (LLM Judge Verified)", "#F87171"),
-        ("============================================================================", "#38BDF8"),
-        ("BÁO CÁO: COMPLETED | 3/3 bước | 19.812s | TTR=0.43 >= 0.35 | agent_final_report", "#FCD34D"),
+        ("==========================================================================", "#38BDF8"),
+        ("BÁO CÁO: COMPLETED | 3/3 bước | 19.812s | TTR=0.43 >= 0.35 | PASS", "#FCD34D"),
     ]
 
-    y_pos = 4.38
+    y_pos = 4.54
     for line, color in terminal_text:
-        ax.text(0.20, y_pos, line, fontsize=11.0, color=color, family="monospace", va="center", fontweight="bold")
-        y_pos -= 0.230
+        ax.text(0.20, y_pos, line, fontsize=11.8, color=color, family="monospace", va="center", fontweight="bold")
+        y_pos -= 0.245
 
     ax.set_xlim(0, 10.0)
-    ax.set_ylim(0, 5.0)
+    ax.set_ylim(0, 5.2)
     ax.axis("off")
 
     img_path = os.path.join(OUTPUT_DIR, "terminal_execution.png")

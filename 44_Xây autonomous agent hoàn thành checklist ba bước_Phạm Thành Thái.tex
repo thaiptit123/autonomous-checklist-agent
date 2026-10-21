@@ -644,8 +644,8 @@ Chưa qua khâu nghiệm thu chất lượng. & Đạt chuẩn định lượng 
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\renewcommand{\arraystretch}{0.90}
-\begin{longtable}{|c|p{0.34\linewidth}|c|p{0.25\linewidth}|}
+\renewcommand{\arraystretch}{0.92}
+\begin{longtable}{|c|p{0.33\linewidth}|c|p{0.27\linewidth}|}
 \caption{Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}\\
 \hline
 \thd{STT} & \thd{Kịch bản kiểm thử\newline (Test Scenario)} & \thd{Trạng thái} & \thd{Điều kiện dừng /\newline Kết quả} \rule{0pt}{2.6ex}\rule[-0.9ex]{0pt}{0pt} \\ \hline
@@ -660,24 +660,24 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \endlastfoot
 \multicolumn{4}{|c|}{\cellcolor{primary!10}\rule{0pt}{2.8ex}\rule[-1.0ex]{0pt}{0pt}\textbf{\color{primary}Nhóm 1: Offline Unit Tests \& Plumbing Tests (13 kịch bản -- Luôn Đạt 13/13 PASS)}} \\ \hline
 1 & Chuẩn bị outline Docker (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Dừng sớm an toàn) \\ \hline
-2 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Kế thừa \texttt{input\_doc}) \\ \hline
+2 & Tóm tắt tài liệu nguồn MCP (2 bước) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Dùng \texttt{input\_doc}) \\ \hline
 3 & Hết ngân sách bước (\texttt{max\_steps=1}) & \texttt{PASS (EXHAUSTED)} & \texttt{Budget exhausted} (Không báo nhầm) \\ \hline
-4 & Kiểm duyệt từ chối (Chất lượng kém chuẩn) & \texttt{PASS (EXHAUSTED)} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
-5 & Mục tiêu ngoài chủ đề mẫu (Apache Kafka) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
+4 & Kiểm duyệt từ chối (Chất lượng kém) & \texttt{PASS (EXHAUSTED)} & \texttt{Budget exhausted} (Chặn bài kém chuẩn) \\ \hline
+5 & Mục tiêu ngoài chủ đề mẫu (Kafka) & \texttt{PASS (COMPLETED)} & \texttt{Goal achieved} (Trích xuất chủ đề mở) \\ \hline
 6 & Quan sát \& Thích ứng bước kế tiếp & \texttt{PASS (Observe)} & \texttt{Step Adapt} (Bước 1 chỉnh Bước 2) \\ \hline
 7 & Sự cố thực thi và phát hiện kẹt & \texttt{PASS (FAILED)} & \texttt{Execution failed} (Retry \& dừng an toàn) \\ \hline
-8 & Rào chắn Bounded Loop \& AST calculate an toàn & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}, Pow limit) \\ \hline
+8 & Rào chắn Bounded Loop \& AST an toàn & \texttt{PASS (Guard)} & Chặn đứng vi phạm (\texttt{ValueError}, Pow limit) \\ \hline
 9 & Từ chối tóm tắt khi thiếu tài liệu nguồn & \texttt{PASS (FAILED)} & \texttt{Execution failed} (Chặn nội dung giả) \\ \hline
-10 & Sai sự thật nhưng đúng format (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock correctness=0) \\ \hline
-11 & Thiếu nội dung bắt buộc (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock completeness=0) \\ \hline
-12 & Bịa đặt nguồn, không bám sát (Plumbing Test) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock groundedness=0) \\ \hline
-13 & Thay đổi \texttt{action\_queue} khi REPLAN & \texttt{PASS (Replan)} & Kế hoạch mới được thực thi và lưu log \\ \hline
+10 & Sai sự thật nhưng đúng format (Plumbing) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock correctness=0) \\ \hline
+11 & Thiếu nội dung bắt buộc (Plumbing) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock completeness=0) \\ \hline
+12 & Bịa đặt nguồn, không bám sát (Plumbing) & \texttt{PASS (Plumbing)} & \texttt{Judge từ chối} (Mock groundedness=0) \\ \hline
+13 & Thay đổi \texttt{action\_queue} khi REPLAN & \texttt{PASS (Replan)} & Kế hoạch mới được lưu log audit \\ \hline
 \multicolumn{4}{|c|}{\cellcolor{primary!10}\rule{0pt}{2.8ex}\rule[-1.0ex]{0pt}{0pt}\textbf{\color{primary}Nhóm 2: Real LLM Integration Tests (5 kịch bản -- Chạy với Ollama thật: 5/5 PASS)}} \\ \hline
 14 & Viết bài RAG hoàn chỉnh với LLM thật & \texttt{PASS (Ollama)} & Hoàn thành 3 bước, Judge nghiệm thu \\ \hline
-15 & Adversarial (Real LLM): Lỗi Correctness (chung chung) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
-16 & Adversarial (Real LLM): Lỗi Correctness (sai hoàn toàn) & \texttt{PASS (Ollama)} & LLM Judge từ chối: correctness=0 \\ \hline
-17 & Adversarial (Real LLM): Lỗi Completeness (thiếu ý) & \texttt{PASS (Ollama)} & LLM Judge từ chối: completeness=0 \\ \hline
-18 & Adversarial (Real LLM): Lỗi Groundedness (bịa đặt) & \texttt{PASS (Ollama)} & LLM Judge từ chối: groundedness=0 \\ \hline
+15 & Adversarial (Real LLM): Lỗi Correctness & \texttt{PASS (Ollama)} & LLM Judge từ chối (Sai dữ kiện) \\ \hline
+16 & Adversarial (Real LLM): Lỗi Sai sự thật & \texttt{PASS (Ollama)} & LLM Judge từ chối (Sai hoàn toàn) \\ \hline
+17 & Adversarial (Real LLM): Lỗi Thiếu ý & \texttt{PASS (Ollama)} & LLM Judge từ chối (Thiếu nội dung) \\ \hline
+18 & Adversarial (Real LLM): Lỗi Bịa đặt nguồn & \texttt{PASS (Ollama)} & LLM Judge từ chối (Bịa đặt nguồn) \\ \hline
 \end{longtable}
 \renewcommand{\arraystretch}{1.0}
 \vspace{-2mm}
@@ -716,7 +716,7 @@ Sau khi kết thúc phiên làm việc, Agent tự động kết xuất tệp ti
 \NormalTok{    \}}
 \NormalTok{  \},}
 \NormalTok{  }\DataTypeTok{"total\_duration\_sec"}\NormalTok{: }\FloatTok{19.812}\NormalTok{,}
-\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"df6c0aa"}\NormalTok{, }\DataTypeTok{"temperature"}\NormalTok{: }\FloatTok{0.25}\NormalTok{, }\DataTypeTok{"seed"}\NormalTok{: }\KeywordTok{null}\NormalTok{, }\DataTypeTok{"python\_version"}\NormalTok{: }\StringTok{"3.8.10"}\NormalTok{, }\DataTypeTok{"prompt\_template\_summary"}\NormalTok{: }\StringTok{"Lập checklist..."}\NormalTok{\}}
+\NormalTok{  }\DataTypeTok{"reproducibility"}\NormalTok{: \{}\DataTypeTok{"model\_version"}\NormalTok{: }\StringTok{"tinix-lm:latest"}\NormalTok{, }\DataTypeTok{"git\_commit"}\NormalTok{: }\StringTok{"29cc9b1"}\NormalTok{, }\DataTypeTok{"temperature"}\NormalTok{: }\FloatTok{0.25}\NormalTok{, }\DataTypeTok{"seed"}\NormalTok{: }\KeywordTok{null}\NormalTok{, }\DataTypeTok{"python\_version"}\NormalTok{: }\StringTok{"3.8.10"}\NormalTok{, }\DataTypeTok{"prompt\_template\_summary"}\NormalTok{: }\StringTok{"Lập checklist..."}\NormalTok{\}}
 \NormalTok{\}}
 \end{Highlighting}
 \end{Shaded}
