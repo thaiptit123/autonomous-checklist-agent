@@ -214,17 +214,72 @@ def generate_state_flow_diagram():
 
 
 def generate_terminal_screenshot():
-    # 8.2 x 3.65 canvas: 16 well-spaced lines, strictly NOTO SANS MONO LIGHT (thinner, elegant, non-bold)
-    fig, ax = plt.subplots(figsize=(8.2, 3.65), dpi=300)
-    fig.patch.set_facecolor("#181825")
-    ax.set_facecolor("#181825")
-    ax.set_xlim(0, 8.2)
-    ax.set_ylim(0, 3.65)
+    # 7.8 x 4.0 canvas: authentic, elegant developer terminal card with macOS chrome & subtle border
+    fig, ax = plt.subplots(figsize=(7.8, 4.0), dpi=300)
+    fig.patch.set_facecolor("#FFFFFF")
+    ax.set_facecolor("#FFFFFF")
+    ax.set_xlim(0, 7.8)
+    ax.set_ylim(0, 4.0)
 
-    fp_reg = FontProperties(fname=NOTO_SANS_MONO_LIGHT, size=9.2)
-    fp_header = FontProperties(fname=NOTO_SANS_MONO_LIGHT, size=8.4)
+    fp_reg = FontProperties(fname=NOTO_SANS_MONO_REG, size=9.6)
+    fp_header = FontProperties(fname=NOTO_SANS_MONO_REG, size=8.6)
 
-    # Measure exact char width dynamically for 100% regular font
+    # Sleek rounded card container with crisp border
+    bg_card = patches.FancyBboxPatch((0.08, 0.08), 7.64, 3.84, boxstyle="round,pad=0.04,rounding_size=0.10",
+                                    facecolor="#181825", edgecolor="#45475A", linewidth=1.2)
+    ax.add_patch(bg_card)
+
+    # Window chrome dots (macOS style)
+    circle_red = patches.Circle((0.36, 3.68), 0.065, color="#F38BA8")
+    circle_yellow = patches.Circle((0.56, 3.68), 0.065, color="#F9E2AF")
+    circle_green = patches.Circle((0.76, 3.68), 0.065, color="#A6E3A1")
+    ax.add_patch(circle_red)
+    ax.add_patch(circle_yellow)
+    ax.add_patch(circle_green)
+
+    ax.text(1.04, 3.68, "thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
+            color="#9399B2", ha="left", fontproperties=fp_header, va="center")
+
+    # Chrome separator line
+    ax.plot([0.08, 7.72], [3.50, 3.50], color="#313244", lw=0.9)
+
+    div_line = "─" * 67
+
+    # Clean, column-aligned terminal session (strictly regular weight, zero bold glyphs)
+    lines = [
+        # Line 1: Command prompt
+        [("$ ", "#7F849C"), ("python3 code/checklist_agent.py", "#89DCEB")],
+        # Line 2: Divider
+        [(div_line, "#363A4F")],
+        # Line 3: Agent start
+        [("[AGENT] ", "#89B4FA"), ("Bắt đầu nhiệm vụ | Ollama (tinix-lm:latest)", "#CDD6F4")],
+        # Line 4: Mission
+        [("Mục tiêu: ", "#A6ADC8"), ("Viết bài chia sẻ ngắn giải thích RAG cho người mới.", "#BAC2DE")],
+        # Line 5: Limit
+        [("Giới hạn: ", "#A6ADC8"), ("Tối đa 3 bước thực thi (Bounded Execution Loop)", "#F9E2AF")],
+        # Line 6: Divider
+        [(div_line, "#363A4F")],
+        # Line 7: Planner
+        [("[PLANNER] ", "#94E2D5"), ("Khởi tạo checklist 3 bước động bằng LLM:", "#CDD6F4")],
+        # Line 8-10: Step plan
+        [("  [1] (research_points) ", "#BAC2DE"), ("Luận điểm cốt lõi về RAG", "#CDD6F4")],
+        [("  [2] (outline)         ", "#BAC2DE"), ("Dàn ý 4 phần (mở, thân, ví dụ, kết)", "#CDD6F4")],
+        [("  [3] (generate)        ", "#BAC2DE"), ("Hoàn thiện bài viết theo dàn ý", "#CDD6F4")],
+        # Line 11: Divider
+        [(div_line, "#363A4F")],
+        # Line 12-16: Execution steps aligned strictly in columns
+        [("[BƯỚC 1] research_points  --> ", "#BAC2DE"), ("COMPLETED", "#A6E3A1"), (" (3.176s)", "#7F849C")],
+        [("[BƯỚC 2] outline          --> ", "#BAC2DE"), ("COMPLETED", "#A6E3A1"), (" (3.356s)", "#7F849C")],
+        [("[BƯỚC 3] generate         --> ", "#BAC2DE"), ("COMPLETED", "#A6E3A1"), (" (7.380s | 1.872 ký tự)", "#7F849C")],
+        [("[LLM JUDGE] Thẩm định     --> ", "#BAC2DE"), ("PASS", "#A6E3A1"), (" (correctness=1, quality_gate)", "#7F849C")],
+        [("[STOP CONDITION] Dừng     --> ", "#BAC2DE"), ("Goal achieved", "#FAB387"), (" (Đạt chuẩn)", "#7F849C")],
+        # Line 17: Divider
+        [(div_line, "#363A4F")],
+        # Line 18: Summary report
+        [("BÁO CÁO: ", "#F9E2AF"), ("COMPLETED", "#A6E3A1"), 
+         (" | 3/3 bước | 19.812s | TTR=0.43 | ", "#CDD6F4"), ("PASS", "#A6E3A1")],
+    ]
+
     t_measure = ax.text(0, -10, "A" * 100, fontproperties=fp_reg)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
@@ -233,63 +288,11 @@ def generate_terminal_screenshot():
     char_w = bbox.transformed(inv).width / 100.0
     t_measure.remove()
 
-    # Window chrome dots
-    circle_red = patches.Circle((0.28, 3.42), 0.075, color="#F38BA8")
-    circle_yellow = patches.Circle((0.50, 3.42), 0.075, color="#F9E2AF")
-    circle_green = patches.Circle((0.72, 3.42), 0.075, color="#A6E3A1")
-    ax.add_patch(circle_red)
-    ax.add_patch(circle_yellow)
-    ax.add_patch(circle_green)
-
-    ax.text(1.02, 3.42, "thaipt@tinix-aiguru: ~/checklist-agent (python3 checklist_agent.py)", 
-            color="#9399B2", ha="left", fontproperties=fp_header, va="center")
-
-    div_line = "─" * 68
-
-    # 100% REGULAR WEIGHT: Keywords are differentiated solely by harmonious color accents.
-    lines = [
-        # Line 1: Command prompt
-        [("$ ", "#6C7086"), ("python3 code/checklist_agent.py", "#89DCEB")],
-        # Line 2: Divider
-        [(div_line, "#313244")],
-        # Line 3: Agent start
-        [("[AGENT] ", "#89B4FA"), ("Bắt đầu nhiệm vụ | tinix-lm:latest (Ollama)", "#BAC2DE")],
-        # Line 4: Mission
-        [("Mục tiêu: ", "#9399B2"), ("Viết bài chia sẻ ngắn giải thích RAG cho người mới.", "#CDD6F4")],
-        # Line 5: Limit
-        [("Giới hạn: ", "#9399B2"), ("Tối đa 3 bước thực thi (Bounded Execution Loop)", "#F9E2AF")],
-        # Line 6: Divider
-        [(div_line, "#313244")],
-        # Line 7: Planner
-        [("[PLANNER] ", "#94E2D5"), ("Khởi tạo checklist 3 bước động bằng LLM:", "#CDD6F4")],
-        # Line 8: Step 1 plan
-        [("  [1] (research_points) ", "#A6ADC8"), ("Luận điểm cốt lõi về RAG", "#BAC2DE")],
-        # Line 9: Step 2 plan
-        [("  [2] (outline)         ", "#A6ADC8"), ("Dàn ý 4 phần (mở, thân, ví dụ, kết)", "#BAC2DE")],
-        # Line 10: Step 3 plan
-        [("  [3] (generate)        ", "#A6ADC8"), ("Hoàn thiện bài viết theo dàn ý", "#BAC2DE")],
-        # Line 11: Step 1 exec
-        [("[BƯỚC 1] research_points -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (3.176s)", "#6C7086")],
-        # Line 12: Step 2 exec
-        [("[BƯỚC 2] outline         -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (3.356s)", "#6C7086")],
-        # Line 13: Step 3 exec
-        [("[BƯỚC 3] generate        -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (7.380s | 1.872 ký tự)", "#6C7086")],
-        # Line 14: LLM Judge
-        [("  [LLM JUDGE] Thẩm định: correctness=1, quality=", "#94E2D5"), ("PASS", "#A6E3A1")],
-        # Line 15: Stop condition
-        [("[STOP CONDITION] Kích hoạt dừng: ", "#F38BA8"), ("Goal achieved", "#FAB387"), (" (Đạt chuẩn)", "#BAC2DE")],
-        # Line 16: Divider
-        [(div_line, "#313244")],
-        # Line 17: Summary report
-        [("BÁO CÁO: ", "#F9E2AF"), ("COMPLETED", "#A6E3A1"), 
-         (" | 3/3 bước | 19.812s | TTR=0.43 | ", "#F9E2AF"), ("PASS", "#A6E3A1")],
-    ]
-
-    y_pos = 3.12
-    y_step = 0.188
+    y_pos = 3.32
+    y_step = 0.178
 
     for line_segments in lines:
-        cur_x = 0.22
+        cur_x = 0.28
         for text, color in line_segments:
             ax.text(cur_x, y_pos, text, color=color, fontproperties=fp_reg, va="center")
             cur_x += len(text) * char_w
