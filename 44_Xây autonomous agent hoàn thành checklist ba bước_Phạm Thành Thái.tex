@@ -245,12 +245,12 @@ AI Guru x TiniX
 \section*{Các thuật ngữ cơ bản}\label{cac-thuat-ngu-co-ban}}
 \phantomsection\addcontentsline{toc}{section}{Các thuật ngữ cơ bản}
 
-\vspace{2mm}
+\vspace{2.5mm}
 \noindent\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}\label{tab:thuat-ngu}
 
-\vspace{2.5mm}
-\begin{center}
-\renewcommand{\arraystretch}{1.10}
+\vspace{3.5mm}
+{\centering
+\renewcommand{\arraystretch}{1.08}
 \begin{tabular}{|p{0.28\linewidth}|p{0.67\linewidth}|}
 \hline
 \thd{\raggedright Thuật ngữ\strut} & \thd{\raggedright Định nghĩa trong ngữ cảnh Checklist Agent\strut}\tabularnewline \hline
@@ -260,8 +260,7 @@ AI Guru x TiniX
 \raggedright \textbf{Điều kiện dừng (stop condition)}\strut & \raggedright Bộ quy tắc logic xác định khi nào tác nhân phải ngưng vòng lặp. Trong triển khai này, các trạng thái dừng chính gồm: hoàn thành mục tiêu (\texttt{COMPLETED / Goal Achieved}), hết ngân sách bước (\texttt{BUDGET\_EXHAUSTED}) và lỗi thực thi (\texttt{FAILED}).\strut \tabularnewline \hline
 \raggedright \textbf{Bộ nhớ trạng thái ngữ cảnh (context memory)}\strut & \raggedright Cơ chế truyền và tích lũy trạng thái/dữ liệu giữa các bước thực thi. Kết quả đầu ra của Bước 1 (Dàn ý) trở thành đầu vào trực tiếp nuôi Bước 2 (Viết bài) và Bước 3 (Rà soát).\strut \tabularnewline \hline
 \raggedright \textbf{Nhật ký từng bước \& báo cáo tổng kết}\strut & \raggedright Bản ghi kiểm toán (Audit Trail) chi tiết từng chặng và báo cáo tổng kết cuối cùng, đảm bảo tính minh bạch, có thể quan sát (Observability) và kiểm chứng của hệ thống tự hành.\strut \tabularnewline \hline
-\end{tabular}
-\end{center}
+\end{tabular}\par}
 
 \section{Lý thuyết cơ bản: Kiến trúc tác nhân tự hành và vòng lặp quyết định}\label{ly-thuyet-co-ban}
 
@@ -603,7 +602,7 @@ Người dùng nhập mục tiêu: \textit{"Viết một bài chia sẻ ngắn g
 \begin{figure}[H]
     \centering
     \vspace{-4mm}
-    \includegraphics[width=0.82\textwidth]{images/terminal_execution.png}
+    \includegraphics[width=0.80\textwidth]{images/terminal_execution.png}
     \vspace{-2mm}
     \caption{Giao diện phiên thực thi trên terminal đối chiếu đồng bộ với dữ liệu kiểm toán thực tế (\texttt{test\_execution\_ollama.log} và \texttt{agent\_final\_report.json})}
     \label{fig:terminal}
@@ -618,6 +617,7 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 ($\ge 0.35$), 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
+\vspace{-2mm}
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng Agent \textbf{không bắt buộc chạy đủ 3 bước trong mọi mục tiêu}, ta kiểm thử mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi chạy ở chế độ dự phòng (\texttt{use\_llm=False}):
 \begin{itemize}
@@ -626,15 +626,16 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
     \item \textbf{Kích hoạt điều kiện dừng sớm (stop condition):} Ngay khi Bước 2 hoàn thành, \texttt{QualityEvaluator} trực tiếp thẩm định dàn ý (độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa và dừng an toàn.
 \end{itemize}
 
+\vspace{-1mm}
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng 2 đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
 \vspace{1.5mm}
 \noindent\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
 
-\vspace{2mm}
+\vspace{2.8mm}
 {\centering
-\renewcommand{\arraystretch}{1.05}
+\renewcommand{\arraystretch}{1.02}
 \begin{tabular}{|p{0.46\linewidth}|p{0.48\linewidth}|}
 \hline
 \thd{\raggedright Sản phẩm sau Bước 2 (Dàn ý chi tiết)\strut} & \thd{\raggedright Sản phẩm sau Bước 3 (Bài viết hoàn thiện)\strut}\tabularnewline \hline
@@ -647,12 +648,12 @@ Bảng 2 đối chiếu sự tiến hóa rõ rệt về chất lượng nội du
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
-\vspace{1.5mm}
+\vspace{2.5mm}
 \noindent\textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
 
-\vspace{2mm}
-\renewcommand{\arraystretch}{0.92}
-\setlength{\LTpre}{2mm}
+\vspace{3.5mm}
+\renewcommand{\arraystretch}{0.90}
+\setlength{\LTpre}{3.5mm}
 \begin{longtable}{|c|p{0.33\linewidth}|c|p{0.27\linewidth}|}
 \hline
 \thd{\centering STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\centering Trạng thái\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
