@@ -1,11 +1,10 @@
 """
 Generate high-legibility diagrams and authentic terminal screenshot for Bai 44.
 Directly addresses reviewer comments:
-- Relaxed typography: Title Case instead of aggressive ALL-CAPS BOLD; normal weights for body texts.
-- Visual hierarchy: elements do not compete for attention; calm, professional software architecture styling.
+- Relaxed typography: eliminate all unnecessary bolding inside figures; regular weights with curated colors.
 - Zero line/arrow collision: generous breathing room (>0.35 units) between badges, text labels, and connection lines.
-- Authentic terminal: Catppuccin/VS Code developer theme, subtle dim dividers, 100% regular monospace weights,
-  only accenting key keywords (COMPLETED, Goal achieved, PASS), highly legible at 100% zoom.
+- Authentic terminal: Catppuccin/VS Code developer theme, subtle dim dividers, strictly 100% REGULAR monospace font,
+  distinguishing keywords purely by harmonious color accents (NO bold glyphs), highly legible at 100% zoom.
 """
 import os
 import matplotlib.pyplot as plt
@@ -20,7 +19,6 @@ plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Liberation Sans", "Noto Sans"
 plt.rcParams["axes.unicode_minus"] = False
 
 LIBERATION_MONO_REG = "/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf"
-LIBERATION_MONO_BOLD = "/usr/share/fonts/truetype/liberation2/LiberationMono-Bold.ttf"
 
 
 def generate_architecture_diagram():
@@ -31,18 +29,18 @@ def generate_architecture_diagram():
     ax.set_xlim(0, 10.0)
     ax.set_ylim(0, 6.2)
 
-    # Main title: Title Case, refined semi-bold
+    # Main title: only the overall diagram title is bold; all internal box titles use regular weight
     ax.text(5.00, 5.90, "Kiến trúc tác nhân tự hành với vòng lặp giới hạn (≤ 3 bước)", 
-            fontsize=15.2, fontweight="bold", ha="center", color="#1E3A8A", fontfamily="DejaVu Sans")
+            fontsize=15.0, fontweight="bold", ha="center", color="#1E3A8A", fontfamily="DejaVu Sans")
     ax.text(5.00, 5.58, "Mô hình 5 thành phần với vòng lặp quyết định và kiểm định an toàn", 
-            fontsize=10.8, ha="center", color="#64748B", style="italic", fontfamily="DejaVu Sans")
+            fontsize=10.6, ha="center", color="#64748B", style="italic", fontfamily="DejaVu Sans")
 
     # 4 top boxes: y from 2.05 to 4.55 (height 2.50)
     # Box 1: Mục tiêu
     b1 = patches.FancyBboxPatch((0.25, 2.05), 2.05, 2.50, boxstyle="round,pad=0.10",
                                 edgecolor="#3B82F6", facecolor="#F8FAFC", linewidth=1.4)
     ax.add_patch(b1)
-    ax.text(1.275, 4.22, "1. Tiếp nhận mục tiêu", fontsize=11.8, fontweight="bold", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
+    ax.text(1.275, 4.22, "1. Tiếp nhận mục tiêu", fontsize=11.6, fontweight="normal", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
     ax.text(1.275, 3.94, "(User Goal)", fontsize=10.0, ha="center", color="#3B82F6", style="italic", fontfamily="DejaVu Sans")
     ax.text(1.275, 2.96, "Tiếp nhận\nmục tiêu &\nphân tích\ný định", 
             fontsize=10.8, fontweight="normal", ha="center", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
@@ -55,7 +53,7 @@ def generate_architecture_diagram():
     b2 = patches.FancyBboxPatch((2.65, 2.05), 2.25, 2.50, boxstyle="round,pad=0.10",
                                 edgecolor="#D97706", facecolor="#FFFBEB", linewidth=1.4)
     ax.add_patch(b2)
-    ax.text(3.775, 4.22, "2. Lập kế hoạch", fontsize=11.8, fontweight="bold", ha="center", color="#B45309", fontfamily="DejaVu Sans")
+    ax.text(3.775, 4.22, "2. Lập kế hoạch", fontsize=11.6, fontweight="normal", ha="center", color="#B45309", fontfamily="DejaVu Sans")
     ax.text(3.775, 3.94, "(Dynamic Planner)", fontsize=10.0, ha="center", color="#D97706", style="italic", fontfamily="DejaVu Sans")
     ax.text(3.775, 2.96, "Phân rã\nChecklist\nđộng (LLM)\n(Tối đa ≤ 3)", 
             fontsize=10.8, fontweight="normal", ha="center", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
@@ -68,7 +66,7 @@ def generate_architecture_diagram():
     b3 = patches.FancyBboxPatch((5.25, 2.05), 3.05, 2.50, boxstyle="round,pad=0.10",
                                 edgecolor="#059669", facecolor="#F0FDF4", linewidth=1.4)
     ax.add_patch(b3)
-    ax.text(6.775, 4.22, "3. Thực thi & Bộ nhớ", fontsize=11.8, fontweight="bold", ha="center", color="#047857", fontfamily="DejaVu Sans")
+    ax.text(6.775, 4.22, "3. Thực thi & Bộ nhớ", fontsize=11.6, fontweight="normal", ha="center", color="#047857", fontfamily="DejaVu Sans")
     ax.text(6.775, 3.94, "(Execution & Memory)", fontsize=10.0, ha="center", color="#059669", style="italic", fontfamily="DejaVu Sans")
     ax.text(5.50, 3.06, "• Bước 1: Luận điểm cốt lõi\n• Bước 2: Dàn ý chi tiết 4 phần\n• Bước 3: Hoàn thiện bài viết", 
             fontsize=10.5, fontweight="normal", ha="left", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
@@ -82,7 +80,7 @@ def generate_architecture_diagram():
     b4 = patches.FancyBboxPatch((8.65, 2.05), 1.15, 2.50, boxstyle="round,pad=0.10",
                                 edgecolor="#DC2626", facecolor="#FEF2F2", linewidth=1.4)
     ax.add_patch(b4)
-    ax.text(9.225, 4.22, "4. Kiểm định", fontsize=11.8, fontweight="bold", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
+    ax.text(9.225, 4.22, "4. Kiểm định", fontsize=11.6, fontweight="normal", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
     ax.text(9.225, 3.94, "(Stop Gate)", fontsize=10.0, ha="center", color="#DC2626", style="italic", fontfamily="DejaVu Sans")
     ax.text(9.225, 3.04, "Đạt chuẩn\nmục tiêu?\nHoặc\nbước ≥ 3", 
             fontsize=10.5, fontweight="normal", ha="center", color="#475569", linespacing=1.30, fontfamily="DejaVu Sans")
@@ -114,7 +112,7 @@ def generate_architecture_diagram():
                                 edgecolor="#3B82F6", facecolor="#F8FAFC", linewidth=1.4)
     ax.add_patch(b5)
     ax.text(5.00, 0.98, "5. Báo cáo tổng kết & Sản phẩm nghiệm thu (Final Report)", 
-            fontsize=11.8, fontweight="bold", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
+            fontsize=11.6, fontweight="normal", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
     ax.text(5.00, 0.65, "• Kế hoạch ban đầu (Plan)     • Nhật ký kiểm toán (Audit Trail)     • Trạng thái kết thúc", 
             fontsize=10.4, ha="center", color="#475569", fontweight="normal", fontfamily="DejaVu Sans")
     ax.text(5.00, 0.35, "• Lý do dừng chi tiết     • Thẩm định chất lượng (TTR, Length, LLM Judge)     • Bài viết hoàn chỉnh", 
@@ -136,19 +134,19 @@ def generate_state_flow_diagram():
     ax.set_xlim(0, 10.2)
     ax.set_ylim(0, 5.8)
 
-    # Main title: Title Case, refined
+    # Main title: Title Case, refined bold
     ax.text(5.10, 5.45, "Luồng truyền dữ liệu & Điều kiện dừng qua các bước", 
-            fontsize=15.2, fontweight="bold", ha="center", color="#1E3A8A", fontfamily="DejaVu Sans")
+            fontsize=15.0, fontweight="bold", ha="center", color="#1E3A8A", fontfamily="DejaVu Sans")
     ax.text(5.10, 5.14, "Cơ chế truyền ngữ cảnh (Context Memory) và rà soát điều kiện dừng ở từng bước", 
-            fontsize=10.8, ha="center", color="#64748B", style="italic", fontfamily="DejaVu Sans")
+            fontsize=10.6, ha="center", color="#64748B", style="italic", fontfamily="DejaVu Sans")
 
     # 3 Step boxes with generous gaps
     # Step 1: width 2.40, x: 0.45 to 2.85
     s1 = patches.FancyBboxPatch((0.45, 2.50), 2.40, 2.30, boxstyle="round,pad=0.08",
                                 edgecolor="#3B82F6", facecolor="#F8FAFC", linewidth=1.4)
     ax.add_patch(s1)
-    ax.text(1.65, 4.45, "Bước 1", fontsize=12.0, fontweight="bold", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
-    ax.text(1.65, 4.18, "Luận điểm cốt lõi", fontsize=11.0, fontweight="normal", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
+    ax.text(1.65, 4.45, "Bước 1", fontsize=11.6, fontweight="normal", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
+    ax.text(1.65, 4.18, "Luận điểm cốt lõi", fontsize=10.8, fontweight="normal", ha="center", color="#1E40AF", fontfamily="DejaVu Sans")
     ax.text(1.65, 3.25, "• Tác vụ: research\n• Vào: Mục tiêu đề bài\n• Ra: Luận điểm chính", 
             fontsize=10.0, fontweight="normal", ha="center", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
 
@@ -161,8 +159,8 @@ def generate_state_flow_diagram():
     s2 = patches.FancyBboxPatch((3.90, 2.50), 2.40, 2.30, boxstyle="round,pad=0.08",
                                 edgecolor="#D97706", facecolor="#FFFBEB", linewidth=1.4)
     ax.add_patch(s2)
-    ax.text(5.10, 4.45, "Bước 2", fontsize=12.0, fontweight="bold", ha="center", color="#B45309", fontfamily="DejaVu Sans")
-    ax.text(5.10, 4.18, "Dàn ý chi tiết", fontsize=11.0, fontweight="normal", ha="center", color="#B45309", fontfamily="DejaVu Sans")
+    ax.text(5.10, 4.45, "Bước 2", fontsize=11.6, fontweight="normal", ha="center", color="#B45309", fontfamily="DejaVu Sans")
+    ax.text(5.10, 4.18, "Dàn ý chi tiết", fontsize=10.8, fontweight="normal", ha="center", color="#B45309", fontfamily="DejaVu Sans")
     ax.text(5.10, 3.25, "• Tác vụ: outline\n• Vào: Luận điểm B1\n• Ra: Dàn ý 4 phần", 
             fontsize=10.0, fontweight="normal", ha="center", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
 
@@ -175,8 +173,8 @@ def generate_state_flow_diagram():
     s3 = patches.FancyBboxPatch((7.35, 2.50), 2.40, 2.30, boxstyle="round,pad=0.08",
                                 edgecolor="#059669", facecolor="#F0FDF4", linewidth=1.4)
     ax.add_patch(s3)
-    ax.text(8.55, 4.45, "Bước 3", fontsize=12.0, fontweight="bold", ha="center", color="#047857", fontfamily="DejaVu Sans")
-    ax.text(8.55, 4.18, "Hoàn thiện bài viết", fontsize=11.0, fontweight="normal", ha="center", color="#047857", fontfamily="DejaVu Sans")
+    ax.text(8.55, 4.45, "Bước 3", fontsize=11.6, fontweight="normal", ha="center", color="#047857", fontfamily="DejaVu Sans")
+    ax.text(8.55, 4.18, "Hoàn thiện bài viết", fontsize=10.8, fontweight="normal", ha="center", color="#047857", fontfamily="DejaVu Sans")
     ax.text(8.55, 3.25, "• Tác vụ: generate\n• Vào: Dàn ý & bộ nhớ\n• Ra: Bài viết hoàn thiện", 
             fontsize=10.0, fontweight="normal", ha="center", color="#475569", linespacing=1.35, fontfamily="DejaVu Sans")
 
@@ -185,25 +183,25 @@ def generate_state_flow_diagram():
                                       edgecolor="#DC2626", facecolor="#FFFFFF", linewidth=1.3)
     ax.add_patch(eval_box)
     ax.text(5.10, 1.82, "Bộ đánh giá điều kiện dừng (Stop Condition Evaluator)", 
-            fontsize=11.8, fontweight="bold", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
+            fontsize=11.6, fontweight="normal", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
 
     # Col 1: Completed
-    ax.text(1.65, 1.36, "Đạt chuẩn mục tiêu", fontsize=10.8, fontweight="bold", ha="center", color="#047857", fontfamily="DejaVu Sans")
+    ax.text(1.65, 1.36, "Đạt chuẩn mục tiêu", fontsize=10.6, fontweight="normal", ha="center", color="#047857", fontfamily="DejaVu Sans")
     ax.text(1.65, 0.82, "Goal Achieved == True\nĐạt TTR, độ dài & LLM Judge", 
             fontsize=9.8, fontweight="normal", ha="center", color="#475569", linespacing=1.30, fontfamily="DejaVu Sans")
-    ax.text(1.65, 0.42, "→ COMPLETED", fontsize=10.5, fontweight="bold", ha="center", color="#059669", fontfamily="DejaVu Sans")
+    ax.text(1.65, 0.42, "→ COMPLETED", fontsize=10.2, fontweight="normal", ha="center", color="#059669", fontfamily="DejaVu Sans")
 
     # Col 2: Budget exhausted
-    ax.text(5.10, 1.36, "Hết ngân sách bước", fontsize=10.8, fontweight="bold", ha="center", color="#B45309", fontfamily="DejaVu Sans")
+    ax.text(5.10, 1.36, "Hết ngân sách bước", fontsize=10.6, fontweight="normal", ha="center", color="#B45309", fontfamily="DejaVu Sans")
     ax.text(5.10, 0.82, "Steps Executed ≥ 3\nChốt chặn Bounded Loop", 
             fontsize=9.8, fontweight="normal", ha="center", color="#475569", linespacing=1.30, fontfamily="DejaVu Sans")
-    ax.text(5.10, 0.42, "→ BUDGET_EXHAUSTED", fontsize=10.5, fontweight="bold", ha="center", color="#D97706", fontfamily="DejaVu Sans")
+    ax.text(5.10, 0.42, "→ BUDGET_EXHAUSTED", fontsize=10.2, fontweight="normal", ha="center", color="#D97706", fontfamily="DejaVu Sans")
 
     # Col 3: Failed
-    ax.text(8.55, 1.36, "Lỗi thực thi", fontsize=10.8, fontweight="bold", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
+    ax.text(8.55, 1.36, "Lỗi thực thi", fontsize=10.6, fontweight="normal", ha="center", color="#B91C1C", fontfamily="DejaVu Sans")
     ax.text(8.55, 0.82, "Execution Error\nThất bại sau 2 lần retry", 
             fontsize=9.8, fontweight="normal", ha="center", color="#475569", linespacing=1.30, fontfamily="DejaVu Sans")
-    ax.text(8.55, 0.42, "→ FAILED", fontsize=10.5, fontweight="bold", ha="center", color="#DC2626", fontfamily="DejaVu Sans")
+    ax.text(8.55, 0.42, "→ FAILED", fontsize=10.2, fontweight="normal", ha="center", color="#DC2626", fontfamily="DejaVu Sans")
 
     ax.axis("off")
     img_path = os.path.join(OUTPUT_DIR, "state_flow_diagram.png")
@@ -214,7 +212,7 @@ def generate_state_flow_diagram():
 
 
 def generate_terminal_screenshot():
-    # 8.2 x 3.65 canvas: 16 well-spaced lines, airy, authentic, no crowded feeling
+    # 8.2 x 3.65 canvas: 16 well-spaced lines, strictly 100% REGULAR monospace font (ZERO BOLD GLYPHS)
     fig, ax = plt.subplots(figsize=(8.2, 3.65), dpi=300)
     fig.patch.set_facecolor("#181825")
     ax.set_facecolor("#181825")
@@ -222,10 +220,9 @@ def generate_terminal_screenshot():
     ax.set_ylim(0, 3.65)
 
     fp_reg = FontProperties(fname=LIBERATION_MONO_REG, size=9.6)
-    fp_bold = FontProperties(fname=LIBERATION_MONO_BOLD, size=9.6)
     fp_header = FontProperties(fname=LIBERATION_MONO_REG, size=8.8)
 
-    # Measure exact char width dynamically
+    # Measure exact char width dynamically for 100% regular font
     t_measure = ax.text(0, -10, "A" * 100, fontproperties=fp_reg)
     fig.canvas.draw()
     renderer = fig.canvas.get_renderer()
@@ -234,7 +231,7 @@ def generate_terminal_screenshot():
     char_w = bbox.transformed(inv).width / 100.0
     t_measure.remove()
 
-    # Window chrome
+    # Window chrome dots
     circle_red = patches.Circle((0.28, 3.42), 0.075, color="#F38BA8")
     circle_yellow = patches.Circle((0.50, 3.42), 0.075, color="#F9E2AF")
     circle_green = patches.Circle((0.72, 3.42), 0.075, color="#A6E3A1")
@@ -247,42 +244,43 @@ def generate_terminal_screenshot():
 
     div_line = "─" * 68
 
+    # 100% REGULAR WEIGHT: Keywords are differentiated solely by harmonious color accents.
     lines = [
         # Line 1: Command prompt
-        [("$ ", "#6C7086", fp_reg), ("python3 code/checklist_agent.py", "#89DCEB", fp_reg)],
+        [("$ ", "#6C7086"), ("python3 code/checklist_agent.py", "#89DCEB")],
         # Line 2: Divider
-        [(div_line, "#313244", fp_reg)],
+        [(div_line, "#313244")],
         # Line 3: Agent start
-        [("[AGENT] ", "#89B4FA", fp_reg), ("Bắt đầu nhiệm vụ | tinix-lm:latest (Ollama)", "#BAC2DE", fp_reg)],
+        [("[AGENT] ", "#89B4FA"), ("Bắt đầu nhiệm vụ | tinix-lm:latest (Ollama)", "#BAC2DE")],
         # Line 4: Mission
-        [("Mục tiêu: ", "#9399B2", fp_reg), ("Viết bài chia sẻ ngắn giải thích RAG cho người mới.", "#CDD6F4", fp_reg)],
+        [("Mục tiêu: ", "#9399B2"), ("Viết bài chia sẻ ngắn giải thích RAG cho người mới.", "#CDD6F4")],
         # Line 5: Limit
-        [("Giới hạn: ", "#9399B2", fp_reg), ("Tối đa 3 bước thực thi (Bounded Execution Loop)", "#F9E2AF", fp_reg)],
+        [("Giới hạn: ", "#9399B2"), ("Tối đa 3 bước thực thi (Bounded Execution Loop)", "#F9E2AF")],
         # Line 6: Divider
-        [(div_line, "#313244", fp_reg)],
+        [(div_line, "#313244")],
         # Line 7: Planner
-        [("[PLANNER] ", "#94E2D5", fp_reg), ("Khởi tạo checklist 3 bước động bằng LLM:", "#CDD6F4", fp_reg)],
+        [("[PLANNER] ", "#94E2D5"), ("Khởi tạo checklist 3 bước động bằng LLM:", "#CDD6F4")],
         # Line 8: Step 1 plan
-        [("  [1] (research_points) ", "#A6ADC8", fp_reg), ("Luận điểm cốt lõi về RAG", "#BAC2DE", fp_reg)],
+        [("  [1] (research_points) ", "#A6ADC8"), ("Luận điểm cốt lõi về RAG", "#BAC2DE")],
         # Line 9: Step 2 plan
-        [("  [2] (outline)         ", "#A6ADC8", fp_reg), ("Dàn ý 4 phần (mở, thân, ví dụ, kết)", "#BAC2DE", fp_reg)],
+        [("  [2] (outline)         ", "#A6ADC8"), ("Dàn ý 4 phần (mở, thân, ví dụ, kết)", "#BAC2DE")],
         # Line 10: Step 3 plan
-        [("  [3] (generate)        ", "#A6ADC8", fp_reg), ("Hoàn thiện bài viết theo dàn ý", "#BAC2DE", fp_reg)],
+        [("  [3] (generate)        ", "#A6ADC8"), ("Hoàn thiện bài viết theo dàn ý", "#BAC2DE")],
         # Line 11: Step 1 exec
-        [("[BƯỚC 1] research_points -> [OK] ", "#A6ADC8", fp_reg), ("COMPLETED", "#A6E3A1", fp_bold), (" (3.176s)", "#6C7086", fp_reg)],
+        [("[BƯỚC 1] research_points -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (3.176s)", "#6C7086")],
         # Line 12: Step 2 exec
-        [("[BƯỚC 2] outline         -> [OK] ", "#A6ADC8", fp_reg), ("COMPLETED", "#A6E3A1", fp_bold), (" (3.356s)", "#6C7086", fp_reg)],
+        [("[BƯỚC 2] outline         -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (3.356s)", "#6C7086")],
         # Line 13: Step 3 exec
-        [("[BƯỚC 3] generate        -> [OK] ", "#A6ADC8", fp_reg), ("COMPLETED", "#A6E3A1", fp_bold), (" (7.380s | 1.872 ký tự)", "#6C7086", fp_reg)],
+        [("[BƯỚC 3] generate        -> [OK] ", "#A6ADC8"), ("COMPLETED", "#A6E3A1"), (" (7.380s | 1.872 ký tự)", "#6C7086")],
         # Line 14: LLM Judge
-        [("  [LLM JUDGE] Thẩm định: correctness=1, quality=", "#94E2D5", fp_reg), ("PASS", "#A6E3A1", fp_bold)],
+        [("  [LLM JUDGE] Thẩm định: correctness=1, quality=", "#94E2D5"), ("PASS", "#A6E3A1")],
         # Line 15: Stop condition
-        [("[STOP CONDITION] Kích hoạt dừng: ", "#F38BA8", fp_reg), ("Goal achieved", "#FAB387", fp_bold), (" (Đạt chuẩn)", "#BAC2DE", fp_reg)],
+        [("[STOP CONDITION] Kích hoạt dừng: ", "#F38BA8"), ("Goal achieved", "#FAB387"), (" (Đạt chuẩn)", "#BAC2DE")],
         # Line 16: Divider
-        [(div_line, "#313244", fp_reg)],
+        [(div_line, "#313244")],
         # Line 17: Summary report
-        [("BÁO CÁO: ", "#F9E2AF", fp_reg), ("COMPLETED", "#A6E3A1", fp_bold), 
-         (" | 3/3 bước | 19.812s | TTR=0.43 | ", "#F9E2AF", fp_reg), ("PASS", "#A6E3A1", fp_bold)],
+        [("BÁO CÁO: ", "#F9E2AF"), ("COMPLETED", "#A6E3A1"), 
+         (" | 3/3 bước | 19.812s | TTR=0.43 | ", "#F9E2AF"), ("PASS", "#A6E3A1")],
     ]
 
     y_pos = 3.12
@@ -290,8 +288,8 @@ def generate_terminal_screenshot():
 
     for line_segments in lines:
         cur_x = 0.22
-        for text, color, fp in line_segments:
-            ax.text(cur_x, y_pos, text, color=color, fontproperties=fp, va="center")
+        for text, color in line_segments:
+            ax.text(cur_x, y_pos, text, color=color, fontproperties=fp_reg, va="center")
             cur_x += len(text) * char_w
         y_pos -= y_step
 

@@ -248,7 +248,7 @@ AI Guru x TiniX
 \vspace{2.5mm}
 \noindent\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}\label{tab:thuat-ngu}
 
-\vspace{3.5mm}
+\vspace{5.0mm}
 {\centering
 \renewcommand{\arraystretch}{1.08}
 \begin{tabular}{|p{0.28\linewidth}|p{0.67\linewidth}|}
@@ -617,7 +617,7 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
     \item \textbf{Thực thi LLM thật và kiểm định dừng (real execution \& quality gate):} Bước 3 chạy hoàn tất (thời gian benchmark 19.8s). Bộ \texttt{QualityEvaluator} thẩm định: TTR = 0.43 ($\ge 0.35$), 1.872 ký tự (391 từ), Markdown chuẩn và kích hoạt dừng \texttt{Goal achieved}.
 \end{enumerate}
 
-\vspace{-2mm}
+\vspace{-3mm}
 \subsection{2. Kịch bản 2: Mục tiêu nhỏ chuẩn bị outline Docker (tự xác định 2 bước và dừng sớm)}
 Để minh chứng Agent \textbf{không bắt buộc chạy đủ 3 bước trong mọi mục tiêu}, ta kiểm thử mục tiêu nhỏ: \textit{"Chuẩn bị outline cho bài viết về Docker cho sinh viên IT."} Khi chạy ở chế độ dự phòng (\texttt{use\_llm=False}):
 \begin{itemize}
@@ -626,16 +626,16 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
     \item \textbf{Kích hoạt điều kiện dừng sớm (stop condition):} Ngay khi Bước 2 hoàn thành, \texttt{QualityEvaluator} trực tiếp thẩm định dàn ý (độ dài, từ khóa Docker, cấu trúc phân cấp). Khi đạt chuẩn định lượng (\texttt{passed == True}), hệ thống lập tức kích hoạt điều kiện dừng: \textit{"Goal achieved: Dàn ý hoàn chỉnh đạt chuẩn định lượng của QualityEvaluator."} Agent kết thúc thành công ở Bước 2, loại bỏ hoàn toàn các bước thừa và dừng an toàn.
 \end{itemize}
 
-\vspace{-1mm}
+\vspace{-2.5mm}
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
 Bảng 2 đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\vspace{1.5mm}
+\vspace{1.2mm}
 \noindent\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
 
-\vspace{3.2mm}
+\vspace{5.0mm}
 {\centering
-\renewcommand{\arraystretch}{1.02}
+\renewcommand{\arraystretch}{0.98}
 \begin{tabular}{|p{0.46\linewidth}|p{0.48\linewidth}|}
 \hline
 \thd{\raggedright Sản phẩm sau Bước 2 (Dàn ý chi tiết)\strut} & \thd{\raggedright Sản phẩm sau Bước 3 (Bài viết hoàn thiện)\strut}\tabularnewline \hline
@@ -651,7 +651,7 @@ Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_a
 \vspace{2.5mm}
 \noindent\textbf{Bảng 3: Kết quả kiểm định 18 kịch bản (13 Unit Tests và 5 Real LLM Tests)}\label{tab:test-cases}
 
-\vspace{4.0mm}
+\vspace{5.5mm}
 \renewcommand{\arraystretch}{0.96}
 \setlength{\LTpre}{3.5mm}
 \begin{longtable}{|c|p{0.33\linewidth}|c|p{0.27\linewidth}|}
