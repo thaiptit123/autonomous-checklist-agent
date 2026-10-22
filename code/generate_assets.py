@@ -18,6 +18,8 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Liberation Sans", "Noto Sans", "Arial"]
 plt.rcParams["axes.unicode_minus"] = False
 
+NOTO_SANS_MONO_LIGHT = "/usr/share/fonts/truetype/noto/NotoSansMono-Light.ttf"
+NOTO_SANS_MONO_REG = "/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf"
 LIBERATION_MONO_REG = "/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf"
 
 
@@ -212,15 +214,15 @@ def generate_state_flow_diagram():
 
 
 def generate_terminal_screenshot():
-    # 8.2 x 3.65 canvas: 16 well-spaced lines, strictly 100% REGULAR monospace font (ZERO BOLD GLYPHS)
+    # 8.2 x 3.65 canvas: 16 well-spaced lines, strictly NOTO SANS MONO LIGHT (thinner, elegant, non-bold)
     fig, ax = plt.subplots(figsize=(8.2, 3.65), dpi=300)
     fig.patch.set_facecolor("#181825")
     ax.set_facecolor("#181825")
     ax.set_xlim(0, 8.2)
     ax.set_ylim(0, 3.65)
 
-    fp_reg = FontProperties(fname=LIBERATION_MONO_REG, size=9.6)
-    fp_header = FontProperties(fname=LIBERATION_MONO_REG, size=8.8)
+    fp_reg = FontProperties(fname=NOTO_SANS_MONO_LIGHT, size=9.2)
+    fp_header = FontProperties(fname=NOTO_SANS_MONO_LIGHT, size=8.4)
 
     # Measure exact char width dynamically for 100% regular font
     t_measure = ax.text(0, -10, "A" * 100, fontproperties=fp_reg)
