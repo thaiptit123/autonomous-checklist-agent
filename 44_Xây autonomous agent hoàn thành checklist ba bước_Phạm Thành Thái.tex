@@ -245,12 +245,12 @@ AI Guru x TiniX
 \section*{Các thuật ngữ cơ bản}\label{cac-thuat-ngu-co-ban}}
 \phantomsection\addcontentsline{toc}{section}{Các thuật ngữ cơ bản}
 
-\renewcommand{\arraystretch}{1.10}
+\vspace{2mm}
+\noindent\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}\label{tab:thuat-ngu}
 
-\textbf{Bảng 1: Các thuật ngữ trong hệ thống tác nhân tự hành (autonomous systems)}\label{tab:thuat-ngu}
-
-\vspace{-2mm}
+\vspace{2.5mm}
 \begin{center}
+\renewcommand{\arraystretch}{1.10}
 \begin{tabular}{|p{0.28\linewidth}|p{0.67\linewidth}|}
 \hline
 \thd{\raggedright Thuật ngữ\strut} & \thd{\raggedright Định nghĩa trong ngữ cảnh Checklist Agent\strut}\tabularnewline \hline
@@ -627,14 +627,14 @@ Nhật ký thực thi minh họa 3 chặng dưới sự điều khiển của LL
 \end{itemize}
 
 \subsection{3. So sánh chất lượng sản phẩm giữa các bước}
-Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
+Bảng 2 đối chiếu sự tiến hóa rõ rệt về chất lượng nội dung giữa dàn ý sau Bước 2 và bài viết hoàn thiện sau Bước 3 nhờ cơ chế truyền ngữ cảnh và vòng lặp quan sát thích ứng:
 
-\vspace{-2mm}
-\renewcommand{\arraystretch}{1.10}
+\vspace{1.5mm}
+\noindent\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
 
-\textbf{Bảng 2: Đối chiếu chất lượng nội dung qua chuỗi truyền trạng thái}\label{tab:so-sanh-chat-luong}
-\vspace{-2mm}
-\begin{center}
+\vspace{2mm}
+{\centering
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{|p{0.46\linewidth}|p{0.48\linewidth}|}
 \hline
 \thd{\raggedright Sản phẩm sau Bước 2 (Dàn ý chi tiết)\strut} & \thd{\raggedright Sản phẩm sau Bước 3 (Bài viết hoàn thiện)\strut}\tabularnewline \hline
@@ -642,16 +642,17 @@ Bảng \ref{tab:so-sanh-chat-luong} đối chiếu sự tiến hóa rõ rệt v�
 \raggedright Định hình cấu trúc và ví dụ minh họa dạng gạch đầu dòng.\strut & \raggedright Diễn giải sâu sắc bằng ví dụ so sánh đời thường: học sinh thi ``mở sách'' vs ``đóng sách'' giúp người mới dễ hiểu ngay.\strut \tabularnewline \hline
 \raggedright Chưa phải nội dung văn bản hoàn chỉnh (dừng ở mức khung dàn bài).\strut & \raggedright Hoàn thiện toàn bộ văn bản đạt 1.872 ký tự (391 từ), cấu trúc Markdown phân cấp rõ ràng.\strut \tabularnewline \hline
 \raggedright Chưa qua khâu nghiệm thu chất lượng.\strut & \raggedright Đạt chuẩn định lượng bằng \texttt{QualityEvaluator}: TTR = 0.43 (đáp ứng ngưỡng đa dạng từ vựng $\ge 0.35$), đủ từ khóa chủ đề và LLM Judge xác nhận.\strut \tabularnewline \hline
-\end{tabular}
-\end{center}
+\end{tabular}\par}
 
 \subsection{4. Phân rã kiểm thử: Offline Unit Tests và Integration Tests}
 Nhằm đáp ứng tiêu chuẩn phần mềm, bộ kiểm thử \texttt{eval\_agent.py} được phân tách rõ ràng thành hai nhóm: \textbf{Unit Tests (chạy offline)} không phụ thuộc mô hình để thẩm định cơ chế tự hành, vòng lặp an toàn và khả năng phục hồi lỗi; \textbf{Integration Tests} yêu cầu kết nối Ollama thực tế để đánh giá năng lực tác nhân. Toàn bộ kịch bản được chuẩn hóa tự động qua \texttt{unittest} và có điều kiện bỏ qua tự động (skip conditions) linh hoạt theo cấu hình môi trường:
 
+\vspace{1.5mm}
+\noindent\textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
+
+\vspace{2mm}
 \renewcommand{\arraystretch}{0.92}
-
-\textbf{Bảng 3: Kết quả kiểm thử 18 kịch bản (13 Offline Unit Tests đạt \& 5 Real LLM Integration Tests)}\label{tab:test-cases}
-
+\setlength{\LTpre}{2mm}
 \begin{longtable}{|c|p{0.33\linewidth}|c|p{0.27\linewidth}|}
 \hline
 \thd{\centering STT\strut} & \thd{\raggedright Kịch bản kiểm thử (Test Scenario)\strut} & \thd{\centering Trạng thái\strut} & \thd{\raggedright Điều kiện dừng / Kết quả\strut}\tabularnewline \hline
